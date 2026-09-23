@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-primary-blue: #2B2B9B;
+  --color-primary-dark: #1A1A1A;
+  --color-body-text: #444444;
+  --color-light-gray: #F0F1F5;
+  --color-accent-hover: #3D3DCC;
+
+  --animate-marquee: marquee 40s linear infinite;
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+}
+
+@layer utilities {
+  .hover-pause:hover {
+    animation-play-state: paused;
+  }
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-body-text);
+  }
+  body {
+    background-color: white;
+    line-height: 1.8;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-primary-dark);
+    font-weight: 700;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  * {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
