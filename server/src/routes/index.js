@@ -8,6 +8,8 @@ const videoGallery = require('./videoGallery');
 const siteSettings = require('./siteSettings');
 const suppliers = require('./suppliers');
 const pages = require('./pages');
+const contact = require('./contact');
+const career = require('./career');
 const adminDivisions = require('./admin/divisions');
 const adminNews = require('./admin/news');
 const adminPhotoGallery = require('./admin/photoGallery');
@@ -15,6 +17,8 @@ const adminVideoGallery = require('./admin/videoGallery');
 const adminSiteSettings = require('./admin/siteSettings');
 const adminSuppliers = require('./admin/suppliers');
 const adminPages = require('./admin/pages');
+const adminContactMessages = require('./admin/contactMessages');
+const adminCareerApplications = require('./admin/careerApplications');
 const requireAuth = require('../middleware/requireAuth');
 
 const router = Router();
@@ -30,6 +34,8 @@ router.use('/video-gallery', videoGallery);
 router.use('/site-settings', siteSettings);
 router.use('/suppliers', suppliers);
 router.use('/pages', pages);
+router.use('/contact', contact);
+router.use('/career', career);
 
 // Admin (session-authenticated)
 router.use('/admin/divisions', requireAuth, adminDivisions);
@@ -39,8 +45,9 @@ router.use('/admin/video-gallery', requireAuth, adminVideoGallery);
 router.use('/admin/site-settings', requireAuth, adminSiteSettings);
 router.use('/admin/suppliers', requireAuth, adminSuppliers);
 router.use('/admin/pages', requireAuth, adminPages);
+router.use('/admin/contact-messages', requireAuth, adminContactMessages);
+router.use('/admin/career-applications', requireAuth, adminCareerApplications);
 
-// Phase 8: contact, career
 // Phase 9: seo-meta, sitemap
 
 module.exports = router;

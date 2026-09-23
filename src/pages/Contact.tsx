@@ -1,47 +1,36 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
 import SEO from '../components/SEO';
 import { seoData } from '../data/seoData';
-import emailjs from '@emailjs/browser';
+import { apiFetch, ApiError } from '../lib/api';
+
+const EMPTY_FORM = { name: '', company: '', email: '', phone: '', subject: '', message: '' };
 
 export default function Contact() {
-  const form = useRef<HTMLFormElement>(null);
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.current) return;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
-    // Note to user: Please replace 'YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', and 'YOUR_PUBLIC_KEY' 
-    // with your actual EmailJS credentials to make the form functional.
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
-    const templateId = import.meta.env.VITE_EMAILJS_CONTACT_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
-
-    if (serviceId === 'YOUR_SERVICE_ID' || publicKey === 'YOUR_PUBLIC_KEY') {
-      setError('EmailJS is not configured. Please add your VITE_EMAILJS credentials to the .env file.');
+    try {
+      await apiFetch('/api/contact', { method: 'POST', body: JSON.stringify(formData) });
+      setIsSuccess(true);
+      setFormData(EMPTY_FORM);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to send message. Please try again later.');
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    emailjs.sendForm(serviceId, templateId, form.current, { publicKey })
-      .then(() => {
-        setIsSuccess(true);
-        setIsSubmitting(false);
-        form.current?.reset();
-      })
-      .catch((err) => {
-        console.error('FAILED...', err);
-        const errorMessage = err?.text || err?.message || 'Failed to send message. Please try again later.';
-        setError(`Error: ${errorMessage}`);
-        setIsSubmitting(false);
-      });
   };
 
   return (
@@ -75,8 +64,7 @@ export default function Contact() {
                 </button>
               </div>
             ) : (
-              <form ref={form} className="space-y-6" onSubmit={handleSubmit}>
-                <input type="hidden" name="time" id="time" value={new Date().toLocaleString()} />
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 {error && (
                   <div className="bg-red-50 text-red-600 p-4 rounded-md border border-red-200 text-sm">
                     {error}
@@ -85,30 +73,30 @@ export default function Contact() {
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-body-text mb-2">Full Name *</label>
-                    <input type="text" name="name" id="name" className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="John Doe" required />
+                    <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="John Doe" required />
                   </div>
                   <div>
                     <label htmlFor="company" className="block text-sm font-medium text-body-text mb-2">Company Name</label>
-                    <input type="text" name="company" id="company" className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="XYZ Corp" />
+                    <input type="text" name="company" id="company" value={formData.company} onChange={handleChange} className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="XYZ Corp" />
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-body-text mb-2">Email Address *</label>
-                    <input type="email" name="email" id="email" className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="john@example.com" required />
+                    <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="john@example.com" required />
                   </div>
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-body-text mb-2">Phone Number</label>
-                    <input type="tel" name="number" id="phone" className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="+880 1..." />
+                    <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="+880 1..." />
                   </div>
                 </div>
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium text-body-text mb-2">Subject</label>
-                  <input type="text" name="title" id="subject" className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="How can we help?" />
+                  <input type="text" name="subject" id="subject" value={formData.subject} onChange={handleChange} className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors" placeholder="How can we help?" />
                 </div>
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-body-text mb-2">Message *</label>
-                  <textarea name="message" id="message" rows={5} className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors resize-none" placeholder="Write your message here..." required></textarea>
+                  <textarea name="message" id="message" rows={5} value={formData.message} onChange={handleChange} className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue transition-colors resize-none" placeholder="Write your message here..." required></textarea>
                 </div>
                 <button type="submit" disabled={isSubmitting} className={`w-full bg-primary-blue hover:bg-accent-hover text-white py-4 rounded-md font-bold transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}>
                   {isSubmitting ? 'Sending...' : 'Send Message'}

@@ -239,17 +239,31 @@
 ---
 
 ## Phase 8 — Contact & Career Forms Backend
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 9
 
 **Goal:** Replace the fragile Google Apps Script + client-only EmailJS flow with a proper server-side pipeline, while keeping email notifications.
 
-**Tasks:**
-- `POST /api/contact` — stores message in `contact_messages`, sends notification email via `nodemailer` (SMTP).
-- `POST /api/career` — stores application in `career_applications`, stores uploaded CV file server-side under `/uploads/cv` (via `multer`, with type/size validation), sends notification email via `nodemailer`.
-- Admin inbox screens to view/manage contact messages and job applications (mark read, export, delete).
-- Remove dependency on Google Apps Script/Google Drive once this is verified working.
+**Backend (`/server`):**
+- `services/mail.js` — a thin `nodemailer` wrapper. If SMTP isn't configured (empty host/user in `.env`), it logs a warning and returns `{sent:false}` instead of throwing — a form submission always succeeds and is captured in the DB even before real SMTP credentials exist, which matters because I don't have real SMTP creds to test with in this environment.
+- `services/contactMessages.js` / `services/careerApplications.js` — plain CRUD + status updates, following the established service pattern.
+- `middleware/documentUpload.js` — a `multer` upload restricted to PDF/DOC/DOCX, 5MB cap (matches the original frontend's stated limit), reusing `imageUpload.js`'s `publicPathFor` helper rather than duplicating it.
+- Public `POST /api/contact` (JSON) and `POST /api/career` (multipart, CV required) — both behind a new shared `formSubmitLimiter` (8 submissions/15min, intentionally shared across both endpoints by IP as one combined per-visitor budget rather than 8+8 separately).
+- Admin `GET/PATCH/DELETE` under `/api/admin/contact-messages` and `/api/admin/career-applications` — status transitions validated against a fixed enum, delete on career applications also removes the uploaded CV file from disk.
 
-**Deliverable:** Both forms work end-to-end through the new backend; admin can see submissions directly in the panel.
+**Frontend — full replacement, not a patch:**
+- `Contact.tsx` rewritten from `emailjs.sendForm` (uncontrolled ref-based form) to controlled state posting JSON to `/api/contact` via the shared `apiFetch` client.
+- `Career.tsx` rewritten from base64-encode → POST to a hardcoded Google Apps Script URL → `emailjs.send` (three external dependencies chained together) to a single `FormData` POST to `/api/career`. Deleted the dead "Google Apps Script Configuration Required" troubleshooting UI block that existed only to explain that fragile flow's most common failure mode.
+- `src/admin/inbox/AdminContactMessages.tsx` and `AdminCareerApplications.tsx` — expandable-row inboxes; opening a contact message auto-marks it read; career applications show a CV download link and a status dropdown (new/reviewed/shortlisted/rejected).
+- **Cleanup that the phase's own deliverable called for:** removed the now-unused `@emailjs/browser` package (`npm uninstall`, not just deleting the import), deleted `google-apps-script.js` from the repo root, and cleared the now-dead `VITE_EMAILJS_*` variables out of the local `.env`.
+
+**Verified, not just written:**
+- curl-driven test of both public endpoints: validation errors, a full successful submission, non-PDF/DOC file rejection on the CV upload, and the rate limiter (confirmed it triggers at exactly the 9th request across the two endpoints combined — which is correct given they share one limiter instance, not a bug I had to chase).
+- curl-driven test of the admin side: status transitions (including rejecting an invalid status value), CV file actually being servable over HTTP, delete-with-file-cleanup confirmed by re-requesting the CV URL and getting 404 afterward.
+- Full Playwright pass through the real public forms: submitted the live Contact form and the live Career form (with an actual file picked via `setInputFiles` for the CV upload) through the rendered UI — not just the API directly — then confirmed both submissions appear correctly in their admin inboxes, exercised the auto-mark-as-read behavior, changed a career application's status, confirmed the "View CV" link in the admin UI resolves to a real 200 response, then deleted both test records through the admin UI itself and confirmed the empty-state messaging returns. No uncaught JS errors.
+- `tsc --noEmit` and `vite build` both clean (707.24KB — the `@emailjs/browser` removal roughly offset the two new admin inbox pages, net +4KB).
+- Confirmed both DB tables and the `uploads/cv` folder are empty/clean after the Playwright run deleted its own test data; dev servers stopped.
+
+**Deliverable:** ✅ Both forms work end-to-end through the new backend with no EmailJS or Google Apps Script dependency left anywhere in the codebase; admin can see, triage, and act on every submission directly in the panel.
 
 ---
 
@@ -362,8 +376,8 @@
 | 4 | Done | 2026-09-24 |
 | 5 | Done | 2026-09-24 |
 | 6 | Done | 2026-09-24 |
-| 7 | Done (awaiting approval) | — |
-| 8 | Not Started | — |
+| 7 | Done | 2026-09-24 |
+| 8 | Done (awaiting approval) | — |
 | 9 | Not Started | — |
 | 10 | Not Started | — |
 | 11 | Not Started | — |

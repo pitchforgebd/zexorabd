@@ -100,3 +100,31 @@ export type PageSection = {
   layoutVariant: string;
   config: Record<string, unknown>;
 };
+
+export type ContactMessage = {
+  id: number;
+  name: string;
+  company: string | null;
+  email: string;
+  phone: string | null;
+  subject: string | null;
+  message: string;
+  status: 'unread' | 'read' | 'archived';
+  createdAt: string;
+};
+
+export type CareerApplication = {
+  id: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  position: string | null;
+  education: string | null;
+  experienceYears: string | null;
+  coverLetter: string | null;
+  message: string | null;
+  cvFilePath: string;
+  consent: boolean;
+  status: 'new' | 'reviewed' | 'shortlisted' | 'rejected';
+  createdAt: string;
+};

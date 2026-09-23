@@ -45,6 +45,8 @@ import AdminVideoGallery from './admin/media/AdminVideoGallery';
 import AdminHomepage from './admin/homepage/AdminHomepage';
 import AdminSuppliers from './admin/homepage/AdminSuppliers';
 import AdminPageSections from './admin/sections/AdminPageSections';
+import AdminContactMessages from './admin/inbox/AdminContactMessages';
+import AdminCareerApplications from './admin/inbox/AdminCareerApplications';
 
 export default function App() {
   return (
@@ -88,8 +90,8 @@ export default function App() {
                 <Route path="homepage" element={<AdminHomepage />} />
                 <Route path="homepage/suppliers" element={<AdminSuppliers />} />
                 <Route path="sections" element={<AdminPageSections />} />
-                <Route path="career-applications" element={<AdminPlaceholder title="Career Applications" phase="Phase 8" />} />
-                <Route path="contact-messages" element={<AdminPlaceholder title="Contact Messages" phase="Phase 8" />} />
+                <Route path="career-applications" element={<AdminCareerApplications />} />
+                <Route path="contact-messages" element={<AdminContactMessages />} />
                 <Route path="seo" element={<AdminPlaceholder title="SEO" phase="Phase 9" />} />
               </Route>
             </Route>

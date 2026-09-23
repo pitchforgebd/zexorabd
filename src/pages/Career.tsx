@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import SEO from '../components/SEO';
 import { CheckCircle2, ChevronDown, UploadCloud } from 'lucide-react';
-import emailjs from '@emailjs/browser';
+import { apiFetch, ApiError } from '../lib/api';
 
 export default function Career() {
   const form = useRef<HTMLFormElement>(null);
@@ -48,87 +48,21 @@ export default function Career() {
     setIsSubmitting(true);
     setError(null);
 
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
-    const templateId = import.meta.env.VITE_EMAILJS_CAREER_TEMPLATE_ID || 'template_us95vqw';
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
-
-    if (serviceId === 'YOUR_SERVICE_ID' || publicKey === 'YOUR_PUBLIC_KEY') {
-      setError('EmailJS is not configured. Please add your VITE_EMAILJS credentials to the .env file.');
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      // 1. Convert file to Base64
-      const base64File = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          if (typeof reader.result === 'string') {
-            // Remove data:application/pdf;base64, prefix
-            const base64 = reader.result.split(',')[1];
-            resolve(base64);
-          } else {
-            reject(new Error('Failed to convert file to base64'));
-          }
-        };
-        reader.onerror = error => reject(error);
-      });
+      const fd = new FormData();
+      fd.append('fullName', formData.fullName);
+      fd.append('email', formData.email);
+      fd.append('phone', formData.phone);
+      fd.append('position', formData.position);
+      fd.append('education', formData.education);
+      fd.append('experience', formData.experience);
+      fd.append('coverLetter', formData.coverLetter);
+      fd.append('message', formData.message);
+      fd.append('consent', String(formData.consent));
+      fd.append('cv', file);
 
-      // 2. Upload file to Google Apps Script Web App
-      let cvLink = '';
-      if (file) {
-        const gasUrl = 'https://script.google.com/macros/s/AKfycbyiZKkI0CWFf1HyHxMSgCCkQJsmU6OYguvEDWmynygp32drK4iqFYpnRYiEt1AFvkar/exec';
-        let uploadResponse;
-        try {
-          uploadResponse = await fetch(gasUrl, {
-            method: 'POST',
-            // Google Apps Script handles text/plain without CORS preflight
-            headers: {
-              'Content-Type': 'text/plain;charset=utf-8',
-            },
-            body: JSON.stringify({
-              file: base64File,
-              fileName: file.name,
-              mimeType: file.type
-            }),
-          });
-        } catch (fetchError: any) {
-          console.error("Fetch error details:", fetchError);
-          throw new Error('GAS_AUTH_ERROR');
-        }
+      await apiFetch('/api/career', { method: 'POST', body: fd });
 
-        if (!uploadResponse.ok) {
-          throw new Error(`Upload failed with status ${uploadResponse.status}. Please check your Google Apps Script deployment settings.`);
-        }
-
-        const uploadResult = await uploadResponse.json();
-        
-        if (!uploadResult.success && !uploadResult.url) {
-          throw new Error(`Google Drive Upload Error: ${uploadResult.message || 'Unknown error'}`);
-        }
-
-        cvLink = uploadResult.url;
-      }
-
-      // 3. Send email via EmailJS
-      const templateParams = {
-        name: formData.fullName,
-        full_name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        position: formData.position,
-        education: formData.education,
-        experience: formData.experience,
-        cv_link: cvLink,
-        cover_letter: formData.coverLetter,
-        additional_message: formData.message,
-        consent: formData.consent ? 'Yes' : 'No',
-        time: new Date().toLocaleString()
-      };
-
-      await emailjs.send(serviceId, templateId, templateParams, publicKey);
-      
       setIsSuccess(true);
       setFormData({
         fullName: '',
@@ -144,9 +78,9 @@ export default function Career() {
       setFile(null);
       if (form.current) form.current.reset();
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Submission error:', err);
-      setError(err.message || 'An error occurred during submission. Please try again.');
+      setError(err instanceof ApiError ? err.message : 'An error occurred during submission. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -187,29 +121,11 @@ export default function Career() {
               </div>
             ) : (
               <form ref={form} onSubmit={handleSubmit} className="space-y-6">
-                {error === 'GAS_AUTH_ERROR' ? (
-                  <div className="bg-orange-50 border border-orange-200 p-5 rounded-xl">
-                    <h3 className="text-orange-800 font-semibold mb-2 text-lg">Google Apps Script Configuration Required</h3>
-                    <p className="text-orange-700 text-sm mb-4">
-                      The CV upload was blocked because your Google Apps Script is requiring authentication. 
-                      You need to change the deployment settings to allow public access.
-                    </p>
-                    <div className="space-y-2 text-sm text-orange-800 bg-orange-100/50 p-4 rounded-lg">
-                      <p className="font-semibold">How to fix this in Google Apps Script:</p>
-                      <ol className="list-decimal pl-4 space-y-1">
-                        <li>Click <strong>Deploy</strong> &gt; <strong>Manage deployments</strong> (or New deployment).</li>
-                        <li>Click the pencil icon to edit the deployment.</li>
-                        <li>Under <strong>Execute as</strong>, ensure <strong>"Me"</strong> is selected.</li>
-                        <li>Under <strong>Who has access</strong>, you <span className="font-bold underline">MUST</span> select <strong>"Anyone"</strong> (Do NOT select "Anyone with Google Account").</li>
-                        <li>Click <strong>Deploy</strong> and authorize the script again if prompted.</li>
-                      </ol>
-                    </div>
-                  </div>
-                ) : error ? (
+                {error && (
                   <div className="bg-red-50 text-red-600 p-4 rounded-md border border-red-200 text-sm">
                     {error}
                   </div>
-                ) : null}
+                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
