@@ -18,36 +18,42 @@
 ---
 
 ## Phase 0 — Architecture & Decisions Confirmation
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 1
 
 **Goal:** Lock every open technical decision before any code is written, so later phases don't require rework.
 
-**Tasks:**
-- **Critical:** Confirm the cPanel hosting plan actually includes "Setup Node.js App" (Phusion Passenger) — check Node.js version(s) available, whether `npm install` is possible via cPanel Terminal/Node selector, process memory limits, and whether the app runs as a long-lived process or per-request. If Node.js isn't available on this hosting plan, the whole stack decision needs to be revisited before Phase 1.
-- Confirm domain/subdomain structure (e.g. does the Node API live on `zexora.com.bd/api/` or `api.zexora.com.bd`, and how that's proxied to the Node app under Passenger/`.htaccess`).
-- Finalize folder layout for deployment (Node app root, built React `dist/`, `/uploads` for images/CVs, how Passenger's required `app.js`/`server.js` entry point maps to this).
-- Decide admin panel delivery: server-rendered admin pages (Express + templating) vs. a protected route inside the React app hitting the same API with JWT/session auth. (Recommendation: React admin UI under `/admin`, same SPA, authenticated via httpOnly session cookie — keeps one frontend codebase.)
-- Decide SEO rendering approach in principle (finalized in Phase 9): Express-side SSR of the React app, or a bot-detecting prerender middleware, or defer to a future Next.js migration.
-- Initialize Git repository for version control (currently the project has no git history — needed before further changes for safety/rollback).
-- Define naming/coding conventions for the Node backend (folder structure, response format, error format, env var handling).
+**Decisions confirmed:**
+- **cPanel Node.js App (Passenger) support:** ✅ Confirmed available on the hosting plan.
+- **Domain/API structure:** API mounted under the same domain at `/api/*`, reverse-proxied to the Node app via cPanel's Node.js Selector-generated Passenger config. No separate API subdomain — simpler DNS/CORS story. Revisit later only if needed.
+- **Folder layout:**
+  - Repo root = the existing frontend (Vite/React), unchanged in structure.
+  - New `/server` directory = Node/Express backend, its own `package.json`/`node_modules`, deployed as the cPanel "Application root".
+  - `server/uploads/` for CVs and CMS-uploaded images, served via an Express static route.
+  - Built frontend (`dist/`) deployed to the domain's public web root; `/api/*` requests proxied to the Node app.
+- **Admin panel delivery:** React admin UI lives inside the same SPA under `/admin`, authenticated via an httpOnly session cookie issued by the Express API (not a separate app).
+- **SEO rendering approach (principle):** Vite SSR pattern — Express renders public marketing pages server-side via `react-dom/server` (a dedicated `entry-server.tsx`) so crawlers receive real HTML + meta tags. The admin panel stays client-side-only (CSR); it doesn't need SEO. Full detail finalized in Phase 9.
+- **DB driver:** `mysql2` (promise-based pool), no heavy ORM. Schema managed as versioned plain `.sql` migration files (Phase 1).
+- **Backend conventions:** `server/src/{routes,controllers,db,middleware,utils}`; JSON response envelope `{ success, data?, error?: { message, code } }`; config via `server/.env` (gitignored) with a committed `.env.example`.
+- **Local dev environment verified:** Node v22.17.0 / npm 10.9.2.
+- **Git repository initialized**, baseline snapshot committed (`0bb90bc`) before any dynamic-site changes.
 
-**Deliverable:** A short decisions doc (or this file updated) confirming stack details + Git repo initialized + Node.js hosting support verified.
+**Deliverable:** ✅ Decisions documented above, repo under version control, Node.js hosting support verified.
 
 ---
 
 ## Phase 1 — Database Design
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 2
 
 **Goal:** Design the MySQL schema that will back the entire CMS.
 
-**Tasks:**
-- Tables for: `divisions`, `division_products`, `product_subcategories`, `suppliers`, `news_posts`, `photo_gallery`, `video_gallery`, `career_applications`, `contact_messages`, `seo_meta` (per-page SEO overrides), `admin_users`, `site_settings` (general homepage content).
-- `page_sections` table planned here too (used by Phase 7): `page_key`, `section_key`, `is_visible`, `sort_order`, `layout_variant`, `config` (JSON).
-- Define relationships/foreign keys (e.g. products belong to a division).
-- Define indexes for anything queried by slug/URL (SEO-friendly lookups).
-- Write the schema as versioned `.sql` migration files (applied via a small Node migration runner or manually through phpMyAdmin from cPanel, but always kept in version control).
+**What was built:**
+- `database/schema.sql` — full `CREATE TABLE` schema: `admin_users`, `divisions`, `product_categories`, `product_subcategories`, `product_items`, `suppliers`, `news_posts`, `photo_gallery`, `video_gallery`, `career_applications`, `contact_messages`, `seo_meta`, `site_settings`, `page_sections` (the last three exist now so Phases 6/7/9 need no schema changes later).
+- `database/README.md` — entity-relationship notes, a MySQL/MariaDB JSON-support version caveat to double check at deployment time, and the seeding plan.
+- Product catalog (division → category → subcategory → item) is fully relational with FKs (`ON DELETE CASCADE`) since it needs real CRUD + reordering in the admin.
+- Simpler bullet-list division content (industries, reasons, commitment, strengths, markets, philosophy, sourcing steps) is stored as `JSON` columns directly on `divisions` rather than one table per list — it's page copy, not queryable catalog data; keeps the schema from exploding into a dozen near-identical list tables.
+- Everything CRUD-relevant has `sort_order` for drag-reorder support in the admin later.
 
-**Deliverable:** `/database/schema.sql` (or migration files) + an ER diagram/description.
+**Deliverable:** ✅ `/database/schema.sql` + `/database/README.md` (ER description).
 
 ---
 
@@ -263,8 +269,8 @@
 
 | Phase | Status | Approved On |
 |---|---|---|
-| 0 | Not Started | — |
-| 1 | Not Started | — |
+| 0 | Done | 2026-09-23 |
+| 1 | Done (awaiting approval) | — |
 | 2 | Not Started | — |
 | 3 | Not Started | — |
 | 4 | Not Started | — |
