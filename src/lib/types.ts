@@ -92,3 +92,11 @@ export type SiteSettings = {
   'home.whyChooseUs'?: { heading: string; subheading: string; reasons: WhyChooseReason[] };
   'home.suppliers'?: { heading: string; subheading: string; description: string };
 };
+
+export type PageSection = {
+  sectionKey: string;
+  isVisible: boolean;
+  sortOrder: number;
+  layoutVariant: string;
+  config: Record<string, unknown>;
+};

@@ -4,9 +4,13 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSiteSettings } from '../lib/useSiteSettings';
 
-export default function HeroSlider() {
+type HeroSliderProps = { variant?: 'slider' | 'static' };
+
+export default function HeroSlider({ variant = 'slider' }: HeroSliderProps) {
   const { settings, loading } = useSiteSettings();
-  const slides = settings?.['home.hero']?.slides || [];
+  const allSlides = settings?.['home.hero']?.slides || [];
+  // 'static' shows only the first slide - no autoplay, no controls.
+  const slides = variant === 'static' ? allSlides.slice(0, 1) : allSlides;
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -134,39 +138,41 @@ export default function HeroSlider() {
       </div>
 
       {/* Slider Controls */}
-      <div className="absolute inset-x-0 bottom-6 sm:bottom-10 z-30 flex justify-center items-center gap-4 sm:gap-6 px-4">
-        <button 
-          onClick={prevSlide}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
-        
-        <div className="flex gap-3">
-          {slides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setDirection(idx > currentSlide ? 1 : -1);
-                setCurrentSlide(idx);
-              }}
-              className={`h-2 transition-all duration-300 rounded-full ${
-                idx === currentSlide ? 'w-10 bg-primary-blue shadow-lg shadow-primary-blue/30' : 'w-2 bg-white/40 hover:bg-white/80'
-              }`}
-              aria-label={`Go to slide ${idx + 1}`}
-            />
-          ))}
-        </div>
+      {variant === 'slider' && (
+        <div className="absolute inset-x-0 bottom-6 sm:bottom-10 z-30 flex justify-center items-center gap-4 sm:gap-6 px-4">
+          <button
+            onClick={prevSlide}
+            className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
 
-        <button 
-          onClick={nextSlide}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
-      </div>
+          <div className="flex gap-3">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setDirection(idx > currentSlide ? 1 : -1);
+                  setCurrentSlide(idx);
+                }}
+                className={`h-2 transition-all duration-300 rounded-full ${
+                  idx === currentSlide ? 'w-10 bg-primary-blue shadow-lg shadow-primary-blue/30' : 'w-2 bg-white/40 hover:bg-white/80'
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={nextSlide}
+            className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        </div>
+      )}
     </section>
   );
 }

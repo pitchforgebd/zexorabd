@@ -7,12 +7,14 @@ const photoGallery = require('./photoGallery');
 const videoGallery = require('./videoGallery');
 const siteSettings = require('./siteSettings');
 const suppliers = require('./suppliers');
+const pages = require('./pages');
 const adminDivisions = require('./admin/divisions');
 const adminNews = require('./admin/news');
 const adminPhotoGallery = require('./admin/photoGallery');
 const adminVideoGallery = require('./admin/videoGallery');
 const adminSiteSettings = require('./admin/siteSettings');
 const adminSuppliers = require('./admin/suppliers');
+const adminPages = require('./admin/pages');
 const requireAuth = require('../middleware/requireAuth');
 
 const router = Router();
@@ -27,6 +29,7 @@ router.use('/photo-gallery', photoGallery);
 router.use('/video-gallery', videoGallery);
 router.use('/site-settings', siteSettings);
 router.use('/suppliers', suppliers);
+router.use('/pages', pages);
 
 // Admin (session-authenticated)
 router.use('/admin/divisions', requireAuth, adminDivisions);
@@ -35,8 +38,8 @@ router.use('/admin/photo-gallery', requireAuth, adminPhotoGallery);
 router.use('/admin/video-gallery', requireAuth, adminVideoGallery);
 router.use('/admin/site-settings', requireAuth, adminSiteSettings);
 router.use('/admin/suppliers', requireAuth, adminSuppliers);
+router.use('/admin/pages', requireAuth, adminPages);
 
-// Phase 7: pages/:pageKey/sections
 // Phase 8: contact, career
 // Phase 9: seo-meta, sitemap
 
