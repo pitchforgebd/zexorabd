@@ -58,20 +58,29 @@
 ---
 
 ## Phase 2 — Backend API Core
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 3
 
 **Goal:** Stand up the Node.js/Express REST API skeleton that all CMS modules will build on.
 
-**Tasks:**
-- Express app scaffold with the entry point Passenger expects on cPanel.
-- DB connection layer using `mysql2` (connection pool, prepared statements only — no raw string concatenation, to prevent SQL injection).
-- Routing structure (`/api/...`), centralized error handler, standard JSON response envelope.
-- Core middleware: `helmet` (security headers), `cors` (if API/frontend end up on different origins), request body parsing, request logging.
-- Input validation layer (e.g. `express-validator` or hand-written validators).
-- `.env`-based configuration (DB credentials, session secret, mail settings) — kept out of the web root / git.
-- cPanel-specific plumbing: Passenger restart file (`tmp/restart.txt`) workflow, `package.json` start script Passenger will call.
+**What was built (`/server`):**
+- `app.js` — Passenger-compatible entry point (listens on `process.env.PORT`, per cPanel Node.js App requirements).
+- `src/createApp.js` — Express app factory: `helmet`, `compression`, JSON/urlencoded body parsing, `morgan` logging, conditional `cors`, static `/uploads` serving, mounts `/api`, then 404 + centralized error handler.
+- `src/db/pool.js` — `mysql2/promise` connection pool (prepared statements via named placeholders, no string-concatenated SQL).
+- `src/utils/response.js` — standard envelope helpers (`ok`, `created`, `fail`, `ApiError`) used by every route from here on.
+- `src/middleware/{notFound,errorHandler,validate}.js` — 404 handler, centralized error handler (masks internals in production), and an `express-validator` wrapper ready for Phase 3+ mutating routes.
+- `src/routes/health.js` + `src/routes/index.js` — `GET /api/health` (checks real DB connectivity), with the router pre-wired for every module coming in Phases 4–9.
+- `src/config/index.js` — `.env`-driven config (DB, CORS, session secret, mail — mail/session values unused until Phases 3/8 but defined now).
+- `.env.example` committed; real `.env` gitignored.
+- `.gitignore` updated so `server/uploads/**` (runtime CV/image uploads) is excluded from git while the folder structure itself is kept via `.gitkeep`.
 
-**Deliverable:** A working `/api/health` endpoint plus the shared framework code reused by every later module, running under cPanel's Node.js App manager.
+**Verified working, not just written:**
+- Created a local dev MySQL database and applied `database/schema.sql` against real MySQL 8.0.30 — all 14 tables created cleanly, no FK/JSON errors.
+- Booted the server locally and hit the live endpoints:
+  - `GET /api/health` → `{"success":true,"data":{"status":"ok","db":"connected","time":"..."}}`
+  - `GET /api/nope` → `{"success":false,"error":{"message":"Route not found: GET /api/nope","code":"NOT_FOUND"}}`
+- Dev server stopped afterward; nothing left running.
+
+**Deliverable:** ✅ Working `/api/health` endpoint (DB-backed) + shared framework code for every later module.
 
 ---
 
@@ -270,8 +279,8 @@
 | Phase | Status | Approved On |
 |---|---|---|
 | 0 | Done | 2026-09-23 |
-| 1 | Done (awaiting approval) | — |
-| 2 | Not Started | — |
+| 1 | Done | 2026-09-23 |
+| 2 | Done (awaiting approval) | — |
 | 3 | Not Started | — |
 | 4 | Not Started | — |
 | 5 | Not Started | — |

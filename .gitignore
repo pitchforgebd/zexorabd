@@ -6,3 +6,10 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Uploaded files (CVs, CMS images) are runtime data, not source
+server/uploads/*
+!server/uploads/.gitkeep
+!server/uploads/cv/
+server/uploads/cv/*
+!server/uploads/cv/.gitkeep
