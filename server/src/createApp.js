@@ -3,8 +3,11 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const compression = require('compression');
+const cookieParser = require('cookie-parser');
 
 const config = require('./config');
+const sessionMiddleware = require('./session');
+const csrf = require('./middleware/csrf');
 const apiRouter = require('./routes');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
@@ -24,6 +27,10 @@ function createApp() {
   if (config.corsOrigin.length > 0) {
     app.use(cors({ origin: config.corsOrigin, credentials: true }));
   }
+
+  app.use(cookieParser());
+  app.use(sessionMiddleware);
+  app.use('/api', csrf);
 
   app.use('/uploads', express.static(config.uploadsDir));
   app.use('/api', apiRouter);

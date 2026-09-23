@@ -7,6 +7,9 @@ coverage/
 .env*
 !.env.example
 
+# Claude Code session/tooling state, not project source
+.claude/
+
 # Uploaded files (CVs, CMS images) are runtime data, not source
 server/uploads/*
 !server/uploads/.gitkeep

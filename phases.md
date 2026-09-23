@@ -85,17 +85,32 @@
 ---
 
 ## Phase 3 — Admin Authentication & Panel Shell
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 4
 
 **Goal:** Secure login system and the base admin dashboard shell.
 
-**Tasks:**
-- `admin_users` table, password hashing (`bcrypt`), login endpoint, session handling (`express-session` with a MySQL-backed session store, so sessions survive app restarts).
-- CSRF protection on admin forms/mutating requests.
-- Basic dashboard layout/navigation in the React admin area (sidebar linking to each CMS module, most of which are empty until later phases).
-- Logout, session timeout, brute-force login throttling (e.g. `express-rate-limit` on the login route).
+**Backend (`/server`):**
+- `src/session.js` — `express-session` backed by `express-mysql-session` (own `sessions` table, auto-created), httpOnly/`sameSite=lax` cookie, 8h rolling expiry.
+- `src/middleware/csrf.js` — double-submit-cookie CSRF protection (non-httpOnly `csrf_token` cookie + required `X-CSRF-Token` header on every mutating `/api/*` request). Avoids the unmaintained `csurf` package.
+- `src/middleware/requireAuth.js`, `src/middleware/rateLimiters.js` (login limited to 10 attempts/15min).
+- `src/routes/auth.js` — `POST /login` (bcryptjs compare, session regenerate on success, constant error message whether the email exists or not), `POST /logout`, `GET /me`.
+- `bcryptjs` chosen over native `bcrypt` deliberately — no compiled bindings, so it can't fail to install on cPanel shared hosting without a build toolchain.
+- `scripts/createAdmin.js` — CLI-only admin provisioning (`node scripts/createAdmin.js --name ... --email ... --password ...`). There is **no public registration endpoint**, by design.
 
-**Deliverable:** A working, secured `/admin` login + empty dashboard shell.
+**Frontend (`src/admin`):**
+- `api.ts` — fetch wrapper: attaches the CSRF header on mutating requests, unwraps the `{success, data}` / `{success:false, error}` envelope.
+- `AuthContext.tsx` / `ProtectedRoute.tsx` — session-aware auth state (checks `GET /api/auth/me` on load), redirects unauthenticated users to `/admin/login`.
+- `AdminLogin.tsx`, `AdminLayout.tsx` (sidebar shell), `AdminDashboard.tsx`, `AdminPlaceholder.tsx` (stub pages for every module still to come — Divisions, News & Media, Homepage & Suppliers, Page Sections, Career Applications, Contact Messages, SEO — each says which phase will build it).
+- Wired into `App.tsx` as a separate `/admin/*` route tree, deliberately **outside** the public `Layout` (no public Header/Footer on admin pages).
+- `vite.config.ts` — dev-only proxy of `/api` and `/uploads` to the Node server, so the frontend calls relative paths exactly as it will in production (same-origin behind Passenger).
+
+**Verified, not just written:**
+- Backend: full curl-driven test of the auth flow — unauthenticated `/me` (401), login rejected without CSRF header (403), login rejected with wrong password (401), successful login + session cookie, authenticated `/me`, logout, `/me` after logout (401 again). All passed.
+- Frontend: ran both dev servers and drove a real headless-Chromium session through the whole flow (`/admin` → redirect to login → log in → dashboard → click a placeholder module → sign out → redirected to login → re-visiting `/admin` bounces to login again). Screenshots confirmed correct rendering at every step; no uncaught JS errors (only expected benign 401 network log lines during the logged-out `/me` check, which the app already handles gracefully).
+- `tsc --noEmit` clean for all new admin code (the project's pre-existing unrelated type error in `src/data/divisions.ts`/`Divisions.tsx` — a `sourcing` field missing from the `DivisionContent` type — predates this work and is left alone; that file is retired in Phase 10 anyway).
+- Dev servers and the temporary Playwright browser install were both cleaned up after testing; nothing left running.
+
+**Deliverable:** ✅ Working, secured `/admin` login + dashboard shell with navigation to every future CMS module.
 
 ---
 
@@ -280,8 +295,8 @@
 |---|---|---|
 | 0 | Done | 2026-09-23 |
 | 1 | Done | 2026-09-23 |
-| 2 | Done (awaiting approval) | — |
-| 3 | Not Started | — |
+| 2 | Done | 2026-09-23 |
+| 3 | Done (awaiting approval) | — |
 | 4 | Not Started | — |
 | 5 | Not Started | — |
 | 6 | Not Started | — |

@@ -17,6 +17,13 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      // Dev-only proxy to the Node/Express API (server/), so the frontend
+      // can call relative /api and /uploads paths exactly as it will in
+      // production on cPanel (same-origin, reverse-proxied by Passenger).
+      proxy: {
+        '/api': { target: 'http://localhost:3001', changeOrigin: true },
+        '/uploads': { target: 'http://localhost:3001', changeOrigin: true },
+      },
     },
   };
 });
