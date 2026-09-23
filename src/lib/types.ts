@@ -41,3 +41,35 @@ export type DivisionDetail = DivisionSummary & {
   products: ProductCategory[];
   galleryImages: GalleryImage[];
 };
+
+export type NewsPost = {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  body: string | null;
+  coverImage: string | null;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NewsListResult = { items: NewsPost[]; total: number; page: number; limit: number };
+
+export type PhotoGalleryImage = {
+  id: number;
+  url: string;
+  caption: string | null;
+  isPublished: boolean;
+  sortOrder: number;
+};
+
+export type VideoGalleryItem = {
+  id: number;
+  title: string;
+  videoUrl: string;
+  thumbnail: string | null;
+  isPublished: boolean;
+  sortOrder: number;
+};

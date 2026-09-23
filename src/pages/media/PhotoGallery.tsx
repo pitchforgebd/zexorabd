@@ -1,9 +1,12 @@
 import SEO from '../../components/SEO';
+import { usePhotoGallery } from '../../lib/useMedia';
 
 export default function PhotoGallery() {
+  const { images, loading, error } = usePhotoGallery();
+
   return (
     <>
-      <SEO 
+      <SEO
         title="Photo Gallery | Media Centre | Zexora Corporation"
         description="Explore the photo gallery of Zexora Corporation events and operations."
       />
@@ -14,16 +17,30 @@ export default function PhotoGallery() {
             <h2 className="text-3xl md:text-5xl font-bold text-primary-dark mb-4 tracking-tight">Photo Gallery</h2>
             <p className="text-lg text-body-text max-w-2xl mx-auto">Visual highlights of our operations, facilities, and corporate events.</p>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div key={item} className="aspect-video bg-gray-200 rounded-xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-md transition-all">
-                <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                  <span className="text-sm font-medium">Image {item}</span>
+
+          {loading && <p className="text-center text-body-text">Loading…</p>}
+          {error && <p className="text-center text-red-600">{error}</p>}
+
+          {!loading && !error && images.length === 0 && (
+            <div className="flex items-center justify-center h-64 border-2 border-dashed border-gray-200 rounded-xl bg-white">
+              <p className="text-gray-500 font-medium">No photos available yet.</p>
+            </div>
+          )}
+
+          {!loading && images.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {images.map((img) => (
+                <div key={img.id} className="aspect-video bg-gray-200 rounded-xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-md transition-all">
+                  <img src={img.url} alt={img.caption || 'Zexora Corporation'} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                  {img.caption && (
+                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 to-transparent p-3 text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                      {img.caption}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

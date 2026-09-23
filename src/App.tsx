@@ -24,6 +24,7 @@ import CeoMessage from './pages/CeoMessage';
 import Career from './pages/Career';
 import MediaCentre from './pages/media/MediaCentre';
 import News from './pages/media/News';
+import NewsDetail from './pages/media/NewsDetail';
 import PhotoGallery from './pages/media/PhotoGallery';
 import VideoGallery from './pages/media/VideoGallery';
 
@@ -36,6 +37,11 @@ import AdminDashboard from './admin/AdminDashboard';
 import AdminPlaceholder from './admin/AdminPlaceholder';
 import AdminDivisionsList from './admin/divisions/AdminDivisionsList';
 import AdminDivisionEdit from './admin/divisions/AdminDivisionEdit';
+import AdminMediaHub from './admin/media/AdminMediaHub';
+import AdminNewsList from './admin/media/AdminNewsList';
+import AdminNewsEdit from './admin/media/AdminNewsEdit';
+import AdminPhotoGallery from './admin/media/AdminPhotoGallery';
+import AdminVideoGallery from './admin/media/AdminVideoGallery';
 
 export default function App() {
   return (
@@ -59,6 +65,7 @@ export default function App() {
               <Route path="career" element={<Career />} />
               <Route path="media-centre" element={<MediaCentre />} />
               <Route path="media-centre/news" element={<News />} />
+              <Route path="media-centre/news/:slug" element={<NewsDetail />} />
               <Route path="media-centre/photo-gallery" element={<PhotoGallery />} />
               <Route path="media-centre/video-gallery" element={<VideoGallery />} />
               <Route path="contact" element={<Contact />} />
@@ -70,7 +77,11 @@ export default function App() {
                 <Route index element={<AdminDashboard />} />
                 <Route path="divisions" element={<AdminDivisionsList />} />
                 <Route path="divisions/:id" element={<AdminDivisionEdit />} />
-                <Route path="media" element={<AdminPlaceholder title="News & Media" phase="Phase 5" />} />
+                <Route path="media" element={<AdminMediaHub />} />
+                <Route path="media/news" element={<AdminNewsList />} />
+                <Route path="media/news/:id" element={<AdminNewsEdit />} />
+                <Route path="media/photos" element={<AdminPhotoGallery />} />
+                <Route path="media/videos" element={<AdminVideoGallery />} />
                 <Route path="homepage" element={<AdminPlaceholder title="Homepage & Suppliers" phase="Phase 6" />} />
                 <Route path="sections" element={<AdminPlaceholder title="Page Sections" phase="Phase 7" />} />
                 <Route path="career-applications" element={<AdminPlaceholder title="Career Applications" phase="Phase 8" />} />

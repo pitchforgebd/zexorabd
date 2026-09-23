@@ -150,16 +150,30 @@
 ---
 
 ## Phase 5 — CMS Module: News & Media Centre
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 6
 
 **Goal:** Turn the currently-empty News/Photo Gallery/Video Gallery pages into real, manageable content.
 
-**Tasks:**
-- Admin CRUD: news posts (title, body, cover image, publish date, slug), photo gallery (albums/images), video gallery (YouTube/Vimeo embeds or uploaded video links).
-- Public API endpoints + pagination.
-- Frontend wiring for `News.tsx`, `PhotoGallery.tsx`, `VideoGallery.tsx`.
+**Backend (`/server`):**
+- `src/services/{news,photoGallery,videoGallery}.js` — same conventions as Phase 4's divisions module.
+- Public: `GET /api/news` (paginated, published-only), `GET /api/news/:slug`, `GET /api/photo-gallery`, `GET /api/video-gallery` (both published-only, ordered by `sort_order`).
+- Admin: full CRUD under `/api/admin/{news,photo-gallery,video-gallery}` — news has title/slug/excerpt/body/cover-image + publish toggle; photo gallery is direct multi-image upload (no separate "create" step) with publish/hide toggle, delete, reorder; video gallery stores a title + external video URL (YouTube/Vimeo) with an optional uploaded thumbnail.
+- Photo/video gallery each have a `PATCH /reorder` route — **deliberately registered before their `PATCH /:id` route**, otherwise Express would match the literal path segment `reorder` as an `:id` parameter and reroute it into the wrong handler. Caught this by testing the reorder call directly, not just by reading the code.
 
-**Deliverable:** Media Centre section is fully functional and editable.
+**Frontend:**
+- `src/lib/useMedia.ts` — `useNewsList`, `useNewsPost`, `usePhotoGallery`, `useVideoGallery` hooks.
+- Public `News.tsx` (paginated grid), a new `NewsDetail.tsx` (individual post page — didn't exist before, needed once posts became real), `PhotoGallery.tsx`, and `VideoGallery.tsx` (auto-derives a YouTube thumbnail from the video URL when the admin didn't upload one) now render real data instead of static placeholders.
+- `src/admin/media/` — `AdminMediaHub` (landing page linking to the three sub-sections), `AdminNewsList`/`AdminNewsEdit`, `AdminPhotoGallery` (upload grid with publish/hide/delete), `AdminVideoGallery` (list with inline edit, thumbnail upload).
+
+**Bug caught and fixed before committing:** publishing a post by toggling "Published" in the edit form (as opposed to publishing at creation time) never set `published_at` — only the create endpoint handled that. Found it by actually looking at the rendered public news list (the newly-published test article was missing its date badge) rather than trusting the API response alone. Fixed so `published_at` is set the first time a post becomes published and preserved on every edit after that; verified with a fresh curl sequence (create draft → publish → edit again → timestamp unchanged).
+
+**Verified, not just written:**
+- Full curl-driven test of every new endpoint: news create/publish-filtering, photo upload + reorder (specifically re-testing the route-order fix), video create + reorder, plus the `published_at` bug reproduction and fix confirmation.
+- Playwright browser pass: public News/PhotoGallery/VideoGallery pages, admin login → Media hub → create a draft news post → edit its body → save → publish it → confirmed it appears on the live public news list with the rest of the admin screens (photo gallery, video gallery) loading correctly. Screenshots reviewed; no uncaught JS errors.
+- `tsc --noEmit` and `vite build` both clean (685.74KB bundle — a reasonable ~29KB increase for three new CRUD modules, no repeat of the earlier bundle-bloat mistake).
+- All test data (news posts, uploaded test images, stray upload files) cleaned out of the local dev database before committing; dev servers stopped.
+
+**Deliverable:** ✅ Media Centre section (News with pagination and individual post pages, Photo Gallery, Video Gallery) is fully functional and editable from the admin panel.
 
 ---
 
@@ -317,8 +331,8 @@
 | 1 | Done | 2026-09-23 |
 | 2 | Done | 2026-09-23 |
 | 3 | Done | 2026-09-24 |
-| 4 | Done (awaiting approval) | — |
-| 5 | Not Started | — |
+| 4 | Done | 2026-09-24 |
+| 5 | Done (awaiting approval) | — |
 | 6 | Not Started | — |
 | 7 | Not Started | — |
 | 8 | Not Started | — |
