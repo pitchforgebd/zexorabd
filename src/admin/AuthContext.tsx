@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { apiFetch, ApiError } from './api';
+import { apiFetch, ApiError } from '../lib/api';
 
 export type AdminUser = { id: number; name: string; email: string; role: 'superadmin' | 'editor' };
 

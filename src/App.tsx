@@ -34,6 +34,8 @@ import AdminLogin from './admin/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import AdminDashboard from './admin/AdminDashboard';
 import AdminPlaceholder from './admin/AdminPlaceholder';
+import AdminDivisionsList from './admin/divisions/AdminDivisionsList';
+import AdminDivisionEdit from './admin/divisions/AdminDivisionEdit';
 
 export default function App() {
   return (
@@ -66,7 +68,8 @@ export default function App() {
             <Route path="admin" element={<ProtectedRoute />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
-                <Route path="divisions" element={<AdminPlaceholder title="Divisions & Products" phase="Phase 4" />} />
+                <Route path="divisions" element={<AdminDivisionsList />} />
+                <Route path="divisions/:id" element={<AdminDivisionEdit />} />
                 <Route path="media" element={<AdminPlaceholder title="News & Media" phase="Phase 5" />} />
                 <Route path="homepage" element={<AdminPlaceholder title="Homepage & Suppliers" phase="Phase 6" />} />
                 <Route path="sections" element={<AdminPlaceholder title="Page Sections" phase="Phase 7" />} />

@@ -1,16 +1,22 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, LayoutGrid, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
 import SEO from '../components/SEO';
 import { seoData } from '../data/seoData';
-import { divisions, divisionData } from '../data/divisions';
-import { divisionImages } from '../data/divisionImages';
+import { useDivision, useDivisionsList } from '../lib/useDivisions';
+import { getIcon } from '../lib/icons';
 
 export function DivisionTemplate({ id }: { id: string }) {
-  const data = divisionData[id];
-  if (!data) return null;
-  const seometa = seoData.divisions[data.id as keyof typeof seoData.divisions];
-  const images = divisionImages[id] || [];
+  const { division: data, loading, error } = useDivision(id);
+
+  if (loading) {
+    return <div className="pt-32 pb-24 min-h-screen text-center text-body-text">Loading…</div>;
+  }
+  if (error || !data) {
+    return <div className="pt-32 pb-24 min-h-screen text-center text-body-text">{error || 'Division not found.'}</div>;
+  }
+  const seometa = seoData.divisions[data.slug as keyof typeof seoData.divisions];
+  const images = data.galleryImages;
 
   return (
     <div className="bg-white pt-24 min-h-screen">
@@ -84,9 +90,9 @@ export function DivisionTemplate({ id }: { id: string }) {
               Products & Services
             </h2>
             <div className="space-y-8">
-              {data.products.map((cat, idx) => (
+              {data.products.map((cat) => (
                 <div
-                  key={idx}
+                  key={cat.id}
                   className="bg-light-gray rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <h3 className="text-2xl font-bold text-primary-dark mb-4 border-b border-gray-200 pb-4 tracking-tight">
@@ -96,8 +102,8 @@ export function DivisionTemplate({ id }: { id: string }) {
                     <p className="text-body-text mb-8">{cat.description}</p>
                   )}
                   <div className="space-y-10">
-                    {cat.subcategories.map((sub, sIdx) => (
-                      <div key={sIdx}>
+                    {cat.subcategories.map((sub) => (
+                      <div key={sub.id}>
                         {sub.subName && (
                           <h4 className="text-xl font-bold text-primary-blue mb-3">
                             {sub.subName}
@@ -109,11 +115,11 @@ export function DivisionTemplate({ id }: { id: string }) {
                           </p>
                         )}
                         <ul className="grid sm:grid-cols-2 gap-4">
-                          {sub.items.map((item, i) => (
-                            <li key={i} className="flex items-start">
+                          {sub.items.map((item) => (
+                            <li key={item.id} className="flex items-start">
                               <CheckCircle2 className="w-5 h-5 text-primary-blue mr-3 flex-shrink-0 mt-0.5" />
                               <span className="text-body-text font-medium">
-                                {item}
+                                {item.text}
                               </span>
                             </li>
                           ))}
@@ -146,32 +152,24 @@ export function DivisionTemplate({ id }: { id: string }) {
             </FadeIn>
           )}
 
-          {data.sourcing && data.sourcing.length > 0 && (
+          {data.sourcingSteps && data.sourcingSteps.length > 0 && (
             <FadeIn className="bg-light-gray rounded-3xl p-8 shadow-sm border border-gray-100">
               <h3 className="text-xl font-bold text-primary-dark mb-6 tracking-tight">
                 Our Sourcing Process
               </h3>
 
               <div className="space-y-6">
-                {data.sourcing.map((section, idx) => (
+                {data.sourcingSteps.map((section, idx) => (
                   <div key={idx}>
                     <h4 className="text-base font-bold text-primary-dark mb-2">
                       {section.title}
                     </h4>
-
-                    <ul className="space-y-2">
-                      {section.items.map((item, itemIdx) => (
-                        <li
-                          key={itemIdx}
-                          className="flex items-start text-body-text"
-                        >
-                          <span className="text-primary-blue mr-3 leading-none text-xl">
-                            •
-                          </span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <p className="flex items-start text-body-text">
+                      <span className="text-primary-blue mr-3 leading-none text-xl">
+                        •
+                      </span>
+                      <span>{section.description}</span>
+                    </p>
                   </div>
                 ))}
               </div>
@@ -303,6 +301,8 @@ export function DivisionTemplate({ id }: { id: string }) {
 }
 
 export default function Divisions() {
+  const { divisions, loading, error } = useDivisionsList();
+
   return (
     <div className="bg-light-gray pt-24 min-h-screen">
       <SEO title={seoData.divisionsList.title} description={seoData.divisionsList.description} />
@@ -324,9 +324,12 @@ export default function Divisions() {
           </p>
         </FadeIn>
 
+        {loading && <p className="text-center text-body-text">Loading divisions…</p>}
+        {error && <p className="text-center text-red-600">{error}</p>}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {divisions.map((div, idx) => {
-            const Icon = div.icon || LayoutGrid;
+            const Icon = getIcon(div.icon);
             return (
             <FadeIn key={div.id} delay={idx * 0.1}>
               <div className="bg-white rounded-3xl p-10 shadow-sm hover:shadow-2xl transition-all duration-300 h-full flex flex-col group hover:-translate-y-2 border border-gray-100 relative overflow-hidden">
@@ -336,8 +339,8 @@ export default function Divisions() {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-primary-dark group-hover:text-primary-blue transition-colors tracking-tight relative z-10">{div.name}</h3>
                 <p className="text-body-text mb-8 flex-grow text-lg leading-relaxed relative z-10">{div.tagline}</p>
-                <Link 
-                  to={div.path} 
+                <Link
+                  to={`/divisions/${div.slug}`}
                   className="inline-flex items-center text-primary-blue font-bold group-hover:text-accent-hover transition-colors mt-auto relative z-10 uppercase tracking-wider text-sm"
                 >
                   View Division <ArrowRight className="ml-2 w-5 h-5 transform group-hover:translate-x-2 transition-transform" />

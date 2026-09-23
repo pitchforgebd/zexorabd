@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Globe, ShieldCheck, TrendingUp, Cpu, Truck, Users, FileText, LayoutGrid, Package, CheckCircle2, Factory, Printer, Shirt, Pill, Layers, PaintRoller, Droplet, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Globe, ShieldCheck, TrendingUp, Cpu, Truck, Users, FileText, Package, CheckCircle2, Factory, Printer, Shirt, Pill, Layers, PaintRoller, Droplet, ShoppingBag } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
 import SEO from '../components/SEO';
 import { seoData } from '../data/seoData';
-import { divisions } from '../data/divisions';
-import { divisionImages } from '../data/divisionImages';
+import { useDivisionsList } from '../lib/useDivisions';
+import { getIcon } from '../lib/icons';
 import WorldMap from '../components/WorldMap';
 import HeroSlider from '../components/HeroSlider';
 import StatBox from '../components/StatBox';
@@ -44,6 +44,8 @@ const industries = [
 ];
 
 export default function Home() {
+  const { divisions } = useDivisionsList();
+
   return (
     <div className="bg-white">
       <SEO title={seoData.home.title} description={seoData.home.description} />
@@ -122,15 +124,14 @@ export default function Home() {
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {divisions.map((div, idx) => {
-              const Icon = div.icon || LayoutGrid;
+              const Icon = getIcon(div.icon);
               const bgImage =
-                divisionImages[div.id] && divisionImages[div.id].length > 0
-                  ? divisionImages[div.id][0].url
-                  : "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80";
+                div.coverImage ||
+                "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80";
               return (
                 <FadeIn key={div.id} delay={idx * 0.1}>
                   <Link
-                    to={div.path}
+                    to={`/divisions/${div.slug}`}
                     className="group block h-[420px] rounded-2xl overflow-hidden relative shadow-lg hover:shadow-2xl transition-all duration-500"
                   >
                     <div

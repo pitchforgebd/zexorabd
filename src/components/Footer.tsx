@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Youtube, ChevronRight } from 'lucide-react';
-import { divisions } from '../data/divisions';
+import { useDivisionsList } from '../lib/useDivisions';
 
 export default function Footer() {
+  const { divisions } = useDivisionsList();
+
   return (
     <footer className="relative bg-[#0A0D14] text-white pt-20 pb-10 border-t border-gray-800/50 overflow-hidden">
       {/* Background decoration */}
@@ -49,7 +51,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {divisions.map((div) => (
                 <li key={div.id}>
-                  <Link to={div.path} className="group flex items-center text-gray-400 hover:text-white transition-colors text-sm font-medium">
+                  <Link to={`/divisions/${div.slug}`} className="group flex items-center text-gray-400 hover:text-white transition-colors text-sm font-medium">
                     <ChevronRight className="w-4 h-4 mr-2 opacity-0 -ml-6 group-hover:opacity-100 group-hover:ml-0 text-primary-blue transition-all duration-300" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300 text-left">{div.name}</span>
                   </Link>

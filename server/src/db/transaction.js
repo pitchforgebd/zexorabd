@@ -1,0 +1,22 @@
+const pool = require('./pool');
+
+/**
+ * Run `fn` with a dedicated connection inside a transaction. Commits on
+ * success, rolls back on any thrown error, always releases the connection.
+ */
+async function withTransaction(fn) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const result = await fn(conn);
+    await conn.commit();
+    return result;
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
+module.exports = { withTransaction };

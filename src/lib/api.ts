@@ -16,10 +16,15 @@ function readCookie(name: string): string | null {
 type SuccessEnvelope<T> = { success: true; data: T };
 type ErrorEnvelope = { success: false; error: { message: string; code: string } };
 
+/**
+ * Shared fetch wrapper for the Node/Express API. Used by both the public
+ * site (GET-only, no session needed) and the admin panel (adds the CSRF
+ * header automatically on mutating requests once a session exists).
+ */
 export async function apiFetch<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const method = (options.method || 'GET').toUpperCase();
   const headers = new Headers(options.headers);
-  if (!headers.has('Content-Type') && options.body) {
+  if (!headers.has('Content-Type') && options.body && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
   if (method !== 'GET' && method !== 'HEAD') {

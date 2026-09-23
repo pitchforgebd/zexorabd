@@ -85,7 +85,7 @@
 ---
 
 ## Phase 3 — Admin Authentication & Panel Shell
-**Status:** Done — awaiting your approval to move to Phase 4
+**Status:** Done
 
 **Goal:** Secure login system and the base admin dashboard shell.
 
@@ -115,17 +115,37 @@
 ---
 
 ## Phase 4 — CMS Module: Divisions & Products
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 5
 
 **Goal:** Replace the hardcoded `src/data/divisions.ts` with database-backed content manageable from the admin panel.
 
-**Tasks:**
-- Admin CRUD screens: divisions, product categories, subcategories, items.
-- Image upload handling for division/product images (`multer` for uploads, stored server-side under `/uploads`, not third-party hosts).
-- Public API endpoints (`GET /api/divisions`, `GET /api/divisions/{slug}`) consumed by the React site.
-- Data migration script (Node script) to import the current hardcoded content into MySQL (so nothing is lost).
+**Schema correction found mid-phase:** the live site has a per-division "Visuals & Products" photo gallery (`src/data/divisionImages.ts`, ~130 images across 6 divisions) that Phase 1's schema missed entirely. Added `database/migrations/001_division_gallery_images.sql` (a `division_gallery_images` table) — the first entry in an incremental-migrations folder that sits alongside the Phase 1 `schema.sql` snapshot.
 
-**Deliverable:** Divisions pages on the live site are fully DB-driven; admin can edit a product line without a code deploy.
+**Backend (`/server`):**
+- `src/services/divisions.js` — shared read/write logic: list, get-by-slug-or-id (with full nested product tree + gallery), create, full-update (transactional replace of the entire category→subcategory→item tree on every save), delete, slug-uniqueness check, reorder.
+- `src/db/transaction.js` — small `withTransaction()` helper wrapping begin/commit/rollback/release.
+- `src/middleware/imageUpload.js` — `multer`-based image upload factory (randomized filenames, JPEG/PNG/WEBP/GIF only, 8MB cap, never trusts client-supplied filenames).
+- `src/routes/divisions.js` — public `GET /api/divisions`, `GET /api/divisions/:slug`.
+- `src/routes/admin/divisions.js` — full authenticated CRUD (`GET/POST/PUT/DELETE /api/admin/divisions[/:id]`), `PATCH .../reorder`, cover-image and gallery-image upload/delete endpoints. Deleting a division now also best-effort deletes its uploaded cover + gallery files from disk (caught this gap myself before it shipped, fixed before committing).
+
+**Data migration:**
+- `scripts/migrate-divisions.ts` (root, run via `npx tsx`) — safely re-runnable script that reads the existing `src/data/divisions.ts`, `divisionImages.ts`, and `suppliers.ts` and upserts everything into MySQL (divisions upserted by slug, each division's product tree and gallery fully rebuilt from source on every run, suppliers inserted if not already present). Also backfills `cover_image` from each division's first gallery image, since the homepage needed a thumbnail source.
+
+**Frontend:**
+- `src/lib/{api.ts,types.ts,icons.ts,useDivisions.ts}` — the API client (moved out of `src/admin` since it's now shared with the public site), typed API shapes, a small curated icon-name→component map (see below), and `useDivisionsList`/`useDivision` hooks.
+- `src/pages/Divisions.tsx` (listing + `DivisionTemplate` detail), `src/components/Footer.tsx`, and `src/pages/Home.tsx` all now fetch from the API instead of importing the static data files — the whole site's division content is DB-driven, not just the `/divisions` routes.
+- `src/admin/divisions/` — `AdminDivisionsList` (table with reorder arrows, create, delete), `AdminDivisionEdit` (full editor: basic info, cover image upload, optional philosophy section, five bullet-list editors, optional sourcing steps, the full category→subcategory→item product tree editor, gallery upload/delete grid), `ProductsEditor`, `StringListEditor`.
+
+**Bug caught and fixed before committing:** initially used lucide-react's `icons` registry object for dynamic icon lookup by name — this pulled in every icon in the library and bloated the production bundle from 664KB to 1.39MB (confirmed by diffing build output against the pre-Phase-4 baseline). Replaced with a small explicitly-imported map of just the icons actually used; bundle is now 656KB, slightly *smaller* than before this phase.
+
+**Verified, not just written:**
+- Migration script run against a real local MySQL 8 database: 6 divisions, 18 categories, 43 subcategories, 300 items, 123 gallery images, 32 suppliers — counts double-checked by direct SQL query.
+- Full curl-driven test of the admin API: CSRF-rejected/validated/successful create, full nested-tree update, slug-collision rejection, cover-image and gallery-image upload (plus non-image-file rejection), gallery-image delete, reorder, delete with cascade verified at the DB level (orphan categories/gallery rows = 0 after deleting a test division with children).
+- Full Playwright browser run covering both sides at once: home page and `/divisions` listing and detail pages rendering DB content, admin login → open the real "chemicals" division → edit its tagline → save → confirmed the change appears live on the public page → reverted it back, all in one session. Screenshots reviewed; no uncaught JS errors.
+- `tsc --noEmit` and `vite build` both clean (the one pre-existing unrelated type error in `src/data/divisions.ts` is untouched, as before).
+- All dev servers, the temporary Playwright browser, and stray processes were stopped/cleaned up after testing.
+
+**Deliverable:** ✅ Divisions pages (and the homepage/footer division references) are fully DB-driven; admin can edit a division's full content, including its product catalog, without a code deploy.
 
 ---
 
@@ -296,8 +316,8 @@
 | 0 | Done | 2026-09-23 |
 | 1 | Done | 2026-09-23 |
 | 2 | Done | 2026-09-23 |
-| 3 | Done (awaiting approval) | — |
-| 4 | Not Started | — |
+| 3 | Done | 2026-09-24 |
+| 4 | Done (awaiting approval) | — |
 | 5 | Not Started | — |
 | 6 | Not Started | — |
 | 7 | Not Started | — |
