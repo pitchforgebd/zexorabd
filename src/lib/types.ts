@@ -73,3 +73,22 @@ export type VideoGalleryItem = {
   isPublished: boolean;
   sortOrder: number;
 };
+
+export type Supplier = {
+  id: number;
+  url: string;
+  altText: string | null;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+export type HeroSlide = { image: string; title: string; subtitle: string; description: string };
+export type StatItem = { value: string; label: string };
+export type WhyChooseReason = { title: string; desc: string };
+
+export type SiteSettings = {
+  'home.hero'?: { slides: HeroSlide[] };
+  'home.stats'?: { items: StatItem[] };
+  'home.whyChooseUs'?: { heading: string; subheading: string; reasons: WhyChooseReason[] };
+  'home.suppliers'?: { heading: string; subheading: string; description: string };
+};

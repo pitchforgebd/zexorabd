@@ -2,63 +2,23 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-
-const slides = [
-  {
-    id: 1,
-    image: 'https://i.ibb.co.com/zWcjLZnx/Home-Banner-3.jpg',
-    title: 'Zexora Corporation',
-    subtitle: 'A Diversified Multi-Sector Business Group',
-    description: 'Performance. Partnership. Progress.',
-  },
-  {
-    id: 2,
-    image: 'https://i.ibb.co.com/1tNwZTLN/Home-Page-Banner-1-1.jpg',
-    title: 'Global Sourcing Network',
-    subtitle: 'Connecting Markets Worldwide',
-    description: 'Verified suppliers from 9+ countries worldwide ensuring supply chain resilience.',
-  },
-  {
-    id: 3,
-    image: 'https://i.ibb.co.com/fdnGRcV3/Home-Page-Banner-1-2.jpg',
-    title: 'Industrial Excellence',
-    subtitle: 'Quality Across 6 Specialized Divisions',
-    description: 'From chemicals to packaging, our expertise drives sustainable long-term value.',
-  },
-  {
-    id: 4,
-    image: 'https://i.ibb.co.com/SDLSJ9b7/Home-Page-Banner-1-3.jpg',
-    title: 'Commitment to Quality',
-    subtitle: 'Delivering Excellence Globally',
-    description: 'Empowering businesses with superior products and unmatched service.',
-  },
-  {
-    id: 5,
-    image: 'https://i.ibb.co.com/jZRsLkPc/Home-Page-Banner-1-4.jpg',
-    title: 'Sustainable Partnerships',
-    subtitle: 'Building the Future Together',
-    description: 'Fostering innovation and sustainable growth across industries.',
-  },
-  {
-    id: 6,
-    image: 'https://i.ibb.co.com/sTDp13Y/Home-Page-Banner-1-5.jpg',
-    title: 'Empowering Industries',
-    subtitle: 'Comprehensive B2B Solutions',
-    description: 'Your trusted partner for end-to-end industrial and corporate supply.',
-  }
-];
+import { useSiteSettings } from '../lib/useSiteSettings';
 
 export default function HeroSlider() {
+  const { settings, loading } = useSiteSettings();
+  const slides = settings?.['home.hero']?.slides || [];
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(1);
 
   useEffect(() => {
+    if (slides.length < 2) return;
     const timer = setInterval(() => {
       setDirection(1);
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     }, 6000);
     return () => clearInterval(timer);
-  }, [currentSlide]);
+  }, [currentSlide, slides.length]);
 
   const nextSlide = () => {
     setDirection(1);
@@ -103,6 +63,14 @@ export default function HeroSlider() {
       transition: { duration: 0.4, ease: "easeIn" as const }
     })
   };
+
+  if (slides.length === 0) {
+    return (
+      <section className="relative min-h-[600px] md:min-h-[700px] lg:min-h-[800px] h-screen w-full flex items-center justify-center overflow-hidden bg-black">
+        {loading && <p className="text-white/40 text-sm">Loading…</p>}
+      </section>
+    );
+  }
 
   return (
     <section className="relative min-h-[600px] md:min-h-[700px] lg:min-h-[800px] h-screen w-full flex items-center justify-center overflow-hidden bg-black">

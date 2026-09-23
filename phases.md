@@ -178,16 +178,33 @@
 ---
 
 ## Phase 6 — CMS Module: Homepage & Supplier Content
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 7
 
 **Goal:** Move remaining hardcoded content (hero slider text/images, stats, supplier logos, "why choose us") into the CMS.
 
-**Tasks:**
-- `site_settings` admin screens for homepage sections' content (text, numbers, images).
-- Supplier logo manager (replacing the hardcoded ibb.co URL list with server-hosted uploads).
-- Frontend wiring for `HeroSlider`, `StatBox`, `SupplierLogos`, `WhyChooseGrid`.
+**Backend (`/server`):**
+- `services/siteSettings.js` — generic key/value get-all/set over the `site_settings` table (JSON values), used for `home.hero`, `home.stats`, `home.whyChooseUs`, `home.suppliers`.
+- `services/suppliers.js` — same CRUD conventions as photo gallery (Phase 5).
+- Public `GET /api/site-settings` (all keys in one call — the homepage needs several at once) and `GET /api/suppliers` (active only).
+- Admin `GET/PUT /api/admin/site-settings[/:key]`, a generic `POST /api/admin/site-settings/upload-image` (for hero slide images, which aren't tied to an existing record the way a division's cover image is), and full admin CRUD under `/api/admin/suppliers` (upload, reorder, hide/show, delete).
 
-**Deliverable:** Homepage content is fully editable without touching code.
+**Data:**
+- `scripts/seed-site-settings.ts` — mirrors `migrate-divisions.ts`'s approach: seeds `site_settings` with the *exact* current hardcoded hero slides/stats/reasons/supplier copy, so cutting over to the CMS caused zero visual regression. Supplier logos didn't need a separate seed — Phase 4's `migrate-divisions.ts` already populated the `suppliers` table.
+
+**Frontend:**
+- `src/lib/useSiteSettings.ts` — `useSiteSettings()` and `useSuppliers()` hooks.
+- `HeroSlider.tsx` and `SupplierLogos.tsx` now fetch their own content instead of importing static arrays (each falls back gracefully — an empty slide/supplier list just renders nothing rather than crashing). `Home.tsx`'s stats and "why choose us" reasons/heading come from settings with the original hardcoded values kept as in-code fallback defaults (so the page never flashes empty before the fetch resolves).
+- `src/admin/homepage/AdminHomepage.tsx` — one page, four independently-saved sections: Hero Slider (per-slide image upload + text), Stats, Why Choose Us (heading/subheading + reasons), Supplier section copy. `AdminSuppliers.tsx` — the logo grid manager (upload, hide/show, delete), linked from the homepage settings page.
+
+**Bug caught during my own verification (not an app bug — a test-script mistake worth recording anyway):** while browser-testing the save flow, my test script edited the first "Stats" row's label, then "reverted" it by typing the *second* row's original label into that same first-row field, silently corrupting the seeded data (`Established` → `Years of Experience`). Caught it by re-querying the API afterward instead of trusting the test's own success output, and restored the correct seeded values via a direct API call before moving on. Recorded here because it's exactly the kind of self-inflicted verification bug that's worth staying suspicious of.
+
+**Verified, not just written:**
+- curl-driven test of every new endpoint, including a regression check that the Phase 5 `PATCH /reorder`-before-`/:id` route-ordering fix pattern was correctly applied to the new suppliers routes too.
+- Playwright pass: public homepage (hero text, stats, why-choose-us, supplier section) rendering from the API; admin login → Homepage & Suppliers settings page (all 6 hero slides / 3 stats / 8 reasons / supplier copy loaded correctly) → edited and saved a stat → confirmed it went live on the public homepage → reverted → opened the supplier logo manager and confirmed all 32 migrated logos load. Hero/supplier background images show blank in screenshots only because this sandbox has no outbound internet to reach the legacy `ibb.co` URLs — same known, already-confirmed limitation from Phases 4–5, not a rendering bug.
+- `tsc --noEmit` clean, `vite build` clean (696.63KB, a reasonable ~11KB increase — no repeat of the Phase 4 bundle-bloat mistake).
+- Dev servers stopped and local DB double-checked back to its correct seeded state after testing.
+
+**Deliverable:** ✅ Homepage content (hero slider, stats, "why choose us", supplier logos and section copy) is fully editable from the admin panel without touching code.
 
 > Note: this phase covers *content* inside sections. *Whether a section shows, its order, and its visual variant* is handled next, in Phase 7.
 
@@ -332,8 +349,8 @@
 | 2 | Done | 2026-09-23 |
 | 3 | Done | 2026-09-24 |
 | 4 | Done | 2026-09-24 |
-| 5 | Done (awaiting approval) | — |
-| 6 | Not Started | — |
+| 5 | Done | 2026-09-24 |
+| 6 | Done (awaiting approval) | — |
 | 7 | Not Started | — |
 | 8 | Not Started | — |
 | 9 | Not Started | — |

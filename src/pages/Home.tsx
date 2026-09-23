@@ -5,6 +5,7 @@ import SEO from '../components/SEO';
 import { seoData } from '../data/seoData';
 import { useDivisionsList } from '../lib/useDivisions';
 import { getIcon } from '../lib/icons';
+import { useSiteSettings } from '../lib/useSiteSettings';
 import WorldMap from '../components/WorldMap';
 import HeroSlider from '../components/HeroSlider';
 import StatBox from '../components/StatBox';
@@ -14,13 +15,13 @@ import IndustriesGrid from '../components/IndustriesGrid';
 import CTABanner from '../components/CTABanner';
 import SupplierLogos from '../components/SupplierLogos';
 
-const statBoxes = [
+const DEFAULT_STATS = [
   { value: '2024', label: 'Established' },
   { value: '15+', label: 'Years of Experience' },
   { value: '6', label: 'Business Divisions' },
 ];
 
-const reasons = [
+const DEFAULT_REASONS = [
   { title: 'Reliable Global Sourcing Network', desc: 'Verified suppliers from 9+ countries worldwide' },
   { title: 'Consistent Industrial Quality', desc: 'Strict quality standards maintained at every supply stage' },
   { title: 'Competitive Commercial Support', desc: 'Transparent pricing and sustainable long-term value' },
@@ -45,6 +46,10 @@ const industries = [
 
 export default function Home() {
   const { divisions } = useDivisionsList();
+  const { settings } = useSiteSettings();
+  const statBoxes = settings?.['home.stats']?.items || DEFAULT_STATS;
+  const whyChooseUs = settings?.['home.whyChooseUs'];
+  const reasons = whyChooseUs?.reasons || DEFAULT_REASONS;
 
   return (
     <div className="bg-white">
@@ -166,10 +171,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-              Why Choose Zexora Corporation?
+              {whyChooseUs?.heading || 'Why Choose Zexora Corporation?'}
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Built on experience. Driven by performance. Trusted by industry.
+              {whyChooseUs?.subheading || 'Built on experience. Driven by performance. Trusted by industry.'}
             </p>
           </FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
