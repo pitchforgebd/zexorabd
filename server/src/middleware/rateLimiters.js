@@ -20,4 +20,16 @@ const formSubmitLimiter = rateLimit({
   handler: (req, res) => fail(res, 'Too many submissions. Please try again later.', 429, 'RATE_LIMITED'),
 });
 
-module.exports = { loginLimiter, formSubmitLimiter };
+// Broad defense-in-depth backstop across all /api routes, sitting behind the
+// tighter per-route limiters above (login, form submissions). Generous
+// enough not to bother a real admin or a browsing visitor, tight enough to
+// blunt scraping/brute-force scripts that ignore the narrower limiters.
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => fail(res, 'Too many requests. Please slow down.', 429, 'RATE_LIMITED'),
+});
+
+module.exports = { loginLimiter, formSubmitLimiter, apiLimiter };

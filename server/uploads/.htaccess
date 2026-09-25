@@ -1,0 +1,15 @@
+# Defense-in-depth: uploaded files are served by the Node app
+# (express.static in createApp.js), not Apache, and imageUpload.js/
+# documentUpload.js already only ever save files with a fixed,
+# code-controlled extension (never trusting the client-supplied
+# filename). This is a second layer in case cPanel's Apache config ever
+# serves this directory directly ahead of proxying to Node - it should
+# never execute anything here as a script, no matter what lands on disk.
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+
+RemoveHandler .php .phtml .php3 .php4 .php5 .pl .py .cgi .asp .aspx .sh .exe

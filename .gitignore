@@ -13,6 +13,10 @@ coverage/
 # Uploaded files (CVs, CMS images) are runtime data, not source
 server/uploads/*
 !server/uploads/.gitkeep
+!server/uploads/.htaccess
 !server/uploads/cv/
 server/uploads/cv/*
 !server/uploads/cv/.gitkeep
+
+# Local/cron-generated DB dumps from scripts/backupDatabase.js - never source
+server/backups/

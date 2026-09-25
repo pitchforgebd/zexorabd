@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -9,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const config = require('./config');
 const sessionMiddleware = require('./session');
 const csrf = require('./middleware/csrf');
+const { apiLimiter } = require('./middleware/rateLimiters');
 const apiRouter = require('./routes');
 const sitemapRouter = require('./routes/sitemap');
 const seoResolver = require('./services/seoResolver');
@@ -21,6 +23,16 @@ function createApp() {
 
   app.disable('x-powered-by');
   app.set('trust proxy', 1); // behind cPanel's Apache/Passenger reverse proxy
+
+  // cPanel terminates TLS at Apache/LiteSpeed in front of the Node app, so
+  // req.secure reads X-Forwarded-Proto (trust proxy, above) rather than the
+  // raw socket. Only enforced in production - local/dev runs plain HTTP.
+  if (config.isProduction) {
+    app.use((req, res, next) => {
+      if (req.secure) return next();
+      return res.redirect(308, `https://${req.headers.host}${req.originalUrl}`);
+    });
+  }
 
   // Helmet's default CSP (img-src 'self' data:, connect-src 'self', no
   // frame-src) is fine for pure JSON API responses, but this app also now
@@ -54,8 +66,15 @@ function createApp() {
   app.use(cookieParser());
   app.use(sessionMiddleware);
   app.use('/api', csrf);
+  app.use('/api', apiLimiter);
 
-  app.use('/uploads', express.static(config.uploadsDir));
+  // Uploaded filenames are randomized per-file (crypto.randomBytes) and
+  // never reused, so a far-future immutable cache is safe - a URL either
+  // 404s or always resolves to the exact same bytes.
+  app.use(
+    '/uploads',
+    express.static(config.uploadsDir, { maxAge: '1y', immutable: true })
+  );
   app.use('/api', apiRouter);
   app.use(sitemapRouter);
 
@@ -64,10 +83,27 @@ function createApp() {
   // meta into index.html before sending it - see phases.md Phase 9/0.
   const distExists = fs.existsSync(config.distDir);
   if (distExists) {
-    app.use(express.static(config.distDir, { index: false }));
+    app.use(
+      express.static(config.distDir, {
+        index: false,
+        setHeaders: (res, filePath) => {
+          // Vite fingerprints everything under assets/ (index-<hash>.js) so
+          // those are safe to cache forever; a content change ships under a
+          // new filename. Anything else in dist (favicon, robots.txt, etc.)
+          // gets a short cache instead since it isn't fingerprinted.
+          if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          } else {
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+          }
+        },
+      })
+    );
   }
 
-  // SPA fallback for everything else, with server-rendered SEO meta.
+  // SPA fallback for everything else, with server-rendered SEO meta. Always
+  // fresh - this is the one response whose content (per-route SEO tags)
+  // must never be served stale from a cache.
   app.get('*', async (req, res, next) => {
     if (!distExists || !htmlTemplate.templateExists()) {
       return next(); // no build available (e.g. running the API alone in dev) - fall through to 404
@@ -75,6 +111,7 @@ function createApp() {
     try {
       const meta = await seoResolver.resolveForPath(req.path);
       res.set('Content-Type', 'text/html');
+      res.set('Cache-Control', 'no-store');
       return res.send(htmlTemplate.renderPage(meta));
     } catch (err) {
       return next(err);

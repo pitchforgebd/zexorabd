@@ -5,7 +5,7 @@ const { body, param } = require('express-validator');
 const suppliersService = require('../../services/suppliers');
 const { ok, fail, ApiError } = require('../../utils/response');
 const validate = require('../../middleware/validate');
-const { createImageUpload, publicPathFor } = require('../../middleware/imageUpload');
+const { createImageUpload, publicPathFor, optimizeImage } = require('../../middleware/imageUpload');
 const config = require('../../config');
 
 const router = Router();
@@ -32,6 +32,7 @@ router.post('/upload', (req, res, next) => {
     try {
       let order = await suppliersService.nextSortOrder();
       for (const file of req.files) {
+        await optimizeImage(file.path);
         await suppliersService.insert({ imagePath: publicPathFor('suppliers', file.filename), sortOrder: order++ });
       }
       return ok(res, await suppliersService.listAll());

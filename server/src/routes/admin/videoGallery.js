@@ -5,7 +5,7 @@ const { body, param } = require('express-validator');
 const videoGalleryService = require('../../services/videoGallery');
 const { ok, created, fail, ApiError } = require('../../utils/response');
 const validate = require('../../middleware/validate');
-const { createImageUpload, publicPathFor } = require('../../middleware/imageUpload');
+const { createImageUpload, publicPathFor, optimizeImage } = require('../../middleware/imageUpload');
 const config = require('../../config');
 
 const router = Router();
@@ -95,6 +95,7 @@ router.post('/:id/thumbnail', param('id').isInt(), validate([]), loadVideoOr404,
     if (err) return next(new ApiError(err.message, 400, 'UPLOAD_ERROR'));
     if (!req.file) return fail(res, 'No image file provided', 400, 'BAD_REQUEST');
     try {
+      await optimizeImage(req.file.path);
       const publicPath = publicPathFor('video-gallery', req.file.filename);
       deleteLocalUploadFile(req.video.thumbnail);
       await videoGalleryService.updateThumbnail(req.video.id, publicPath);

@@ -7,7 +7,7 @@ const { withTransaction } = require('../../db/transaction');
 const divisionsService = require('../../services/divisions');
 const { ok, created, fail, ApiError } = require('../../utils/response');
 const validate = require('../../middleware/validate');
-const { createImageUpload, publicPathFor } = require('../../middleware/imageUpload');
+const { createImageUpload, publicPathFor, optimizeImage } = require('../../middleware/imageUpload');
 const config = require('../../config');
 
 const router = Router();
@@ -123,6 +123,7 @@ router.post('/:id/cover-image', param('id').isInt(), validate([]), loadDivisionO
     if (err) return next(new ApiError(err.message, 400, 'UPLOAD_ERROR'));
     if (!req.file) return fail(res, 'No image file provided', 400, 'BAD_REQUEST');
     try {
+      await optimizeImage(req.file.path);
       const publicPath = publicPathFor('divisions', req.file.filename);
       await pool.query('UPDATE divisions SET cover_image = :coverImage WHERE id = :id', {
         coverImage: publicPath,
@@ -146,6 +147,7 @@ router.post('/:id/gallery-images', param('id').isInt(), validate([]), loadDivisi
       );
       let order = maxOrder + 1;
       for (const file of req.files) {
+        await optimizeImage(file.path);
         const publicPath = publicPathFor('divisions/gallery', file.filename);
         await pool.query(
           'INSERT INTO division_gallery_images (division_id, image_path, sort_order) VALUES (:id, :imagePath, :sortOrder)',

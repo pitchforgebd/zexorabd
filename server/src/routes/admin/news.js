@@ -5,7 +5,7 @@ const { body, param } = require('express-validator');
 const newsService = require('../../services/news');
 const { ok, created, fail, ApiError } = require('../../utils/response');
 const validate = require('../../middleware/validate');
-const { createImageUpload, publicPathFor } = require('../../middleware/imageUpload');
+const { createImageUpload, publicPathFor, optimizeImage } = require('../../middleware/imageUpload');
 const config = require('../../config');
 
 const router = Router();
@@ -96,6 +96,7 @@ router.post('/:id/cover-image', param('id').isInt(), validate([]), loadPostOr404
     if (err) return next(new ApiError(err.message, 400, 'UPLOAD_ERROR'));
     if (!req.file) return fail(res, 'No image file provided', 400, 'BAD_REQUEST');
     try {
+      await optimizeImage(req.file.path);
       const publicPath = publicPathFor('news', req.file.filename);
       deleteLocalUploadFile(req.post.coverImage);
       await newsService.updateCoverImage(req.post.id, publicPath);

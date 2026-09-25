@@ -63,8 +63,13 @@ function breadcrumbJsonLd(breadcrumbs) {
 function renderPage(meta) {
   const jsonLdBlocks = [organizationJsonLd()];
   if (meta.breadcrumbs) jsonLdBlocks.push(breadcrumbJsonLd(meta.breadcrumbs));
+  // JSON.stringify doesn't escape "<", so a division name or news title
+  // (admin-editable, e.g. via breadcrumbJsonLd) containing "</script>" would
+  // otherwise close this tag early and let whatever follows execute as HTML
+  // for every visitor. \u003c is valid inside a JSON string and still
+  // parses back to "<" when a crawler/JSON-LD consumer reads the tag.
   const jsonLdHtml = jsonLdBlocks
-    .map((block) => `<script type="application/ld+json">${JSON.stringify(block)}</script>`)
+    .map((block) => `<script type="application/ld+json">${JSON.stringify(block).replace(/</g, '\\u003c')}</script>`)
     .join('\n  ');
 
   return loadTemplate()

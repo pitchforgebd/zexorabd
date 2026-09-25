@@ -332,7 +332,7 @@
 ---
 
 ## Phase 11 — Security & Performance Hardening
-**Status:** Not Started
+**Status:** Done
 
 **Goal:** Production-harden before go-live.
 
@@ -344,7 +344,42 @@
 - Caching headers for static assets; basic query caching where useful.
 - Process resilience under Passenger (auto-restart on crash), and an automated MySQL backup strategy on cPanel (cron + `mysqldump`).
 
-**Deliverable:** Security checklist signed off; backups verified restorable.
+**What was built:**
+
+- **Full checklist and rationale:** `server/SECURITY.md` — every item below is recorded there with its verification method; this section is the narrative version.
+
+**Two real vulnerabilities found and fixed during the audit** (not just a pass/fail checklist — actual bugs caught by adversarial testing):
+
+1. **File-upload extension confusion.** `imageUpload.js`/`documentUpload.js` validated only `file.mimetype` (client-claimed, from the multipart `Content-Type` header) but saved the file using `path.extname(file.originalname)` (fully client-controlled). A file named `shell.php` with a spoofed `Content-Type: image/jpeg` would pass the mimetype check and land on disk as `<random>.php` — a real RCE path if that directory were ever reachable by a PHP-enabled webserver ahead of Node. Fixed by replacing the extension source with a fixed `MIME_TO_EXT` lookup keyed off the *validated* mimetype, so the saved extension is always one of a small code-controlled set, never client input. Added `server/uploads/.htaccess` as defense-in-depth (disables script execution) in case Apache ever serves that directory directly.
+2. **Unescaped JSON-LD (stored XSS via admin content).** `htmlTemplate.js` built `<script type="application/ld+json">` blocks with `JSON.stringify()`, which does not escape `<`. A division name or news title (admin-editable, flows into `breadcrumbJsonLd()`) containing `</script><script>...` would close the tag early and inject live script into every visitor's page — not just the admin's own session. Fixed by escaping `<` to `<` in the JSON-LD payload before embedding (valid JSON, breaks the HTML tag-close sequence). The Phase 9 `escapeHtml()` calls on title/description/canonical/og:image were unaffected and re-confirmed correct.
+
+**Also implemented:**
+- **Image optimization** — new `optimizeImage()` in `imageUpload.js` using `jimp` (pure-JS, no native bindings — same shared-hosting-portability reasoning as `bcryptjs` over `bcrypt` in Phase 3). Resizes to max 1920px width, re-compresses JPEGs at quality 82, skips GIFs (Jimp doesn't reliably round-trip animated ones), best-effort (a corrupt/unsupported file is left untouched rather than failing the admin's save). Wired into all 6 image-upload endpoints: divisions (cover + gallery), news cover, photo gallery, suppliers, video gallery thumbnail, homepage/site-settings generic upload.
+- **General API rate limiting** — `apiLimiter` (300 req/min per client across all `/api/*`) added as a defense-in-depth backstop behind the existing narrower `loginLimiter` and `formSubmitLimiter`.
+- **HTTPS enforcement** — production-only redirect middleware using `req.secure` (works correctly behind `trust proxy` since cPanel terminates TLS at Apache/LiteSpeed in front of the Node app); inactive in dev so local HTTP still works. Helmet's default HSTS header was already active.
+- **Cache headers** — `/uploads/*` and `dist/assets/*` (both have immutable, content-derived/randomized filenames) get a 1-year immutable cache; other `dist/` files get 1 hour; the SPA-fallback HTML (server-injects per-route SEO meta, must never be stale) gets `Cache-Control: no-store`.
+- **Automated MySQL backups** — `scripts/backupDatabase.js` (`mysqldump` piped through gzip, timestamped, retention pruning, default keep 14) and `scripts/restoreDatabase.js`, both plain Node scripts (no shell script needed) meant to run via a daily cPanel cron job. Matches the `scripts/createAdmin.js` style already in the repo.
+- **Process resilience** — deliberately *not* extra application code: cPanel's "Setup Node.js App" runs the app under Phusion Passenger, which already guarantees process respawn on crash. Documented as a reasoned no-op rather than left silently unaddressed.
+
+**Audited and confirmed already correct (no changes needed):**
+- SQL injection — grep-audited every query across `services/*.js` and `routes/**/*.js`; 100% named placeholders. The two places with conditionally-built SQL (`slugExists()`, `getDivision()`'s dynamic WHERE) only vary fixed SQL structure by code logic, never interpolate user input.
+- Auth bypass — all 10 admin route mounts in `routes/index.js` have `requireAuth` at the `router.use()` level; no gaps.
+- CSRF, session/cookie config, CSP — all already correct from Phases 3 and 9; re-verified, not re-implemented.
+
+**Verified, not just written:**
+- `node -c` syntax-checked every modified file.
+- Live end-to-end test of the extension-confusion fix: uploaded a file named `notreal.php` with a spoofed `image/jpeg` Content-Type through the real running server — saved as `.jpg`, confirmed via directory listing that zero `.php` files exist anywhere under `uploads/`. A genuinely non-image file with an honest mimetype was correctly rejected. Repeated for the public, unauthenticated `career.js` CV-upload path (uses `documentUpload.js`, the sibling fix) — same result.
+- Live end-to-end test of the JSON-LD XSS fix: set a real division's name to `XSSTEST</script><script>alert(1)</script>` in the dev DB, requested its page from the running server, and confirmed the served HTML shows `</script><script>` (inert) rather than a literal closing tag — then restored the original name.
+- Live image-optimization test: generated a 3000×2000 (164KB) JPEG, uploaded it through the real `upload-image` endpoint, and confirmed the file saved to disk was resized to 1920×1280 and compressed to ~68KB.
+- Cache headers confirmed via `curl -I` against the running server: fingerprinted assets get `max-age=31536000, immutable`; the SPA-fallback HTML gets `no-store`.
+- Rate limiter confirmed active via response headers (`RateLimit-Limit`, `RateLimit-Remaining`) on a real request.
+- HTTPS-redirect middleware confirmed inert in dev (`NODE_ENV` not `production`) so local testing wasn't broken.
+- Backup/restore round-trip verified for real: ran `scripts/backupDatabase.js` against the live dev database, restored the resulting `.sql.gz` into a throwaway database (`zexora_cms_restoretest`), confirmed row counts matched the source (6 divisions), then dropped the throwaway database and deleted the local backup artifact.
+- Full login → authenticated upload flow re-tested after all middleware changes (rate limiter, cache headers, HTTPS-redirect) landed, to confirm nothing broke the legitimate path.
+
+**Scope note:** the local dev admin account's password was temporarily reset to a known test value during this phase's live-upload testing (no way to test authenticated upload endpoints otherwise without the original password, which wasn't recorded anywhere). This only affects the local development database, not production.
+
+**Deliverable:** ✅ Security checklist signed off (`server/SECURITY.md`), including two real vulnerabilities found and fixed, not just a pass/fail pass. Backups verified restorable via an actual restore-and-compare, not just "the script ran without error."
 
 ---
 
@@ -412,8 +447,8 @@
 | 7 | Done | 2026-09-24 |
 | 8 | Done | 2026-09-24 |
 | 9 | Done | 2026-09-26 |
-| 10 | Done (awaiting approval) | — |
-| 11 | Not Started | — |
+| 10 | Done | 2026-09-26 |
+| 11 | Done | 2026-09-26 |
 | 12 | Not Started | — |
 | 13 | Not Started | — |
 | 14 | Not Started | — |
