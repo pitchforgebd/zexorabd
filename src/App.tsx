@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
 import RouteTitleSync from './components/RouteTitleSync';
 import Home from './pages/Home';
@@ -27,6 +27,8 @@ import News from './pages/media/News';
 import NewsDetail from './pages/media/NewsDetail';
 import PhotoGallery from './pages/media/PhotoGallery';
 import VideoGallery from './pages/media/VideoGallery';
+import NotFound from './pages/NotFound';
+import LegalPlaceholder from './pages/LegalPlaceholder';
 
 // Admin (Phase 3+)
 import { AuthProvider } from './admin/AuthContext';
@@ -50,32 +52,43 @@ import AdminSeoSettings from './admin/seo/AdminSeoSettings';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <RouteTitleSync />
-        <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="about" element={<About />} />
-              <Route path="ceo-message" element={<CeoMessage />} />
-              <Route path="vision-mission" element={<VisionMission />} />
-              <Route path="divisions" element={<Divisions />} />
-              <Route path="divisions/chemicals" element={<Chemicals />} />
-              <Route path="divisions/equipment" element={<Equipment />} />
-              <Route path="divisions/power" element={<Power />} />
-              <Route path="divisions/apparel" element={<Apparel />} />
-              <Route path="divisions/printpack" element={<PrintPack />} />
-              <Route path="divisions/fashion" element={<Fashion />} />
-              <Route path="global-sourcing" element={<GlobalSourcing />} />
-              <Route path="career" element={<Career />} />
-              <Route path="media-centre" element={<MediaCentre />} />
-              <Route path="media-centre/news" element={<News />} />
-              <Route path="media-centre/news/:slug" element={<NewsDetail />} />
-              <Route path="media-centre/photo-gallery" element={<PhotoGallery />} />
-              <Route path="media-centre/video-gallery" element={<VideoGallery />} />
-              <Route path="contact" element={<Contact />} />
-            </Route>
+    <Router>
+      <RouteTitleSync />
+      <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="about" element={<About />} />
+            <Route path="ceo-message" element={<CeoMessage />} />
+            <Route path="vision-mission" element={<VisionMission />} />
+            <Route path="divisions" element={<Divisions />} />
+            <Route path="divisions/chemicals" element={<Chemicals />} />
+            <Route path="divisions/equipment" element={<Equipment />} />
+            <Route path="divisions/power" element={<Power />} />
+            <Route path="divisions/apparel" element={<Apparel />} />
+            <Route path="divisions/printpack" element={<PrintPack />} />
+            <Route path="divisions/fashion" element={<Fashion />} />
+            <Route path="global-sourcing" element={<GlobalSourcing />} />
+            <Route path="career" element={<Career />} />
+            <Route path="media-centre" element={<MediaCentre />} />
+            <Route path="media-centre/news" element={<News />} />
+            <Route path="media-centre/news/:slug" element={<NewsDetail />} />
+            <Route path="media-centre/photo-gallery" element={<PhotoGallery />} />
+            <Route path="media-centre/video-gallery" element={<VideoGallery />} />
+            <Route path="contact" element={<Contact />} />
+            {/* Footer links to these; real legal copy is pending from the
+                client - see phases.md Phase 12 note. Placeholder, not
+                fabricated legal text, so the links aren't dead in the
+                meantime. */}
+            <Route path="privacy-policy" element={<LegalPlaceholder title="Privacy Policy" />} />
+            <Route path="terms-of-service" element={<LegalPlaceholder title="Terms of Service" />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
 
+          {/* AuthProvider is scoped to just the admin subtree - it checks
+              /api/auth/me on mount, which used to fire (and 401) on every
+              public pageview from anonymous visitors when it wrapped the
+              whole app. */}
+          <Route element={<AuthProvider><Outlet /></AuthProvider>}>
             <Route path="admin/login" element={<AdminLogin />} />
             <Route path="admin" element={<ProtectedRoute />}>
               <Route element={<AdminLayout />}>
@@ -95,8 +108,8 @@ export default function App() {
                 <Route path="seo" element={<AdminSeoSettings />} />
               </Route>
             </Route>
-        </Routes>
-      </Router>
-    </AuthProvider>
+          </Route>
+      </Routes>
+    </Router>
   );
 }

@@ -27,10 +27,20 @@
   html {
     font-family: var(--font-sans);
     color: var(--color-body-text);
+    /* Scroll-reveal entrance animations (FadeIn, translateX) sit off-canvas
+       before their IntersectionObserver fires, and the marquee logo strip
+       is deliberately wider than the viewport - both are invisible/clipped
+       by design but were still expanding the page's real scrollable width
+       on mobile. Found via cross-browser QA (Phase 12): a horizontal
+       scrollbar on load, before anything below the fold had animated in.
+       Set on both html and body - html.scrollWidth is what actually
+       determines page-level horizontal scroll, not body alone. */
+    overflow-x: hidden;
   }
   body {
     background-color: white;
     line-height: 1.8;
+    overflow-x: hidden;
   }
   h1, h2, h3, h4, h5, h6 {
     color: var(--color-primary-dark);

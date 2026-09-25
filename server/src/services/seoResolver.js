@@ -43,13 +43,14 @@ function resolveImageUrl(image) {
   return image.startsWith('/') ? absoluteUrl(image) : image;
 }
 
-function buildResult({ pathname, title, description, ogImage, canonicalUrl, breadcrumbs }) {
+function buildResult({ pathname, title, description, ogImage, canonicalUrl, breadcrumbs, notFound }) {
   return {
     title: title || DEFAULT_TITLE,
     description: truncate(description) || DEFAULT_DESCRIPTION,
     ogImage: resolveImageUrl(ogImage) || DEFAULT_OG_IMAGE,
     canonicalUrl: canonicalUrl || absoluteUrl(pathname),
     breadcrumbs: breadcrumbs || null,
+    notFound: !!notFound,
   };
 }
 
@@ -118,10 +119,19 @@ async function resolveForPath(pathname) {
     });
   }
 
+  // Real routes with placeholder content pending from the client (see
+  // phases.md Phase 12) - valid pages (200), just not in STATIC_PAGE_KEYS
+  // since there's no seo_meta entry to manage yet, and deliberately left
+  // out of sitemap.xml so they aren't submitted for indexing while the
+  // content is still a placeholder.
+  if (pathname === '/privacy-policy' || pathname === '/terms-of-service') {
+    return buildResult({ pathname });
+  }
+
   // Anything unrecognized (a division/news slug that doesn't exist, a typo'd
-  // route, etc.) just gets the site default - React Router handles the
-  // actual 404 UI client-side.
-  return buildResult({ pathname });
+  // route, etc.) gets the site default plus notFound so the server responds
+  // with a real 404 status - React Router renders the actual 404 UI.
+  return buildResult({ pathname, notFound: true });
 }
 
 module.exports = { resolveForPath, SITE_NAME, DEFAULT_TITLE, DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE };

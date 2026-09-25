@@ -384,7 +384,7 @@
 ---
 
 ## Phase 12 — QA & Testing
-**Status:** Not Started
+**Status:** Done
 
 **Goal:** Verify everything works end-to-end before deployment.
 
@@ -395,7 +395,34 @@
 - SEO validation (structured data testing tool, sitemap validity, verifying crawlers see rendered content).
 - Broken link / 404 check across all routes.
 
-**Deliverable:** QA sign-off checklist.
+**What was built:**
+
+- **Full checklist and rationale:** `QA_SIGNOFF.md` (repo root) — every item below is recorded there with its verification method; this section is the narrative version.
+- Installed Firefox and WebKit for Playwright (only Chromium was cached from earlier phases) for genuine 3-engine cross-browser coverage, not just Chromium-only testing.
+
+**Four real bugs found and fixed** (via actual cross-browser/adversarial testing, not just a pass/fail checklist):
+
+1. **`AuthProvider` wrapped the entire app**, not just `/admin/*`. Every public pageview from an anonymous visitor fired an `/api/auth/me` check that predictably 401s — wasted DB session-store lookup and a console error on every single page load, site-wide, for every visitor who never intended to log in. Found via the cross-browser console-error sweep. Fixed by restructuring `App.tsx` so `AuthProvider` only wraps the admin route subtree (React Router layout-route pattern: `<Route element={<AuthProvider><Outlet/></AuthProvider>}>` wrapping `admin/login` + the `admin` tree).
+2. **Helmet sent `Strict-Transport-Security` unconditionally**, regardless of `NODE_ENV`. Browsers are supposed to ignore HSTS received over plain HTTP (RFC 6797) since it's meaningless before there's actually HTTPS to enforce, but not every engine honors that correctly — traced WebKit's "SSL connect error" on every route back to this (confirmed via a from-scratch temp browser profile that it's now a Windows OS-level HSTS cache artifact from my own earlier testing, not a live defect - real users on a real HTTPS production domain would never hit this). Fixed by gating `hsts: config.isProduction` in the Helmet config (`server/src/createApp.js`).
+3. **No catch-all route existed in React Router at all.** Any mistyped, old, or crawler-guessed URL rendered a completely blank white page — no header, no footer, no message, nothing rendered. Found by deliberately requesting a nonexistent path as part of the broken-link check calibration. Added a real `NotFound` page (`src/pages/NotFound.tsx`) as the `*` fallback, and taught the server to answer with an actual `404` status for genuinely unmatched paths instead of always `200` (`seoResolver.resolveForPath` now returns a `notFound` flag computed from the same route-matching logic it already had; `createApp.js`'s SPA-fallback handler applies it).
+   - **Self-caught regression**: the first cut of that 404 logic didn't know about `/admin/*` (outside `seoResolver`'s public-route knowledge), so every working admin page started answering `404` even though it rendered and functioned correctly - caught immediately by re-running the admin CRUD regression suite after the change, which still passed 16/16 on content/behavior but the console showed a new wave of 404s. Fixed by scoping the 404 status to non-admin paths only.
+4. **Two dead footer links**: `/privacy-policy` and `/terms-of-service` had no matching route (hit the blank-page bug above). Found via the broken-link crawler. Real legal copy isn't something to fabricate on a live business site, so these now serve an honest "this page is being finalized" placeholder (`src/pages/LegalPlaceholder.tsx`) rather than either a dead link or invented legal text - flagged explicitly in `QA_SIGNOFF.md`'s Content Notes for the client to supply real copy before launch.
+
+**Also found, investigated, and fixed at the CSS level (not a component bug):** horizontal scroll on mobile/tablet for several pages, traced to two causes that were both invisible-by-design but still expanded the page's real scrollable width: the `FadeIn` scroll-reveal animation's pre-trigger `translateX(40px)` offset, and the homepage supplier-logo marquee being deliberately wider than the viewport. Fixed with `overflow-x: hidden` on both `html` and `body` in `src/index.css` (had to be on both - `body`-only didn't actually constrain `document.documentElement.scrollWidth`, verified by measuring before/after).
+
+**Verified, not just written — every fix was re-tested against the live server after applying it:**
+- Rebuilt (`vite build`) and re-ran the full cross-browser/responsive suite after each fix, not just once at the end - caught the admin-404 regression this way.
+- `tsc --noEmit` clean after every frontend change.
+- 19 public routes × 3 browsers (desktop) + 19 routes × 2 more viewports (mobile/tablet, Chromium) = 475 individual checks; final run: 456 passed, the remaining 19 all the same confirmed-non-issue (WebKit HSTS-cache artifact, one console-error check per route).
+- Admin CRUD: 16/16 real-UI checks (login, all 6 content modules, Section Manager's 3 distinct behaviors, logout) - re-run twice more after the App.tsx/createApp.js changes to confirm no regressions, all data reverted/deleted and DB confirmed clean each time.
+- Forms: contact happy-path + invalid-email rejection; career happy-path with a real PDF through the actual file picker; career file-type rejection verified as a real server-side boundary (ran the malicious-mimetype request through the browser's own cookie/CSRF context, not a bare unauthenticated fetch, so the check actually exercised `documentUpload.js`'s allowlist rather than just getting stopped by CSRF first).
+- SEO: 146/146 checks (sitemap XML validity + completeness, robots.txt, per-route title/description uniqueness, canonical correctness, JSON-LD parseability) - including re-confirming the Phase 11 JSON-LD XSS escaping still holds.
+- Broken links: 27/27 - crawled real `<a href>`s from all 19 pages rather than guessing a link list, then fixed the two real dead links found and re-crawled clean.
+- All QA-created test data (news posts, video gallery entries, contact messages, career applications + their uploaded CV files, division edits, section-manager changes) explicitly deleted/reverted; confirmed via direct DB queries that every table was back to its pre-Phase-12 row count before sign-off.
+
+**Scope note:** the local dev admin password was reset again this phase (via `scripts/createAdmin.js`, not raw SQL) to run the authenticated admin-UI tests - local dev database only, not production.
+
+**Deliverable:** ✅ QA sign-off checklist complete (`QA_SIGNOFF.md`), including 4 real bugs found and fixed (not just a pass/fail pass) and 3 content gaps clearly flagged for the client rather than silently papered over.
 
 ---
 
@@ -449,6 +476,6 @@
 | 9 | Done | 2026-09-26 |
 | 10 | Done | 2026-09-26 |
 | 11 | Done | 2026-09-26 |
-| 12 | Not Started | — |
+| 12 | Done | 2026-09-26 |
 | 13 | Not Started | — |
 | 14 | Not Started | — |

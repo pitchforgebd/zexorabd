@@ -52,6 +52,13 @@ function createApp() {
           'frame-src': ["'self'", 'https://www.google.com'],
         },
       },
+      // Helmet sends this by default regardless of NODE_ENV. Browsers are
+      // supposed to ignore Strict-Transport-Security received over plain
+      // HTTP (RFC 6797), but not every browser/embedded engine honors that
+      // correctly - found via cross-browser QA testing (Phase 12), where it
+      // broke every subsequent request in one engine after the first
+      // plain-HTTP response. Only meaningful once we're actually on HTTPS.
+      hsts: config.isProduction,
     })
   );
   app.use(compression());
@@ -109,7 +116,15 @@ function createApp() {
       return next(); // no build available (e.g. running the API alone in dev) - fall through to 404
     }
     try {
+      // /admin/* is its own SPA subtree with its own client-side routing
+      // and auth gating (ProtectedRoute) - seoResolver only knows the
+      // public route list, so it would otherwise treat every admin page as
+      // "not found" and serve it with an incorrect 404 status even though
+      // it renders and works fine. Always 200 here; robots.txt already
+      // disallows /admin/ for crawlers regardless.
+      const isAdminPath = req.path === '/admin' || req.path.startsWith('/admin/');
       const meta = await seoResolver.resolveForPath(req.path);
+      res.status(!isAdminPath && meta.notFound ? 404 : 200);
       res.set('Content-Type', 'text/html');
       res.set('Cache-Control', 'no-store');
       return res.send(htmlTemplate.renderPage(meta));
