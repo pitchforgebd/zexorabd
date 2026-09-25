@@ -19,6 +19,7 @@ const adminSuppliers = require('./admin/suppliers');
 const adminPages = require('./admin/pages');
 const adminContactMessages = require('./admin/contactMessages');
 const adminCareerApplications = require('./admin/careerApplications');
+const adminSeoMeta = require('./admin/seoMeta');
 const requireAuth = require('../middleware/requireAuth');
 
 const router = Router();
@@ -47,7 +48,6 @@ router.use('/admin/suppliers', requireAuth, adminSuppliers);
 router.use('/admin/pages', requireAuth, adminPages);
 router.use('/admin/contact-messages', requireAuth, adminContactMessages);
 router.use('/admin/career-applications', requireAuth, adminCareerApplications);
-
-// Phase 9: seo-meta, sitemap
+router.use('/admin/seo-meta', requireAuth, adminSeoMeta);
 
 module.exports = router;

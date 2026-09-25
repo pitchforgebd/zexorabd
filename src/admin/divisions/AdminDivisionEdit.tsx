@@ -5,6 +5,7 @@ import { apiFetch, ApiError } from '../../lib/api';
 import type { DivisionDetail, GalleryImage } from '../../lib/types';
 import StringListEditor from './StringListEditor';
 import ProductsEditor, { type EditCategory } from './ProductsEditor';
+import SeoOverrideSection from '../seo/SeoOverrideSection';
 
 type FormState = {
   name: string;
@@ -61,6 +62,7 @@ export default function AdminDivisionEdit() {
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormState | null>(null);
+  const [originalSlug, setOriginalSlug] = useState<string | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,6 +76,7 @@ export default function AdminDivisionEdit() {
     apiFetch<DivisionDetail>(`/api/admin/divisions/${id}`)
       .then((d) => {
         setForm(toFormState(d));
+        setOriginalSlug(d.slug);
         setCoverImage(d.coverImage);
         setGalleryImages(d.galleryImages);
       })
@@ -97,6 +100,7 @@ export default function AdminDivisionEdit() {
         body: JSON.stringify(form),
       });
       setForm(toFormState(updated));
+      setOriginalSlug(updated.slug);
       setSaveMessage('Saved.');
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (err) {
@@ -346,6 +350,8 @@ export default function AdminDivisionEdit() {
         <h2 className="font-bold text-primary-dark mb-4">Products & Services</h2>
         <ProductsEditor categories={form.products} onChange={(products) => update('products', products)} />
       </section>
+
+      <SeoOverrideSection pageKey={originalSlug ? `division:${originalSlug}` : null} />
 
       {/* Gallery */}
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">

@@ -29,9 +29,9 @@
   - Repo root = the existing frontend (Vite/React), unchanged in structure.
   - New `/server` directory = Node/Express backend, its own `package.json`/`node_modules`, deployed as the cPanel "Application root".
   - `server/uploads/` for CVs and CMS-uploaded images, served via an Express static route.
-  - Built frontend (`dist/`) deployed to the domain's public web root; `/api/*` requests proxied to the Node app.
+  - ~~Built frontend (`dist/`) deployed to the domain's public web root; `/api/*` requests proxied to the Node app.~~ **Revised in Phase 9:** the Node app now serves the built frontend directly too (`express.static(dist/)` + a catch-all route), not split between Apache-static and Node-API. This turned out to be required, not just simpler — SEO meta injection (title/description/OG tags per URL) has to happen server-side before the HTML is sent, which is only possible if the request actually reaches the Node app. See Phase 9.
 - **Admin panel delivery:** React admin UI lives inside the same SPA under `/admin`, authenticated via an httpOnly session cookie issued by the Express API (not a separate app).
-- **SEO rendering approach (principle):** Vite SSR pattern — Express renders public marketing pages server-side via `react-dom/server` (a dedicated `entry-server.tsx`) so crawlers receive real HTML + meta tags. The admin panel stays client-side-only (CSR); it doesn't need SEO. Full detail finalized in Phase 9.
+- **SEO rendering approach (principle):** ~~Vite SSR pattern — Express renders public marketing pages server-side via `react-dom/server`~~. **Revised in Phase 9** after weighing the real cost: full SSR would require rewriting every `useEffect`-based data-fetching hook built across Phases 4–8 into a server-compatible loader pattern, and headless-Chromium prerendering carries real cPanel shared-hosting risk (Puppeteer's bundled Chromium often can't run there). Shipped instead: server-side **meta-tag/OG/JSON-LD injection only** — Express looks up the right title/description/image for the requested URL and substitutes it into `index.html` before sending; the actual page content is still client-rendered React. This covers what actually matters (search engine indexing, since Google/Bing execute JS anyway; social-media link previews, which don't) without the rewrite. Full detail in Phase 9.
 - **DB driver:** `mysql2` (promise-based pool), no heavy ORM. Schema managed as versioned plain `.sql` migration files (Phase 1).
 - **Backend conventions:** `server/src/{routes,controllers,db,middleware,utils}`; JSON response envelope `{ success, data?, error?: { message, code } }`; config via `server/.env` (gitignored) with a committed `.env.example`.
 - **Local dev environment verified:** Node v22.17.0 / npm 10.9.2.
@@ -268,19 +268,36 @@
 ---
 
 ## Phase 9 — SEO Infrastructure
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 10
 
 **Goal:** Make every page genuinely SEO-friendly, not just client-side `<Helmet>` tags that crawlers may not execute.
 
-**Tasks:**
-- Per-page SEO fields editable in admin (`seo_meta` table): title, meta description, OG image, canonical URL — for divisions, news posts, and static pages.
-- Finalize and implement the server-side rendering strategy for crawlers (decided in principle in Phase 0): Express-side SSR of the React app for public routes, or a bot-detecting prerender middleware, injecting real `<title>`/meta/OG tags into the HTML response before it reaches the crawler.
-- Auto-generated `sitemap.xml` (regenerated when content changes) and `robots.txt` review.
-- JSON-LD structured data (Organization, Product, BreadcrumbList where relevant).
-- Clean, human-readable URL slugs for all dynamic content.
-- Image `alt` text sourced from CMS fields.
+**Architecture decision made this phase (see the revised Phase 0 note above):** shipped server-side meta-tag/OG/JSON-LD injection rather than full React SSR. Reasoning laid out above — full SSR would mean rewriting every `useEffect`-based data hook from Phases 4–8, and headless-Chromium prerendering is a real risk on cPanel shared hosting. What crawlers and social-link-preview bots actually need — an accurate `<title>`, description, and OG image for the exact URL they requested — is fully solved by injection alone, since Google/Bing render JS for the body content anyway and non-JS bots (Facebook, WhatsApp, LinkedIn, Slack) only ever read the raw HTML `<head>`.
 
-**Deliverable:** Site passes basic SEO audit (Lighthouse SEO score, valid structured data, sitemap submitted to Search Console).
+**Backend (`/server`):**
+- `services/seoMeta.js` — plain get/get-all/upsert over `seo_meta`.
+- `services/seoResolver.js` — the actual per-URL logic: static pages resolve straight from `seo_meta`; `/divisions/:slug` and `/media-centre/news/:slug` build sensible defaults from the division/post's own data (tagline/excerpt, cover image) and let an optional `seo_meta` row (keyed `division:<slug>` / `news:<slug>`) override any field. Unrecognized paths fall back to the site default rather than erroring. Relative `/uploads/...` image paths are resolved to absolute URLs, since OG images must be absolute for link previews to work.
+- `services/htmlTemplate.js` — reads the built `index.html` once (cached) and substitutes `%%SEO_*%%` tokens per request; also emits Organization JSON-LD sitewide and BreadcrumbList JSON-LD on division/news detail pages.
+- `routes/sitemap.js` — `GET /sitemap.xml`, regenerated fresh on every request (no stale-cache step) from the static route list plus live divisions/published news.
+- Admin `GET/PUT /api/admin/seo-meta[/:pageKey]`.
+- `createApp.js` now serves the built frontend directly (`express.static(dist/)` + a catch-all that resolves SEO meta and renders the injected HTML) — the deployment-approach change noted above.
+
+**A real bug caught by actually loading pages in a browser, not just checking API responses:** Helmet's default Content Security Policy (`img-src 'self' data:`, no `connect-src` beyond self, no `frame-src`) had been present since Phase 2 but never mattered because Vite's dev server — not Express — was the one serving HTML during Phases 3–8's testing. The moment Express started serving the actual site (this phase), that default CSP silently blocked *every* external image on the site — every division's ibb.co-hosted images, Unsplash hero backgrounds, YouTube/QR-code thumbnails, the Google Maps embed, and the world-map's CDN-hosted topojson fetch — over 4,000 console violations on a single page load. Caught it by running the real Playwright pass against the Express-served build (not the Vite dev server) and actually reading the console output rather than trusting that title/meta assertions passing meant the page was fine. Fixed by widening `img-src`/`connect-src`/`frame-src` to the specific hosts and `https:` broadly, re-ran, confirmed zero CSP violations.
+
+**Frontend:**
+- `index.html` now carries `%%SEO_TITLE%%`/`%%SEO_DESCRIPTION%%`/`%%SEO_CANONICAL%%`/`%%SEO_OG_IMAGE%%`/`%%SEO_JSONLD%%` tokens. A dev-only Vite plugin (`apply: 'serve'` — confirmed this restriction after first catching it running during `vite build` too and stripping the tokens from the production output) fills in static defaults so local `npm run dev` doesn't show literal `%%...%%` in the browser tab.
+- `SEO.tsx` now manages **only** `<title>` client-side, not description/OG/Twitter meta. Reasoning: react-helmet-async has no way to know about tags the server already rendered into the initial HTML, so if it also rendered `<meta name="description">` etc., every page would ship two competing description tags. `<title>` is safe to keep client-managed since a document only ever has one.
+- `src/admin/seo/AdminSeoSettings.tsx` — manages the 11 static-page `seo_meta` entries. `SeoOverrideSection.tsx` — a reusable card dropped into `AdminDivisionEdit.tsx` and `AdminNewsEdit.tsx` for per-item overrides, keyed off the *original* loaded slug (not the live-editing draft) so mid-edit slug changes don't orphan the override.
+- `scripts/seed-seo-meta.ts` migrates every existing hardcoded `<SEO title=... />` value (from `seoData.ts` and each page's inline props) into `seo_meta`, so switching to the admin-editable system caused zero content regression.
+- `robots.txt` now disallows `/admin/`; the static `public/sitemap.xml` placeholder is deleted (superseded by the dynamic route).
+
+**Verified, not just written:**
+- curl: home/division/static-page meta injection, a division correctly falling back to its own cover image as `og:image` when no override is set, an unknown slug falling back to the site default, admin SEO update reflecting immediately in the next page fetch, sitemap.xml content, robots.txt content.
+- Full Playwright pass run **against the Express-served production build** (not the Vite dev server) — the same code path cPanel will actually run: home page load, client-side SPA navigation to a division (title updates correctly), a direct deep-link load of that same division (server-injected title matches), admin login, SEO settings list and an entry expanding with its seeded data, a division's SEO Override section pre-populated correctly, sitemap.xml and robots.txt fetched in a real browser tab. This run is what surfaced the CSP bug above.
+- `tsc --noEmit` and `vite build` both clean (714.03KB); confirmed the SEO token-preservation fix by grepping the built `dist/index.html` before and after.
+- Confirmed via direct DB query that nothing was left modified from the verification run; dev server stopped.
+
+**Deliverable:** ✅ Every page has real, admin-editable, server-rendered SEO meta and a working sitemap/robots.txt/structured-data setup. (Lighthouse/Search-Console submission itself is a one-time manual step for whoever manages the live domain once it's deployed — not something to automate here.)
 
 ---
 
@@ -377,8 +394,8 @@
 | 5 | Done | 2026-09-24 |
 | 6 | Done | 2026-09-24 |
 | 7 | Done | 2026-09-24 |
-| 8 | Done (awaiting approval) | — |
-| 9 | Not Started | — |
+| 8 | Done | 2026-09-24 |
+| 9 | Done (awaiting approval) | — |
 | 10 | Not Started | — |
 | 11 | Not Started | — |
 | 12 | Not Started | — |

@@ -34,7 +34,6 @@ import ProtectedRoute from './admin/ProtectedRoute';
 import AdminLogin from './admin/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
 import AdminDashboard from './admin/AdminDashboard';
-import AdminPlaceholder from './admin/AdminPlaceholder';
 import AdminDivisionsList from './admin/divisions/AdminDivisionsList';
 import AdminDivisionEdit from './admin/divisions/AdminDivisionEdit';
 import AdminMediaHub from './admin/media/AdminMediaHub';
@@ -47,6 +46,7 @@ import AdminSuppliers from './admin/homepage/AdminSuppliers';
 import AdminPageSections from './admin/sections/AdminPageSections';
 import AdminContactMessages from './admin/inbox/AdminContactMessages';
 import AdminCareerApplications from './admin/inbox/AdminCareerApplications';
+import AdminSeoSettings from './admin/seo/AdminSeoSettings';
 
 export default function App() {
   return (
@@ -92,7 +92,7 @@ export default function App() {
                 <Route path="sections" element={<AdminPageSections />} />
                 <Route path="career-applications" element={<AdminCareerApplications />} />
                 <Route path="contact-messages" element={<AdminContactMessages />} />
-                <Route path="seo" element={<AdminPlaceholder title="SEO" phase="Phase 9" />} />
+                <Route path="seo" element={<AdminSeoSettings />} />
               </Route>
             </Route>
           </Routes>

@@ -42,4 +42,15 @@ module.exports = {
   },
 
   uploadsDir: path.resolve(__dirname, '../../uploads'),
+
+  // Used to build absolute canonical/OG URLs and the sitemap. Override via
+  // .env once the real domain is live; this default matches the site's
+  // existing robots.txt/sitemap.xml references.
+  siteUrl: (process.env.SITE_URL || 'https://zexora.com.bd').replace(/\/$/, ''),
+
+  // Where the built frontend lives, so the Node app can serve it directly
+  // and inject per-route SEO meta into index.html before sending it (see
+  // Phase 0's revised decision in phases.md: everything is served by the
+  // Node app in production, not split between Apache-static and Node-API).
+  distDir: path.resolve(__dirname, '../../../dist'),
 };

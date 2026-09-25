@@ -128,3 +128,12 @@ export type CareerApplication = {
   status: 'new' | 'reviewed' | 'shortlisted' | 'rejected';
   createdAt: string;
 };
+
+export type SeoMetaEntry = {
+  pageKey: string;
+  title: string | null;
+  metaDescription: string | null;
+  ogImage: string | null;
+  canonicalUrl: string | null;
+  updatedAt: string;
+};

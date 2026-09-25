@@ -7,20 +7,21 @@ interface SEOProps {
   url?: string;
 }
 
-export default function SEO({ title, description, keywords, url }: SEOProps) {
-  const currentUrl = url || typeof window !== 'undefined' ? window.location.href : 'https://zexora.com.bd';
-
+/**
+ * Only manages <title> client-side. Description/OG/Twitter meta tags are
+ * injected server-side per-request (see server/src/createApp.js +
+ * seoResolver.js) based on the actual requested URL - that's what crawlers
+ * and social-link-preview bots see, since they hit the real URL directly
+ * rather than navigating the SPA. Having Helmet also render those tags
+ * would produce duplicate <meta> elements (Helmet has no way to know about
+ * tags that were already in the server-rendered HTML), which is worse for
+ * SEO than leaving them server-only. <title> is safe to keep live-updated
+ * here since the browser only ever has one <title> element.
+ */
+export default function SEO({ title }: SEOProps) {
   return (
     <Helmet>
       <title>{title}</title>
-      <meta name="description" content={description} />
-      {keywords && <meta name="keywords" content={keywords} />}
-      <link rel="canonical" href={currentUrl} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={currentUrl} />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
     </Helmet>
   );
 }

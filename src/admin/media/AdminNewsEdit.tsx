@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ImagePlus } from 'lucide-react';
 import { apiFetch, ApiError } from '../../lib/api';
 import type { NewsPost } from '../../lib/types';
+import SeoOverrideSection from '../seo/SeoOverrideSection';
 
 export default function AdminNewsEdit() {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +12,7 @@ export default function AdminNewsEdit() {
 
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [originalSlug, setOriginalSlug] = useState<string | null>(null);
   const [excerpt, setExcerpt] = useState('');
   const [body, setBody] = useState('');
   const [isPublished, setIsPublished] = useState(false);
@@ -27,6 +29,7 @@ export default function AdminNewsEdit() {
       .then((post) => {
         setTitle(post.title);
         setSlug(post.slug);
+        setOriginalSlug(post.slug);
         setExcerpt(post.excerpt || '');
         setBody(post.body || '');
         setIsPublished(post.isPublished);
@@ -42,10 +45,11 @@ export default function AdminNewsEdit() {
     setSaveMessage(null);
     setError(null);
     try {
-      await apiFetch(`/api/admin/news/${id}`, {
+      const updated = await apiFetch<NewsPost>(`/api/admin/news/${id}`, {
         method: 'PUT',
         body: JSON.stringify({ title, slug, excerpt, body, isPublished }),
       });
+      setOriginalSlug(updated.slug);
       setSaveMessage('Saved.');
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (err) {
@@ -135,6 +139,8 @@ export default function AdminNewsEdit() {
           </div>
         </div>
       </section>
+
+      <SeoOverrideSection pageKey={originalSlug ? `news:${originalSlug}` : null} />
     </form>
   );
 }
