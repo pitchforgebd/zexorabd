@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Beaker, Printer, Globe, Truck, Shirt, Cog, Zap, ShoppingBag, Plane } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
-import SEO from '../components/SEO';
-import { seoData } from '../data/seoData';
 
 const nineDivisions = [
   { name: 'Industrial Chemicals & Ink Solutions', icon: Beaker },
@@ -19,7 +17,6 @@ const nineDivisions = [
 export default function About() {
   return (
     <div className="bg-white pt-24">
-      <SEO title={seoData.about.title} description={seoData.about.description} />
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary-blue to-accent-hover text-white py-24 px-4 overflow-hidden relative">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80')] opacity-10 bg-cover bg-center mix-blend-overlay"></div>

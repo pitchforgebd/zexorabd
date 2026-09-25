@@ -1,4 +1,3 @@
-import SEO from '../../components/SEO';
 import { usePhotoGallery } from '../../lib/useMedia';
 
 export default function PhotoGallery() {
@@ -6,10 +5,6 @@ export default function PhotoGallery() {
 
   return (
     <>
-      <SEO
-        title="Photo Gallery | Media Centre | Zexora Corporation"
-        description="Explore the photo gallery of Zexora Corporation events and operations."
-      />
       <div className="pt-32 pb-24 bg-gray-50 min-h-[70vh]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">

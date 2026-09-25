@@ -1,15 +1,9 @@
-import SEO from '../components/SEO';
 import CTABanner from '../components/CTABanner';
 import FadeIn from '../components/FadeIn';
 
 export default function CeoMessage() {
   return (
     <>
-      <SEO 
-        title="Message from Founder & CEO | Zexora Corporation"
-        description="Read the message from the Founder & CEO of Zexora Corporation."
-      />
-      
       {/* Hero Section */}
       <section className="relative pt-40 pb-24 bg-primary-dark overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03]"></div>

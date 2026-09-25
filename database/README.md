@@ -29,8 +29,13 @@ site_settings   → generic key/value store for homepage misc content (Phase 6)
 page_sections   → polymorphic per page_key + section_key (Phase 7 design dynamics)
 ```
 
-## Seeding plan (Phase 4+)
+## Seeding (done — Phases 4/6/9)
 
-A one-off Node script will read the existing `src/data/divisions.ts` and
-`src/data/suppliers.ts` and insert their content into these tables, so the
-current live copy isn't lost during migration.
+The original hardcoded content (`src/data/divisions.ts`, `suppliers.ts`,
+`seoData.ts`, and the homepage/page-sections defaults) was migrated into
+these tables by one-off scripts under `/scripts` (`migrate-divisions.ts`,
+`seed-site-settings.ts`, `seed-page-sections.ts`, `seed-seo-meta.ts`) and
+the source files were then deleted (Phase 10) once the CMS was confirmed
+working — MySQL is now the only source of truth for this content. Setting
+up a fresh environment means restoring a DB dump/export, not re-running
+those scripts (most no longer have source files to read from).

@@ -1,5 +1,4 @@
 import React, { useRef, useState } from 'react';
-import SEO from '../components/SEO';
 import { CheckCircle2, ChevronDown, UploadCloud } from 'lucide-react';
 import { apiFetch, ApiError } from '../lib/api';
 
@@ -88,10 +87,6 @@ export default function Career() {
 
   return (
     <>
-      <SEO 
-        title="Career Application Form | Zexora Corporation"
-        description="Join Our Team / Apply For A Position at Zexora Corporation."
-      />
       <div className="pt-32 pb-24 bg-gray-50 min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

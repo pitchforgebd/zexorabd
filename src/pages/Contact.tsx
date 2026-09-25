@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
-import SEO from '../components/SEO';
-import { seoData } from '../data/seoData';
 import { apiFetch, ApiError } from '../lib/api';
 
 const EMPTY_FORM = { name: '', company: '', email: '', phone: '', subject: '', message: '' };
@@ -35,7 +33,6 @@ export default function Contact() {
 
   return (
     <div className="bg-light-gray pt-24 min-h-screen">
-      <SEO title={seoData.contact.title} description={seoData.contact.description} />
       {/* Hero */}
       <section className="bg-primary-blue text-white py-24 px-4 text-center">
         <FadeIn className="max-w-4xl mx-auto">

@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Globe, CheckCircle2, Box, Ship, Handshake } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
-import SEO from '../components/SEO';
-import { seoData } from '../data/seoData';
-
 import WorldMap from '../components/WorldMap';
 
 const countries = [
@@ -39,7 +36,6 @@ const models = [
 export default function GlobalSourcing() {
   return (
     <div className="bg-white pt-24">
-      <SEO title={seoData.globalSourcing.title} description={seoData.globalSourcing.description} />
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary-blue to-accent-hover text-white py-24 px-4 text-center overflow-hidden relative">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80')] opacity-5 bg-cover bg-center"></div>

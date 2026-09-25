@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays } from 'lucide-react';
-import SEO from '../../components/SEO';
 import { useNewsList } from '../../lib/useMedia';
 
 export default function News() {
@@ -12,10 +11,6 @@ export default function News() {
 
   return (
     <>
-      <SEO
-        title="News & Updates | Media Centre | Zexora Corporation"
-        description="Stay updated with the latest news and announcements from Zexora Corporation."
-      />
       <div className="pt-32 pb-24 bg-gray-50 min-h-[70vh]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">

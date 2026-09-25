@@ -1,5 +1,3 @@
-import SEO from '../components/SEO';
-import { seoData } from '../data/seoData';
 import { usePageSections } from '../lib/usePageSections';
 import HeroSection from '../components/home-sections/HeroSection';
 import AboutSnapshotSection from '../components/home-sections/AboutSnapshotSection';
@@ -38,7 +36,6 @@ export default function Home() {
 
   return (
     <div className="bg-white">
-      <SEO title={seoData.home.title} description={seoData.home.description} />
       {sectionKeys
         ? sectionKeys
             .filter((s) => s.isVisible)

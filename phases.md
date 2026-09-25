@@ -302,16 +302,32 @@
 ---
 
 ## Phase 10 — Frontend Integration Cleanup
-**Status:** Not Started
+**Status:** Done — awaiting your approval to move to Phase 11
 
 **Goal:** Finish migrating the React app fully off static data files and fixed layouts.
 
-**Tasks:**
-- Remove/retire `src/data/divisions.ts`, `suppliers.ts`, `seoData.ts` once their DB-backed equivalents are confirmed working (keep as fallback only if explicitly wanted).
-- Centralized API client, loading/error states, basic caching.
-- Environment-based API base URL (`.env` for dev vs. production).
+**Deleted (all confirmed zero remaining references first — see the grep-driven approach below):** `src/data/{divisions,divisionImages,suppliers,seoData}.ts`, `src/components/SEO.tsx`, `src/admin/AdminPlaceholder.tsx` (already fully replaced by real screens as of Phase 9), and `scripts/migrate-divisions.ts` (a one-time script whose whole job was reading files that no longer exist — its role is now documented in `database/README.md` instead). Uninstalled `react-helmet-async` and `@emailjs/browser` was already gone since Phase 8. `src/data/` no longer exists as a directory.
 
-**Deliverable:** No content or layout decision is hardcoded in the frontend build; everything renders from the API.
+**Closed a gap deliberately left open in Phase 9:** back then, the client-side `<title>` on SPA navigation was left pointing at the old hardcoded `seoData.ts` values ("crawlers never see client-side updates anyway" — true, but it meant an admin editing a title in `/admin/seo` wouldn't actually be visible to a real visitor navigating in-app, only to a fresh page load). Fixed properly this phase instead of leaving it as permanent debt:
+- New public `GET /api/page-meta?path=<path>` reuses `seoResolver.resolveForPath()` — the *exact same* logic that decides server-injected meta on first load.
+- `src/lib/usePageMeta.ts` + `<RouteTitleSync />` (mounted once inside `<Router>`) call it on every route change and set `document.title` directly. One source of truth for "what's this URL's title" now, not two.
+- This made `react-helmet-async` fully redundant — `SEO.tsx` was its only consumer, and a `<title>` element is safe to manage with a single `useEffect` (a document only ever has one, unlike `<meta>` tags, which is why Phase 9 specifically avoided having Helmet render those). Removed the dependency and the doubled-up `HelmetProvider` that had been wrapping the app twice (once in `main.tsx`, once in `App.tsx` — harmless but redundant, cleaned up along the way).
+- Removed all 12 pages' individual `<SEO title=... description=... />` calls — title is now handled globally; description/OG were already server-only since Phase 9.
+
+**A pre-existing latent bug removed along the way, not just papered over:** `Divisions.tsx`'s per-division detail page did `seoData.divisions[data.slug]` and then read `.title` off the result with no null check — any division added through the admin panel (Phase 4 made that possible) wouldn't have a matching hardcoded `seoData` entry, so that lookup would return `undefined` and `.title` would throw, crashing the page. Deleting the hardcoded lookup entirely (in favor of the server-resolved title) removes the bug as a side effect rather than requiring a separate fix.
+
+**Basic caching (`src/lib/api.ts`):** added an in-memory `Map` cache for `GET` requests only, deliberately excluding `/api/admin/*` (an admin who just saved an edit needs to see it immediately, not a 30-second-stale list). This solves two real things at once: concurrent identical requests (e.g. Home's `AboutSnapshotSection` and `WhyChooseUsSection` both calling `useSiteSettings()` on the same render, noted but not fixed back in Phase 7) now share one in-flight promise instead of firing duplicate HTTP calls, and repeated navigation within a 30s window reuses the cached result. No new dependency (no React Query) — kept in line with the project's existing minimal-dependency approach. Trade-off noted: a visitor already browsing could see public data up to 30s stale after an admin edit elsewhere; acceptable for a low-traffic corporate site and explicitly not attempted for admin routes.
+
+**"Environment-based API base URL" — reassessed, not implemented:** the task as originally written predates Phase 0/9's same-origin architecture. Every `apiFetch` call already uses relative `/api/...` paths, which work correctly in dev (via Vite's proxy) and production (the Node app serves everything, Phase 9) without any base URL to configure. Adding one now would work against that deliberate design rather than complete it, so this task is satisfied by not doing it — documented in `api.ts`'s own comment rather than left silently unaddressed.
+
+**Verified, not just written:**
+- `grep`-verified zero remaining references before deleting each file (not just "I think nothing uses this anymore").
+- `tsc --noEmit` — **fully clean, zero errors**, for the first time in this project's phases (previously always had one pre-existing unrelated error from the now-deleted `divisions.ts`).
+- `vite build` clean; bundle dropped from 714.03KB to 692.67KB (~21KB, matching the `react-helmet-async` + dead-data-file removal).
+- Full Playwright pass over all 11 public routes plus admin login, run against the Express-served production build: confirmed every page still renders and shows its correct, distinct, DB-sourced title (including three of my own test-script assertions that were wrong, not app bugs — generic text like "CEO"/"News"/"Vision" matched *hidden* nav dropdown items and timed out waiting for visibility; fixed by asserting on more specific page text and re-verifying each one individually). Explicitly confirmed client-side SPA navigation updates `document.title` via `waitForFunction`, not just eyeballing it.
+- Confirmed the pre-existing `divisions.ts` type error is gone rather than just silent.
+
+**Deliverable:** ✅ No content is hardcoded in the frontend build; `tsc` and the bundle are both clean; the SEO title-consistency gap flagged in Phase 9 is closed.
 
 ---
 
@@ -395,8 +411,8 @@
 | 6 | Done | 2026-09-24 |
 | 7 | Done | 2026-09-24 |
 | 8 | Done | 2026-09-24 |
-| 9 | Done (awaiting approval) | — |
-| 10 | Not Started | — |
+| 9 | Done | 2026-09-26 |
+| 10 | Done (awaiting approval) | — |
 | 11 | Not Started | — |
 | 12 | Not Started | — |
 | 13 | Not Started | — |

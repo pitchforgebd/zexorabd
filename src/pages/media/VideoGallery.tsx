@@ -1,4 +1,3 @@
-import SEO from '../../components/SEO';
 import { Play } from 'lucide-react';
 import { useVideoGallery } from '../../lib/useMedia';
 
@@ -12,10 +11,6 @@ export default function VideoGallery() {
 
   return (
     <>
-      <SEO
-        title="Video Gallery | Media Centre | Zexora Corporation"
-        description="Explore the video gallery of Zexora Corporation operations and showcases."
-      />
       <div className="pt-32 pb-24 bg-gray-50 min-h-[70vh]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">

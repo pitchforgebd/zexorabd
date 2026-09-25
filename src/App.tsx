@@ -4,8 +4,8 @@
  */
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout';
+import RouteTitleSync from './components/RouteTitleSync';
 import Home from './pages/Home';
 import About from './pages/About';
 import VisionMission from './pages/VisionMission';
@@ -50,10 +50,10 @@ import AdminSeoSettings from './admin/seo/AdminSeoSettings';
 
 export default function App() {
   return (
-    <HelmetProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
+    <AuthProvider>
+      <Router>
+        <RouteTitleSync />
+        <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="about" element={<About />} />
@@ -95,9 +95,8 @@ export default function App() {
                 <Route path="seo" element={<AdminSeoSettings />} />
               </Route>
             </Route>
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </HelmetProvider>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }

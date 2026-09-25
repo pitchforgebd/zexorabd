@@ -8,6 +8,7 @@ const videoGallery = require('./videoGallery');
 const siteSettings = require('./siteSettings');
 const suppliers = require('./suppliers');
 const pages = require('./pages');
+const pageMeta = require('./pageMeta');
 const contact = require('./contact');
 const career = require('./career');
 const adminDivisions = require('./admin/divisions');
@@ -35,6 +36,7 @@ router.use('/video-gallery', videoGallery);
 router.use('/site-settings', siteSettings);
 router.use('/suppliers', suppliers);
 router.use('/pages', pages);
+router.use('/page-meta', pageMeta);
 router.use('/contact', contact);
 router.use('/career', career);
 

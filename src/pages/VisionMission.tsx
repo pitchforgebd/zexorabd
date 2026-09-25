@@ -1,7 +1,5 @@
 import { TrendingUp, ShieldCheck, Target, Heart, Award, CheckCircle2, Factory, Printer, Package, Shirt, Pill, Layers, PaintRoller, Droplet, ShoppingBag } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
-import SEO from '../components/SEO';
-import { seoData } from '../data/seoData';
 
 const coreValues = [
   { icon: Target, title: "Trust", desc: "We build every relationship — with clients, partners, and suppliers — on a foundation of honesty, transparency, and consistent delivery. Trust is not claimed; it is earned through action." },
@@ -37,7 +35,6 @@ const industries = [
 export default function VisionMission() {
   return (
     <div className="bg-white pt-24">
-      <SEO title={seoData.visionMission.title} description={seoData.visionMission.description} />
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary-blue to-accent-hover text-white py-24 px-4 text-center overflow-hidden relative">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80')] opacity-5 bg-cover bg-center"></div>

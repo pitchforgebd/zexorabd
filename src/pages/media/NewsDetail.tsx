@@ -1,6 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
 import { CalendarDays, ArrowLeft } from 'lucide-react';
-import SEO from '../../components/SEO';
 import { useNewsPost } from '../../lib/useMedia';
 
 export default function NewsDetail() {
@@ -21,7 +20,6 @@ export default function NewsDetail() {
 
   return (
     <>
-      <SEO title={`${post.title} | News | Zexora Corporation`} description={post.excerpt || post.title} />
       <div className="pt-32 pb-24 bg-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link to="/media-centre/news" className="inline-flex items-center text-sm text-primary-blue font-medium mb-8 hover:text-accent-hover">
