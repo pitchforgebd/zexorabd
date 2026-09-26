@@ -765,6 +765,24 @@
 
 ---
 
+## Phase 16.7 (cont.) — Sister Concerns turned into a dark "spotlight" section
+**Status:** Done
+
+**Goal:** Client asked for "Subsidiaries & Ecosystem" (the "Our Sister Concerns" section) to be redesigned innovatively.
+
+**What was built:**
+- **`src/components/home-sections/SisterConcernsSection.tsx`** — this was the fourth consecutive light/white-background section in the page's flow (Suppliers → Sister Concerns → Vision & Mission, all light, before finally hitting the dark CTA banner), so beyond restyling the card itself, switched the section to a **dark background** (matching the Why-Choose-Us/Global-Sourcing/CTA treatment) - a deliberate structural fix for page rhythm, not just decoration, breaking up three light sections in a row into a proper alternating pattern. Each sister concern is now a "spotlight" card: a floating white logo plate (so the logo always renders at full color/contrast regardless of its own background, instead of the previous grayscale-until-hover treatment which only worked well on a light card), a bordered glass panel with a corner glow that intensifies on hover, and the tagline/name/description laid out beside it. Same pill-badge eyebrow style used elsewhere on dark sections.
+- No data or admin changes - still reads the same `home.sisterConcerns` settings (heading/subheading/items), same admin editor in Homepage settings, same empty-state behavior (section returns `null` when there are no concerns).
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds; zero browser console/page errors.
+- Screenshotted desktop and mobile; confirmed the logo plate, "Visit Website" link, and description text all render correctly against the new dark background.
+- Re-ran the admin-CRUD regression suite (16/16 after a re-run ruled out one more flaky, unrelated check - same weak-assertion pattern as earlier in this phase) and the public smoke suite (432/450, same known WebKit/Windows HSTS baseline) - no new regressions.
+
+**Deliverable:** ✅ "Our Sister Concerns" is now a dark spotlight section with a floating logo plate per company, both more visually distinctive on its own and fixing a page-rhythm issue where three light sections ran back-to-back.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
