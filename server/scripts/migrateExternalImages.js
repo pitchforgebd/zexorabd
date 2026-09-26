@@ -115,12 +115,35 @@ async function migrateHeroSlides() {
   console.log(`Hero slides: ${ok} migrated, ${fail} failed`);
 }
 
+async function migrateCeoPhoto() {
+  const [rows] = await pool.query("SELECT setting_value FROM site_settings WHERE setting_key = 'page.ceoMessage'");
+  if (!rows.length) return;
+  const value = rows[0].setting_value;
+  if (typeof value.photo !== 'string' || !value.photo.includes('ibb.co')) {
+    console.log('\nCEO photo: already migrated or not set, skipping');
+    return;
+  }
+  console.log('\nCEO photo: 1 to migrate');
+  try {
+    value.photo = await downloadTo(value.photo, 'homepage');
+    await pool.query('UPDATE site_settings SET setting_value = :value WHERE setting_key = :key', {
+      value: JSON.stringify(value),
+      key: 'page.ceoMessage',
+    });
+    console.log('CEO photo: 1 migrated, 0 failed');
+  } catch (err) {
+    console.warn('  FAILED CEO photo:', err.message);
+    console.log('CEO photo: 0 migrated, 1 failed');
+  }
+}
+
 async function main() {
   console.log('Starting external image migration (i.ibb.co.com -> local /uploads)...');
   await migrateDivisionCovers();
   await migrateDivisionGallery();
   await migrateSuppliers();
   await migrateHeroSlides();
+  await migrateCeoPhoto();
   console.log('\nDone.');
   await pool.end();
 }

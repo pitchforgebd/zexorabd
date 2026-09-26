@@ -214,3 +214,21 @@ export type SeoMetaEntry = {
   canonicalUrl: string | null;
   updatedAt: string;
 };
+
+export type DashboardSummary = {
+  counts: {
+    divisions: number;
+    newsPosts: { total: number; published: number; draft: number };
+    photoGallery: number;
+    videoGallery: number;
+    suppliers: number;
+    contactMessages: { total: number; unread: number };
+    careerApplications: { total: number; new: number };
+  };
+  recent: {
+    contactMessages: { id: number; name: string; subject: string | null; status: string; createdAt: string }[];
+    careerApplications: { id: number; fullName: string; position: string | null; status: string; createdAt: string }[];
+    newsPosts: { id: number; title: string; slug: string; isPublished: boolean; updatedAt: string }[];
+    divisions: { id: number; name: string; slug: string; updatedAt: string }[];
+  };
+};

@@ -495,7 +495,7 @@
 ---
 
 ## Phase 15 — Admin Dashboard Redesign
-**Status:** Not Started
+**Status:** Done
 
 **Goal:** Replace the current placeholder dashboard (a static welcome message, no real data) with a genuinely useful overview screen.
 
@@ -504,7 +504,22 @@
 - Quick-links to the most-used admin sections.
 - Visual polish matching the rest of the admin panel's design language.
 
-**Deliverable:** A dashboard that gives an admin useful at-a-glance status on first login, not just a greeting.
+**What was built:**
+
+- **New backend, unlike Phases 13/14**: this is the one recent phase where the generic `site_settings` machinery genuinely didn't fit — a dashboard needs cross-table aggregates (counts, "most recently updated N"), not a single JSON blob. Added `server/src/services/dashboard.js` (`getSummary()`) and `GET /api/admin/dashboard`, using `COUNT(*)`/`SUM(status = ...)` queries run in parallel via `Promise.all`, not fetching full row sets just to read `.length` — deliberately avoided the shortcut of reusing the existing list endpoints for this.
+- Response shape: `counts` (divisions, news posts split published/draft, photo/video gallery, suppliers, contact messages split total/unread, career applications split total/new) plus `recent` (last 5 each of contact messages, career applications, news posts, divisions - each ordered by the most relevant timestamp, `updated_at` for content that gets edited, `created_at` for inbound submissions).
+- Rebuilt `AdminDashboard.tsx`: 7 clickable stat cards (each linking straight to its admin section) with warn-colored badges for anything needing attention (unread messages, new applications, draft posts); a Quick Links row to the 4 least-discoverable admin sections (Website Settings, Static Pages, Page Sections, SEO - the ones without their own obvious top-level content, unlike Divisions/News/etc. which are already one click away in the sidebar); four "recent activity" panels, each row itself a link to that item's edit page, with relative timestamps ("3h ago") and status pills matching each section's own color convention (green/gray for published/draft, amber for unread/new).
+
+**Verified, not just written:**
+- `tsc --noEmit` clean.
+- Tested the dashboard in both states that matter: with the database mostly empty (confirmed every "recent activity" panel shows a correct, non-broken empty state - "No messages yet." etc. - rather than an empty list with no explanation) and with real data (inserted one temporary test row into `contact_messages`, `career_applications`, and `news_posts`, confirmed all three badges and status pills render correctly, then deleted them).
+- Clicked through from the dashboard itself: a news-post row navigated to that post's real edit page, a division row navigated to that division's real edit page, and a "View all" link navigated to the right list page - confirmed via the resulting URL each time, not just that the link element existed.
+- Re-ran the full Phase 12 admin-CRUD regression suite (16/16, including the login → dashboard-renders flow specifically) and the cross-browser/responsive public-route smoke suite - this phase only touches the admin panel, so the public-site suite's unchanged pass rate confirms zero cross-contamination.
+- All temporary test data deleted after verification; confirmed via direct DB query.
+
+**Incidental find while re-running the smoke suite**: Firefox flagged the CEO Message page's photo (`Image corrupt or truncated`) - it was still hot-linked to `i.ibb.co.com`, the same free host flagged in Phase 12's QA_SIGNOFF and largely migrated in Phase 13. It had slipped through that migration because `page.ceoMessage.photo` didn't exist as a field until Phase 14, which ran after Phase 13's one-time migration script. Extended `server/scripts/migrateExternalImages.js` with a `migrateCeoPhoto()` step (idempotent, same pattern as the rest of the script) rather than a one-off fix, so the tool stays the single source of truth for "is anything still hot-linked to ibb.co" - ran it, confirmed the photo is now served from local `/uploads`, and re-ran the full cross-browser suite clean.
+
+**Deliverable:** ✅ The dashboard now shows real content counts, flags what needs attention (unread messages, new applications, drafts), links straight into the sections an admin actually uses, and surfaces recent activity with working click-through - not just a greeting.
 
 ---
 
@@ -574,7 +589,7 @@
 | 12 | Done | 2026-09-26 |
 | 13 | Done | 2026-09-26 |
 | 14 | Done | 2026-09-26 |
-| 15 | Not Started | — |
+| 15 | Done | 2026-09-26 |
 | 16 | Not Started | — |
 | 17 | Not Started | — |
 | 18 | Not Started | — |

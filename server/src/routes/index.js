@@ -21,6 +21,7 @@ const adminPages = require('./admin/pages');
 const adminContactMessages = require('./admin/contactMessages');
 const adminCareerApplications = require('./admin/careerApplications');
 const adminSeoMeta = require('./admin/seoMeta');
+const adminDashboard = require('./admin/dashboard');
 const requireAuth = require('../middleware/requireAuth');
 
 const router = Router();
@@ -51,5 +52,6 @@ router.use('/admin/pages', requireAuth, adminPages);
 router.use('/admin/contact-messages', requireAuth, adminContactMessages);
 router.use('/admin/career-applications', requireAuth, adminCareerApplications);
 router.use('/admin/seo-meta', requireAuth, adminSeoMeta);
+router.use('/admin/dashboard', requireAuth, adminDashboard);
 
 module.exports = router;
