@@ -524,7 +524,7 @@
 ---
 
 ## Phase 16 — Extended Section Manager
-**Status:** Not Started
+**Status:** Done
 
 **Goal:** Extend the Phase 7 Section Manager pattern (currently Home-page-only, by deliberate original scope decision) to the pages made dynamic in Phase 14.
 
@@ -532,7 +532,27 @@
 - Extend `page_sections` usage (or its Phase 14 equivalent) to cover visibility/order/variant control for About, CEO Message, Vision & Mission, and Global Sourcing.
 - Admin UI: extend the existing Section Manager screen to let the admin pick which page they're managing, rather than being hardcoded to `home`.
 
-**Deliverable:** Section-level visibility/reorder/variant control available on every dynamic page, not just Home.
+**What was built:**
+
+- **Zero backend changes** — unlike Phase 15, this is back to the Phase 13/14 pattern of the existing architecture already fitting. `page_sections` (`page_key` + `section_key`, unique together) and both the public (`GET /pages/:pageKey/sections`) and admin (`GET`/`PUT /admin/pages/:pageKey/sections`) routes were *already* fully generic, taking `pageKey` as a route param rather than being hardcoded to `home` — confirmed by reading the actual route/service code before writing anything, rather than assuming a rewrite was needed.
+- **The real work was frontend**, and it's the one genuinely large piece of this phase: Phase 14's four pages were each written as a single monolithic component reading one JSON blob (the right call for "make the content editable," per that phase's own scope note) - but Section Manager's visibility/reorder/variant control operates at the *section* level, which requires the Home-page architecture instead: one small component per section, registered in a `SECTION_REGISTRY` map, rendered in a loop driven by `usePageSections(pageKey)`. Retrofitted all four pages into that pattern:
+  - **About** → 6 sections (hero, who-we-are, divisions-grid, competitive-advantage, our-vision, cta)
+  - **CEO Message** → 3 sections (hero, message [photo + timeline together, since the sticky two-column layout doesn't split further without breaking the design], cta - reusing the existing shared `CTABanner` component directly as a section)
+  - **Vision & Mission** → 5 sections (hero, vision-mission-text, core-values, why-choose-us, industries)
+  - **Global Sourcing** → 5 sections (hero, intro-map, countries, business-models, commitment-cta)
+  - Each page's Phase 14 content hook (`useAboutContent()` etc.) and its `DEFAULT_CONTENT` fallback moved into a shared file per page (`src/components/{page}-sections/use{Page}Content.ts`) so the new small section components don't each need their own copy of the (large) default object.
+- **Admin UI**: `AdminPageSections.tsx` gained a page-picker (5 tabs: Home, About, CEO Message, Vision & Mission, Global Sourcing) replacing the hardcoded `PAGE_KEY = 'home'` constant; switching tabs re-fetches that page's sections. `SECTION_LABELS` stayed a single flat map rather than becoming page-scoped - several pages share a `section_key` name (every page has a `hero`; Home and Vision & Mission both have `why-choose-us`/`industries`), and the same label reads correctly on all of them, so a shared map was the simpler, equally-correct choice over a nested per-page structure.
+- **Scope line, matching the Phase 7 original decision** (Home: 3 of 10 sections got genuine 2-variant layouts, the rest visibility/reorder only): none of the four newly-dynamic pages got new layout variants invented for them - `layoutVariant` stays `'default'` for all of their sections. Inventing genuine alternate layouts for sections that never had one wasn't asked for and would be new design work, not "extend the section manager."
+- `server/scripts/seedPageSections.js` — one-time seed registering each page's section list in `page_sections` (mirroring each page's `SECTION_REGISTRY` order exactly), so Section Manager had rows to manage from the start rather than an empty screen.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean after every page's split (checked incrementally, one page at a time, rather than writing all four and debugging together).
+- Full visual diff (Playwright screenshots, scrolled-through to trigger `FadeIn` correctly per the Phase 14 lesson) of all four newly-section-based pages against their pre-split appearance - pixel-identical, zero console errors.
+- Live functional test of the actual admin-facing behavior, not just that the page loads: switched between all 5 page tabs and confirmed each one's real section count and labels; hid a real section (About's "Who We Are") through the actual UI, saved, and confirmed it was genuinely gone from the live public page (not just toggled in local state) - then restored it and confirmed it came back; reordered a real section (Global Sourcing's Intro & Map above Hero), saved, reloaded the admin page to confirm the new order persisted server-side, then reverted.
+- Re-ran the Phase 12 admin-CRUD regression suite (16/16, including the pre-existing Home Section Manager check) and the full cross-browser/responsive public-route smoke suite - unchanged pass rate confirms the four-page architecture retrofit didn't regress anything on the pages that weren't touched.
+- All test edits reverted; confirmed via direct DB query that `page_sections` rows for both `about` and `global-sourcing` were back to their seeded visibility/order.
+
+**Deliverable:** ✅ Section-level visibility, reorder, and (where applicable) variant control is available on Home, About, CEO Message, Vision & Mission, and Global Sourcing - the same admin screen, picked by page, with zero backend changes required because the underlying data model was already page-agnostic.
 
 ---
 
@@ -590,6 +610,6 @@
 | 13 | Done | 2026-09-26 |
 | 14 | Done | 2026-09-26 |
 | 15 | Done | 2026-09-26 |
-| 16 | Not Started | — |
+| 16 | Done | 2026-09-26 |
 | 17 | Not Started | — |
 | 18 | Not Started | — |

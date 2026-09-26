@@ -3,6 +3,9 @@ import { Eye, EyeOff } from 'lucide-react';
 import { apiFetch, ApiError } from '../../lib/api';
 import type { PageSection } from '../../lib/types';
 
+// Flat rather than per-page: several pages share a section_key (e.g. every
+// page has a "hero"), and the same label reads correctly on all of them -
+// no need for a page-scoped label map.
 const SECTION_LABELS: Record<string, string> = {
   hero: 'Hero Banner',
   'about-snapshot': 'About Snapshot (Who We Are + Stats)',
@@ -14,7 +17,25 @@ const SECTION_LABELS: Record<string, string> = {
   'sister-concerns': 'Sister Concerns',
   'vision-mission': 'Vision & Mission Snapshot',
   cta: 'Call to Action Banner',
+  'who-we-are': 'Who We Are',
+  'competitive-advantage': 'Competitive Advantage',
+  'our-vision': 'Our Vision',
+  message: "CEO's Message (photo + timeline)",
+  'vision-mission-text': 'Vision & Mission Text',
+  'core-values': 'Core Values',
+  'intro-map': 'Intro & World Map',
+  countries: 'Countries We Source From',
+  'business-models': 'Business Models',
+  'commitment-cta': 'Sourcing Commitment & CTA',
 };
+
+const PAGE_OPTIONS = [
+  { key: 'home', label: 'Home' },
+  { key: 'about', label: 'About' },
+  { key: 'ceo-message', label: 'CEO Message' },
+  { key: 'vision-mission', label: 'Vision & Mission' },
+  { key: 'global-sourcing', label: 'Global Sourcing' },
+];
 
 const VARIANT_OPTIONS: Record<string, { value: string; label: string }[]> = {
   hero: [
@@ -31,24 +52,24 @@ const VARIANT_OPTIONS: Record<string, { value: string; label: string }[]> = {
   ],
 };
 
-const PAGE_KEY = 'home';
-
 export default function AdminPageSections() {
+  const [pageKey, setPageKey] = useState('home');
   const [sections, setSections] = useState<PageSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
-  function load() {
+  function load(key: string) {
     setLoading(true);
-    apiFetch<PageSection[]>(`/api/admin/pages/${PAGE_KEY}/sections`)
+    setError(null);
+    apiFetch<PageSection[]>(`/api/admin/pages/${key}/sections`)
       .then((data) => setSections([...data].sort((a, b) => a.sortOrder - b.sortOrder)))
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to load sections'))
       .finally(() => setLoading(false));
   }
 
-  useEffect(load, []);
+  useEffect(() => load(pageKey), [pageKey]);
 
   function toggleVisible(key: string) {
     setSections((s) => s.map((sec) => (sec.sectionKey === key ? { ...sec, isVisible: !sec.isVisible } : sec)));
@@ -77,7 +98,7 @@ export default function AdminPageSections() {
         layoutVariant: s.layoutVariant,
         config: s.config,
       }));
-      await apiFetch(`/api/admin/pages/${PAGE_KEY}/sections`, { method: 'PUT', body: JSON.stringify({ sections: payload }) });
+      await apiFetch(`/api/admin/pages/${pageKey}/sections`, { method: 'PUT', body: JSON.stringify({ sections: payload }) });
       setSavedMessage('Saved.');
       setTimeout(() => setSavedMessage(null), 3000);
     } catch (err) {
@@ -87,21 +108,18 @@ export default function AdminPageSections() {
     }
   }
 
-  if (loading) return <p className="text-body-text">Loading…</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
-
   return (
     <div className="max-w-3xl">
       <div className="flex items-center justify-between mb-2">
         <div>
           <h1 className="text-2xl font-bold text-primary-dark">Page Sections</h1>
-          <p className="text-body-text text-sm">Show/hide, reorder, and switch layout styles for the homepage — no code changes needed.</p>
+          <p className="text-body-text text-sm">Show/hide, reorder, and switch layout styles — no code changes needed.</p>
         </div>
         <div className="flex items-center gap-3">
           {savedMessage && <span className="text-sm text-green-600 font-medium">{savedMessage}</span>}
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || loading || !!error}
             className="bg-primary-blue text-white px-5 py-2.5 rounded-xl font-medium hover:bg-accent-hover transition-colors text-sm disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Save Changes'}
@@ -109,6 +127,24 @@ export default function AdminPageSections() {
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2 mt-5">
+        {PAGE_OPTIONS.map((p) => (
+          <button
+            key={p.key}
+            onClick={() => setPageKey(p.key)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              pageKey === p.key ? 'bg-primary-blue text-white' : 'bg-white text-body-text border border-gray-200 hover:border-primary-blue/40'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {loading && <p className="text-body-text mt-6">Loading…</p>}
+      {error && <p className="text-red-600 mt-6">{error}</p>}
+
+      {!loading && !error && (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100 mt-6">
         {sections.map((section, idx) => {
           const variants = VARIANT_OPTIONS[section.sectionKey];
@@ -148,6 +184,7 @@ export default function AdminPageSections() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }
