@@ -43,7 +43,7 @@ const VARIANT_OPTIONS: Record<string, { value: string; label: string }[]> = {
     { value: 'static', label: 'Static Banner (first slide only)' },
   ],
   'divisions-grid': [
-    { value: 'cards', label: 'Large Image Cards' },
+    { value: 'cards', label: 'Interactive Showcase' },
     { value: 'compact', label: 'Compact Icon Grid' },
   ],
   'why-choose-us': [

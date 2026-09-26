@@ -640,6 +640,27 @@
 
 ---
 
+## Phase 16.7 (cont.) — Business Divisions Interactive Showcase
+**Status:** Done
+
+**Goal:** Client follow-up asking specifically for "Our Business Divisions" to be redesigned *innovatively* rather than just re-skinned like the rest of the sweep above - a genuinely different interaction pattern, not another static card grid.
+
+**What was built:**
+- Replaced the "Large Image Cards" default layout (`src/components/home-sections/DivisionsGridSection.tsx`) with an interactive showcase: a numbered list of every division on the left (hover on desktop, tap on mobile) drives a large full-bleed preview panel on the right that crossfades (via `motion/react`'s `AnimatePresence`) between each division's cover image, icon, name, tagline, and an "Explore Division" link to its detail page. Scales to however many divisions the admin has configured - nothing in the layout assumes a fixed count of six.
+- Mobile: the list becomes a horizontally swipeable, scroll-snapped strip above the preview panel (`snap-x snap-mandatory` + `snap-start` per item), with division names clamped to two lines so inactive tiles stay compact instead of stretching the row.
+- The existing "Compact Icon Grid" variant (used when the admin picks it in Section Manager) is untouched - this only replaces the default variant's implementation. Renamed its admin-facing label from "Large Image Cards" to "Interactive Showcase" (`src/admin/sections/AdminPageSections.tsx`) to describe what it now does.
+- No data changes - still reads the same `useDivisionsList()` data every other homepage division listing uses.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds.
+- Playwright: confirmed all 6 division buttons render, hovering a non-first item (index 3) correctly crossfades the preview panel to that division's own image/name/tagline/link - not a stale or mismatched one. Screenshotted desktop initial state, desktop after-hover state, and mobile.
+- Mobile screenshot caught the first pass looking cramped (long names wrapping to 4 lines in a fixed-width tile); fixed with `line-clamp-2` and re-verified before moving on, rather than shipping the rough version.
+- Re-ran the admin-CRUD regression suite (16/16) and the public smoke suite (432/450, same known WebKit/Windows HSTS baseline) - no new regressions.
+
+**Deliverable:** ✅ "Our Business Divisions" is now an interactive showcase instead of a static grid - a distinct pattern from every other homepage section, as requested, while the underlying division data and the alternate compact-grid variant are both unchanged.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
@@ -698,5 +719,6 @@
 | 16.5 | Done | 2026-09-27 |
 | 16.6 | Done | 2026-09-27 |
 | 16.7 | Done | 2026-09-27 |
+| 16.7 (cont.) | Done | 2026-09-27 |
 | 17 | Not Started | — |
 | 18 | Not Started | — |
