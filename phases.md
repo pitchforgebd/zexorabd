@@ -724,6 +724,25 @@
 
 ---
 
+## Phase 16.7 (cont.) — CTA banner turned into a multi-channel contact hub
+**Status:** Done
+
+**Goal:** Client asked for the closing "Ready to Work with Zexora Corporation?" banner to be made innovative.
+
+**What was built:**
+- **`src/components/home-sections/CtaSection.tsx`** — this was the single most generic pattern on the page: a full-bleed stock photo, a dark overlay, a centered heading, and one button - a layout used on countless sites. Rather than just re-skinning it, turned it into a genuinely more useful **multi-channel contact hub**: the heading/copy/"Get in Touch" button now sit alongside three real, immediately-clickable contact tiles - Call (`tel:`), Email (`mailto:`), and WhatsApp (`wa.me`) - each pulling its **live value from `useSiteInfo()`** (the same hook Footer.tsx already uses), so a visitor who's ready to reach out doesn't have to click through to the Contact page at all if they'd rather just tap-to-call or open WhatsApp directly. Also added the dot-grid texture and a corner glow blob used throughout the rest of the redesigned homepage, so this section no longer looks like an isolated, differently-styled block at the very bottom of the page.
+- No new settings/admin fields - the three tiles read `info.phone`/`info.email`/`info.whatsapp`, which are already admin-editable in Website Settings; whatever the admin has configured there is what displays and what the tiles link to.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds; zero browser console/page errors.
+- Confirmed via Playwright that the three tiles render with the actual live site values (not placeholders) and that their `href`s are correctly formed real `tel:`/`mailto:`/`https://wa.me/` links matching Website Settings.
+- Screenshotted desktop and mobile; confirmed the tiles stack cleanly to a single column on mobile.
+- Re-ran the admin-CRUD regression suite (16/16) and the public smoke suite (432/450, same known WebKit/Windows HSTS baseline) - no new regressions.
+
+**Deliverable:** ✅ The closing CTA is no longer a generic photo-banner-with-one-button; it's a real contact hub with three live, clickable ways to reach Zexora directly, pulling from the same admin-editable contact info used everywhere else on the site.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
