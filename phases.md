@@ -426,7 +426,64 @@
 
 ---
 
-## Phase 13 — cPanel Deployment
+## Phase 13 — Global Website Settings
+**Status:** Not Started
+
+**Goal:** Move site-wide content (contact info, logo, social links, and similar global config) out of hardcoded component source and into a single admin-managed settings panel — currently `Header.tsx`/`Footer.tsx`/`Contact.tsx` hardcode the email, phone, address, and social links, and the logo is a static file in `public/` with no admin upload path.
+
+**Tasks:**
+- Extend `site_settings` (or a new dedicated table, decided during implementation) to cover: company name, email, phone, address, social links (Facebook/Instagram/LinkedIn/YouTube), and site logo.
+- Admin UI: a "Website Settings" page (new sidebar entry) to edit all of the above, including logo upload (reusing the Phase 11 image-optimization pipeline).
+- Refactor `Header.tsx`, `Footer.tsx`, and `Contact.tsx` to read these values from the API instead of hardcoded strings/JSX.
+- SEO/JSON-LD (`Organization` schema in `htmlTemplate.js`) should also pull from these settings rather than its own hardcoded copy, so the two never drift apart.
+
+**Deliverable:** Every piece of site-wide contact/brand info is editable from one admin screen; zero hardcoded contact info or logo path left in component source.
+
+---
+
+## Phase 14 — Dynamic Static Pages
+**Status:** Not Started
+
+**Goal:** Bring About, CEO Message, Vision & Mission, and Global Sourcing under CMS control — these four pages are currently 100% hardcoded (confirmed zero `apiFetch`/data-hook usage), unlike Home/Divisions/News which are already fully dynamic.
+
+**Tasks:**
+- Design a content schema per page (likely a flexible JSON-per-section model, similar to `page_sections.config`, rather than one bespoke table per page — decided during implementation based on how varied each page's layout actually is).
+- Admin UI to edit each page's content.
+- Refactor the four public page components to render from fetched data instead of hardcoded JSX/text.
+- SEO meta for these pages (already server-resolved via `seoResolver.js`'s `STATIC_PAGE_KEYS`) continues to work unchanged.
+
+**Deliverable:** All four pages editable from the admin panel with no code deploy required for a content change.
+
+---
+
+## Phase 15 — Admin Dashboard Redesign
+**Status:** Not Started
+
+**Goal:** Replace the current placeholder dashboard (a static welcome message, no real data) with a genuinely useful overview screen.
+
+**Tasks:**
+- Real widgets: content counts (divisions, news posts, gallery items), recent contact messages/career applications, recently edited content.
+- Quick-links to the most-used admin sections.
+- Visual polish matching the rest of the admin panel's design language.
+
+**Deliverable:** A dashboard that gives an admin useful at-a-glance status on first login, not just a greeting.
+
+---
+
+## Phase 16 — Extended Section Manager
+**Status:** Not Started
+
+**Goal:** Extend the Phase 7 Section Manager pattern (currently Home-page-only, by deliberate original scope decision) to the pages made dynamic in Phase 14.
+
+**Tasks:**
+- Extend `page_sections` usage (or its Phase 14 equivalent) to cover visibility/order/variant control for About, CEO Message, Vision & Mission, and Global Sourcing.
+- Admin UI: extend the existing Section Manager screen to let the admin pick which page they're managing, rather than being hardcoded to `home`.
+
+**Deliverable:** Section-level visibility/reorder/variant control available on every dynamic page, not just Home.
+
+---
+
+## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
 **Goal:** Ship to production.
@@ -444,13 +501,13 @@
 
 ---
 
-## Phase 14 — Documentation & Handover
+## Phase 18 — Documentation & Handover
 **Status:** Not Started
 
 **Goal:** Make the CMS usable by non-technical staff without developer involvement.
 
 **Tasks:**
-- Admin user guide (screenshots): how to edit a division, publish news, view form submissions, use the Section Manager to rearrange a page.
+- Admin user guide (screenshots): how to edit a division, publish news, view form submissions, use the Section Manager to rearrange a page, manage Website Settings.
 - Credentials handover (admin accounts, DB access).
 - Backup/restore instructions.
 - Notes on how to request future developer changes (what's code vs. what's CMS-editable), and how to restart the Node app on cPanel if needed.
@@ -479,3 +536,7 @@
 | 12 | Done | 2026-09-26 |
 | 13 | Not Started | — |
 | 14 | Not Started | — |
+| 15 | Not Started | — |
+| 16 | Not Started | — |
+| 17 | Not Started | — |
+| 18 | Not Started | — |
