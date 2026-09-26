@@ -9,35 +9,44 @@ const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1486406146926-c627a92a
 function CardsVariant() {
   const { divisions } = useDivisionsList();
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-x-8 lg:gap-y-14">
       {divisions.map((div, idx) => {
         const Icon = getIcon(div.icon);
         const bgImage = div.coverImage || FALLBACK_IMAGE;
         return (
-          <FadeIn key={div.id} delay={idx * 0.1}>
+          <FadeIn key={div.id} delay={idx * 0.1} className="h-full">
             <Link
               to={`/divisions/${div.slug}`}
-              className="group block h-105 rounded-3xl overflow-hidden relative shadow-lg hover:shadow-2xl hover:shadow-primary-blue/20 ring-1 ring-black/5 hover:ring-2 hover:ring-primary-blue/40 transition-all duration-500 hover:-translate-y-2"
+              className="group block h-full bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl hover:shadow-primary-blue/15 ring-1 ring-black/5 hover:ring-primary-blue/30 transition-all duration-500 hover:-translate-y-2"
             >
-              <div
-                className="absolute inset-0 bg-cover bg-center transform group-hover:scale-110 transition-transform duration-700"
-                style={{ backgroundImage: `url("${bgImage}")` }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-primary-dark/60 to-transparent" />
+              {/* Image zone */}
+              <div className="relative h-48 overflow-hidden">
+                <div
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
+                  style={{ backgroundImage: `url("${bgImage}")` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
+                <span className="absolute top-4 right-5 text-5xl font-bold text-white/25 select-none">
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+              </div>
 
-              <span className="absolute top-6 right-6 text-4xl font-bold text-white/15 select-none group-hover:text-white/25 transition-colors">
-                {String(idx + 1).padStart(2, '0')}
-              </span>
-
-              <div className="relative z-10 h-full flex flex-col justify-end p-8">
-                <div className="w-14 h-14 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary-blue group-hover:border-primary-blue group-hover:scale-110 transition-all duration-300">
-                  <Icon className="w-7 h-7" />
+              {/* Floating icon badge straddling the image/content split */}
+              <div className="relative px-7">
+                <div className="absolute -top-8 left-7 w-16 h-16 rounded-2xl bg-white shadow-lg ring-1 ring-black/5 flex items-center justify-center text-primary-blue group-hover:bg-primary-blue group-hover:text-white group-hover:-translate-y-1 transition-all duration-300">
+                  <Icon className="w-8 h-8" />
                 </div>
-                <h4 className="text-2xl font-bold mb-3 text-white tracking-tight">{div.name}</h4>
-                <p className="text-blue-100/90 mb-6 text-sm leading-relaxed max-w-xs">{div.tagline}</p>
-                <div className="flex items-center text-white font-bold tracking-wide text-sm uppercase">
-                  Explore Division
-                  <ArrowRight className="ml-2 w-5 h-5 transform group-hover:translate-x-3 transition-transform duration-300" />
+              </div>
+
+              {/* Content */}
+              <div className="flex flex-col px-7 pt-12 pb-7">
+                <h4 className="text-xl font-bold text-primary-dark mb-2 tracking-tight leading-snug">{div.name}</h4>
+                <p className="text-body-text text-sm leading-relaxed mb-6">{div.tagline}</p>
+                <div className="flex items-center justify-between pt-5 border-t border-gray-100">
+                  <span className="text-primary-blue font-bold text-xs uppercase tracking-wider">Explore Division</span>
+                  <span className="w-9 h-9 shrink-0 rounded-full bg-light-gray group-hover:bg-primary-blue flex items-center justify-center transition-colors duration-300">
+                    <ArrowRight className="w-4 h-4 text-primary-blue group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300" />
+                  </span>
                 </div>
               </div>
             </Link>
