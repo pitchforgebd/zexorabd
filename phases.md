@@ -741,6 +741,8 @@
 
 **Deliverable:** ✅ The closing CTA is no longer a generic photo-banner-with-one-button; it's a real contact hub with three live, clickable ways to reach Zexora directly, pulling from the same admin-editable contact info used everywhere else on the site.
 
+**Corrected same day:** client pointed out this was actually a step backward, not forward - the phone/email/WhatsApp tiles just repeated what the Footer, sitting immediately below this section, already shows. Removed the three contact tiles and the `useSiteInfo()` dependency entirely. Replaced with a simpler, non-redundant innovation: a second, secondary-styled button ("Explore Our Divisions" → `/divisions`) alongside the original "Get in Touch", plus a second corner glow blob for a touch more depth - a real choice for the visitor without repeating information the page already states elsewhere. Re-verified (screenshots, both regression suites - 16/16 admin, 432/450 public smoke) after the correction.
+
 ---
 
 ## Phase 17 — cPanel Deployment
