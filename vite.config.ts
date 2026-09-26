@@ -49,6 +49,13 @@ export default defineConfig(() => {
       proxy: {
         '/api': { target: 'http://localhost:3001', changeOrigin: true },
         '/uploads': { target: 'http://localhost:3001', changeOrigin: true },
+        // Both are Express-only routes (server/src/routes/sitemap.js,
+        // robots.js) with no client-side equivalent, so without a proxy
+        // entry they'd fall through to the SPA and hit the 404 page here
+        // in dev - production doesn't have this gap since the Node app
+        // serves everything itself there (see createApp.js).
+        '/sitemap.xml': { target: 'http://localhost:3001', changeOrigin: true },
+        '/robots.txt': { target: 'http://localhost:3001', changeOrigin: true },
       },
     },
   };

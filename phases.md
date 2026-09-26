@@ -835,6 +835,8 @@
 
 **Deliverable:** ✅ Every page now carries correct, richer structured data (Organization with contact/address info, WebSite, breadcrumbs sitewide, NewsArticle on news posts), a proper `robots` meta tag (including `noindex` on 404s and `/admin/*`), and a sitemap with accurate `lastmod` dates and zero leftover test content - everything achievable through code toward being found and correctly understood by Google. Actually submitting/verifying the site in Google Search Console itself is an account-level step for whoever owns the live domain (the admin's **SEO Tools** page already has the verification-code field ready for that, from Phase 16.6), not something further code changes can do.
 
+**Fixed same day:** client reported `/sitemap.xml` returning the site's own 404 page when viewed via the local dev server (`localhost:3000`). Root cause: `sitemap.xml`/`robots.txt` are Express-only routes with no client-side page - Vite's dev-server proxy (`vite.config.ts`) only forwarded `/api` and `/uploads` to the real backend (port 3001), so these two fell through to the SPA and hit its catch-all "not found" route. Production isn't affected (the Node app serves everything itself there, no split), but local `npm run dev` preview was broken. Added both paths to the dev proxy; verified `sitemap.xml` and `robots.txt` both now return the real content through port 3000 (Vite auto-restarted on the config change, no manual step needed).
+
 ---
 
 ## Phase 17 — cPanel Deployment
