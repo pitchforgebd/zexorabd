@@ -70,7 +70,11 @@ export default function DivisionsGridSection({ variant }: { variant?: string }) 
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-30"></div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
-          <h3 className="text-sm font-bold text-primary-blue uppercase tracking-[2px] mb-2">Our Business Divisions</h3>
+          <div className="inline-flex items-center gap-3 mb-4">
+            <span className="w-8 h-0.5 bg-primary-blue" />
+            <h3 className="text-sm font-bold text-primary-blue uppercase tracking-[2px]">Our Business Divisions</h3>
+            <span className="w-8 h-0.5 bg-primary-blue" />
+          </div>
           <h2 className="text-3xl md:text-5xl font-bold text-primary-dark tracking-tight">
             Six specialized divisions.
             <br />

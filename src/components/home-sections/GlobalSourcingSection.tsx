@@ -12,11 +12,11 @@ export default function GlobalSourcingSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <FadeIn direction="right">
-            <h3 className="text-sm font-bold text-primary-light uppercase tracking-[2px] mb-2 flex items-center">
-              <Globe className="w-4 h-4 mr-2" /> Global Presence
-            </h3>
+            <span className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-[11px] sm:text-xs font-semibold uppercase tracking-[2.5px] text-primary-light">
+              <Globe className="w-3.5 h-3.5" /> Global Presence
+            </span>
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Our Global Sourcing Network</h2>
-            <p className="text-lg text-gray-400 mb-8 leading-relaxed text-justify">
+            <p className="text-lg text-gray-400 mb-8 leading-relaxed">
               We source premium industrial products, chemicals, and materials from internationally recognized
               manufacturers across 9+ countries — ensuring world-class quality at competitive prices for
               Bangladesh's growing industries.

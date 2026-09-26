@@ -29,7 +29,11 @@ export default function SisterConcernsSection() {
       <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <FadeIn className="text-center mb-16">
-          <h3 className="text-sm font-bold text-primary-blue uppercase tracking-[2px] mb-2">{c.subheading}</h3>
+          <div className="inline-flex items-center gap-3 mb-4">
+            <span className="w-8 h-0.5 bg-primary-blue" />
+            <h3 className="text-sm font-bold text-primary-blue uppercase tracking-[2px]">{c.subheading}</h3>
+            <span className="w-8 h-0.5 bg-primary-blue" />
+          </div>
           <h2 className="text-3xl md:text-5xl font-bold text-primary-dark tracking-tight">{c.heading}</h2>
         </FadeIn>
 
@@ -61,7 +65,7 @@ export default function SisterConcernsSection() {
                   <div className="w-full md:w-2/3">
                     <h4 className="text-sm font-bold text-primary-blue uppercase tracking-[2px] mb-3">{concern.tagline}</h4>
                     <h3 className="text-2xl md:text-3xl font-bold text-primary-dark mb-4 transition-colors duration-300">{concern.name}</h3>
-                    <div className="text-body-text space-y-4 text-[15px] md:text-base leading-relaxed text-justify">
+                    <div className="text-body-text space-y-4 text-[15px] md:text-base leading-relaxed">
                       {concern.description.split('\n\n').map((p, pIdx) => (
                         <p key={pIdx}>{p}</p>
                       ))}

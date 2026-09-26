@@ -14,9 +14,13 @@ export default function SupplierLogos() {
     <section className="py-24 bg-white border-t border-gray-100 overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <span className="text-sm font-semibold text-primary tracking-wider uppercase mb-3 block text-primary-blue">
-            {copy?.subheading || 'Partner Network'}
-          </span>
+          <div className="inline-flex items-center gap-3 mb-4">
+            <span className="w-8 h-0.5 bg-primary-blue" />
+            <span className="text-sm font-bold text-primary-blue uppercase tracking-[2px]">
+              {copy?.subheading || 'Partner Network'}
+            </span>
+            <span className="w-8 h-0.5 bg-primary-blue" />
+          </div>
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight sm:text-4xl mb-4">
             {copy?.heading || 'Our Global Suppliers'}
           </h2>
