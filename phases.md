@@ -702,6 +702,8 @@
 
 **Deliverable:** ✅ "Our Global Suppliers" is now a fuller, livelier dual-direction logo wall with a real partner-count badge and a grayscale-to-color hover reveal, instead of a single flat scrolling row.
 
+**Tuned same day:** client feedback that the motion had become "too much / too fast" ("speed ta beshi hoye geche") after this pass and the map pass together introduced several new fast animations at once. Slowed everything down for a calmer, more corporate feel rather than reverting either feature: the supplier marquee's duration went from 40s to 70s per loop (both rows, confirmed via measured on-screen pixel movement: ~179px/s before vs ~108px/s after over a 2s sample); the map's auto-cycle interval went from 2.2s to 3.8s per country; its connection-line flowing-dash animation from 1s to 2s per cycle; and the HQ/active-marker "ping" ring from 1.6s to 2.2s per pulse. Re-ran both regression suites again (admin-CRUD 16/16 after a re-run ruled out one more flaky, unrelated check; public smoke 432/450, same known baseline).
+
 ---
 
 ## Phase 17 — cPanel Deployment

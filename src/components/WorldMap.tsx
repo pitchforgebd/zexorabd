@@ -17,7 +17,7 @@ const markers = [
   { name: 'Taiwan', flag: '🇹🇼', coordinates: [120.9605, 23.6978] as [number, number] },
 ];
 
-const AUTO_CYCLE_MS = 2200;
+const AUTO_CYCLE_MS = 3800;
 
 export default function WorldMap() {
   const [autoIdx, setAutoIdx] = useState(0);
@@ -82,7 +82,7 @@ export default function WorldMap() {
                 strokeDasharray: '4 4',
                 opacity: isActive ? 0.95 : 0.35,
                 transition: 'opacity 400ms, stroke 400ms',
-                animation: isActive ? 'dash-flow 1s linear infinite' : undefined,
+                animation: isActive ? 'dash-flow 2s linear infinite' : undefined,
               }}
             />
           );
@@ -100,7 +100,7 @@ export default function WorldMap() {
               style={{ default: { cursor: 'pointer' } }}
             >
               {isActive && (
-                <circle r={5} fill="none" stroke="#60A5FA" strokeWidth={1.5} style={{ transformOrigin: 'center', animation: 'marker-ping 1.6s cubic-bezier(0,0,0.2,1) infinite' }} />
+                <circle r={5} fill="none" stroke="#60A5FA" strokeWidth={1.5} style={{ transformOrigin: 'center', animation: 'marker-ping 2.2s cubic-bezier(0,0,0.2,1) infinite' }} />
               )}
               <circle r={isActive ? 6 : 4} fill={isActive ? '#60A5FA' : '#3b5578'} stroke="#0A0D14" strokeWidth={2} style={{ transition: 'r 300ms, fill 300ms' }} />
               <text
@@ -125,7 +125,7 @@ export default function WorldMap() {
 
         {/* Bangladesh HQ marker */}
         <Marker coordinates={HQ}>
-          <circle r={5} fill="none" stroke="#ef4444" strokeWidth={1.5} style={{ transformOrigin: 'center', animation: 'marker-ping 1.6s cubic-bezier(0,0,0.2,1) infinite' }} />
+          <circle r={5} fill="none" stroke="#ef4444" strokeWidth={1.5} style={{ transformOrigin: 'center', animation: 'marker-ping 2.2s cubic-bezier(0,0,0.2,1) infinite' }} />
           <circle r={7} fill="#ef4444" stroke="#fff" strokeWidth={2.5} />
           <text
             textAnchor="middle"
