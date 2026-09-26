@@ -6,11 +6,14 @@ import { useSiteSettings } from '../lib/useSiteSettings';
 
 type HeroSliderProps = { variant?: 'slider' | 'static' };
 
+const AUTOPLAY_MS = 6000;
+
 export default function HeroSlider({ variant = 'slider' }: HeroSliderProps) {
   const { settings, loading } = useSiteSettings();
   const allSlides = settings?.['home.hero']?.slides || [];
   // 'static' shows only the first slide - no autoplay, no controls.
   const slides = variant === 'static' ? allSlides.slice(0, 1) : allSlides;
+  const isSlider = variant === 'slider' && slides.length > 1;
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -20,7 +23,7 @@ export default function HeroSlider({ variant = 'slider' }: HeroSliderProps) {
     const timer = setInterval(() => {
       setDirection(1);
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 6000);
+    }, AUTOPLAY_MS);
     return () => clearInterval(timer);
   }, [currentSlide, slides.length]);
 
@@ -32,6 +35,11 @@ export default function HeroSlider({ variant = 'slider' }: HeroSliderProps) {
   const prevSlide = () => {
     setDirection(-1);
     setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+  };
+
+  const goToSlide = (idx: number) => {
+    setDirection(idx > currentSlide ? 1 : -1);
+    setCurrentSlide(idx);
   };
 
   const slideVariants = {
@@ -89,15 +97,40 @@ export default function HeroSlider({ variant = 'slider' }: HeroSliderProps) {
           className="absolute inset-0 w-full h-full"
         >
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center scale-105"
             style={{ backgroundImage: `url("${slides[currentSlide].image}")` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/90"></div>
+          {/* Base scrim, kept dark enough to read text over any photo */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/45 to-black/90" />
+          {/* Extra spotlight behind the text block so busy background photos
+              (stock imagery with baked-in labels/icons) never fight the
+              headline for attention, regardless of which image is uploaded. */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_42%,rgba(0,0,0,0.5)_0%,rgba(0,0,0,0)_70%)]" />
         </motion.div>
       </AnimatePresence>
 
-      <div className="relative z-10 w-full px-4 max-w-7xl mx-auto flex flex-col items-center text-center -mt-8 sm:mt-0">
-        <div className="relative w-full h-[250px] sm:h-[300px] md:h-[280px] lg:h-[350px] flex items-center justify-center">
+      {/* Edge arrows */}
+      {isSlider && (
+        <>
+          <button
+            onClick={prevSlide}
+            className="hidden sm:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/5 hover:bg-white/15 text-white/70 hover:text-white backdrop-blur-sm border border-white/10 transition-all hover:scale-110"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="hidden sm:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/5 hover:bg-white/15 text-white/70 hover:text-white backdrop-blur-sm border border-white/10 transition-all hover:scale-110"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+
+      <div className="relative z-10 w-full px-4 max-w-5xl mx-auto flex flex-col items-center text-center -mt-8 sm:mt-0">
+        <div className="relative w-full min-h-[260px] sm:min-h-[300px] md:min-h-[300px] lg:min-h-[360px] flex items-center justify-center">
           <AnimatePresence custom={direction}>
             <motion.div
               key={currentSlide}
@@ -108,29 +141,35 @@ export default function HeroSlider({ variant = 'slider' }: HeroSliderProps) {
               exit="exit"
               className="max-w-4xl absolute w-full flex flex-col items-center justify-center"
             >
-               <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-2 sm:mb-4 tracking-tight leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
-                  {slides[currentSlide].title}
-                </h1>
-                <h2 className="text-base sm:text-xl md:text-3xl text-gray-200 mb-3 sm:mb-5 font-semibold tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+              {slides[currentSlide].subtitle && (
+                <span className="inline-flex items-center gap-2 mb-4 sm:mb-5 px-4 py-1.5 rounded-full border border-white/25 bg-white/10 backdrop-blur-sm text-[11px] sm:text-xs font-semibold uppercase tracking-[2.5px] text-white/90">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary-blue shrink-0" />
                   {slides[currentSlide].subtitle}
-                </h2>
-                <p className="text-sm sm:text-lg md:text-2xl text-blue-300 italic drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] px-4">
+                </span>
+              )}
+              <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-3 sm:mb-5 tracking-tight leading-[1.1] drop-shadow-[0_4px_20px_rgba(0,0,0,0.85)]">
+                {slides[currentSlide].title}
+              </h1>
+              {slides[currentSlide].description && (
+                <p className="text-sm sm:text-lg md:text-xl text-white/75 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] px-4">
                   {slides[currentSlide].description}
                 </p>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-10 relative z-20 w-full sm:w-auto px-4 sm:px-0">
-          <Link 
-            to="/divisions" 
-            className="w-full sm:w-auto bg-primary-blue mx-auto sm:mx-0 hover:bg-accent-hover text-white px-6 sm:px-8 py-2.5 sm:py-4 rounded-full font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center"
+          <Link
+            to="/divisions"
+            className="group w-full sm:w-auto bg-primary-blue mx-auto sm:mx-0 hover:bg-accent-hover text-white px-6 sm:px-8 py-2.5 sm:py-4 rounded-full font-semibold transition-all shadow-lg shadow-primary-blue/30 hover:shadow-xl hover:shadow-primary-blue/40 hover:-translate-y-0.5 flex items-center justify-center"
           >
-            Explore Our Divisions <ArrowRight className="ml-2 w-5 h-5" />
+            Explore Our Divisions
+            <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Link>
-          <Link 
-            to="/contact" 
-            className="w-full sm:w-auto border-2 mx-auto sm:mx-0 border-white hover:bg-white hover:text-primary-dark text-white px-6 sm:px-8 py-2.5 sm:py-4 rounded-full font-semibold transition-all flex items-center justify-center hover:shadow-lg"
+          <Link
+            to="/contact"
+            className="w-full sm:w-auto border-2 mx-auto sm:mx-0 border-white/50 hover:border-white hover:bg-white hover:text-primary-dark text-white px-6 sm:px-8 py-2.5 sm:py-4 rounded-full font-semibold transition-all flex items-center justify-center backdrop-blur-sm hover:shadow-lg"
           >
             Contact Us
           </Link>
@@ -138,39 +177,31 @@ export default function HeroSlider({ variant = 'slider' }: HeroSliderProps) {
       </div>
 
       {/* Slider Controls */}
-      {variant === 'slider' && (
-        <div className="absolute inset-x-0 bottom-6 sm:bottom-10 z-30 flex justify-center items-center gap-4 sm:gap-6 px-4">
-          <button
-            onClick={prevSlide}
-            className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-
-          <div className="flex gap-3">
+      {isSlider && (
+        <div className="absolute inset-x-0 bottom-6 sm:bottom-10 z-30 flex flex-col items-center gap-3 px-4">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {slides.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => {
-                  setDirection(idx > currentSlide ? 1 : -1);
-                  setCurrentSlide(idx);
-                }}
-                className={`h-2 transition-all duration-300 rounded-full ${
-                  idx === currentSlide ? 'w-10 bg-primary-blue shadow-lg shadow-primary-blue/30' : 'w-2 bg-white/40 hover:bg-white/80'
-                }`}
+                onClick={() => goToSlide(idx)}
+                className="relative h-1.5 w-8 sm:w-10 rounded-full bg-white/20 overflow-hidden transition-colors hover:bg-white/30"
                 aria-label={`Go to slide ${idx + 1}`}
-              />
+              >
+                {idx === currentSlide && (
+                  <motion.span
+                    key={currentSlide}
+                    initial={{ width: '0%' }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: AUTOPLAY_MS / 1000, ease: 'linear' }}
+                    className="absolute inset-y-0 left-0 bg-primary-blue rounded-full"
+                  />
+                )}
+              </button>
             ))}
           </div>
-
-          <button
-            onClick={nextSlide}
-            className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
+          <span className="text-white/50 text-xs font-semibold tracking-[3px]">
+            {String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
+          </span>
         </div>
       )}
     </section>

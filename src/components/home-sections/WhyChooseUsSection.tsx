@@ -19,13 +19,30 @@ export default function WhyChooseUsSection({ variant }: { variant?: string }) {
   const reasons = whyChooseUs?.reasons || DEFAULT_REASONS;
 
   return (
-    <section className="py-24 bg-primary-blue text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <FadeIn className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
+    <section className="relative py-20 sm:py-24 lg:py-28 bg-primary-dark text-white overflow-hidden">
+      {/* Decorative depth - a soft glow and a faint dot grid, kept subtle so
+          it reads as texture rather than competing with the cards. */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-blue via-primary-blue to-[#1d1d7a]" />
+      <div className="absolute -top-32 -left-20 w-105 h-105 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-20 w-105 h-105 rounded-full bg-white/5 blur-3xl pointer-events-none" />
+      <div
+        className="absolute inset-0 opacity-[0.07] pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <FadeIn className="text-center mb-14 lg:mb-16">
+          <span className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full border border-white/20 bg-white/5 text-[11px] sm:text-xs font-semibold uppercase tracking-[2.5px] text-blue-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+            Why Zexora
+          </span>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-white tracking-tight">
             {whyChooseUs?.heading || 'Why Choose Zexora Corporation?'}
           </h2>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-blue-100/80 max-w-3xl mx-auto">
             {whyChooseUs?.subheading || 'Built on experience. Driven by performance. Trusted by industry.'}
           </p>
         </FadeIn>

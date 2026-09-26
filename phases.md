@@ -614,6 +614,26 @@
 
 ---
 
+## Phase 16.7 — Homepage UI Polish (Hero, Who We Are, Why Choose Us)
+**Status:** Done
+
+**Goal:** Client-requested visual polish pass on three homepage sections — the hero slider, the "Who We Are" snapshot, and "Why Choose Zexora Corporation?" — explicitly scoped to styling only: "jevabe dynamic kora ache otar upor base korei koro" (build on top of however it's already made dynamic). No data model, admin field, or settings-key changes; every section still reads the exact same `home.hero`/`home.stats`/`home.whyChooseUs` settings and renders whatever the admin has configured, just with a more premium/professional visual treatment.
+
+**What was built:**
+- **Hero slider** (`src/components/HeroSlider.tsx`) — added a radial "spotlight" scrim behind the text block (on top of the existing linear gradient) so the headline stays readable regardless of what's baked into an admin-uploaded background photo (busy stock imagery with labels/icons was fighting the text for attention before). Restyled the subtitle as a small pill/eyebrow badge above the headline instead of a second plain heading line; moved prev/next arrows to the slide edges (desktop only); replaced the plain dot indicators with a per-slide autoplay progress-fill bar plus a "01 / 04" slide counter. All still driven by the same `slides[].title/subtitle/description/image` array and `variant` prop - no changes to `home.hero`'s shape or the admin editor.
+- **Who We Are** (`src/components/home-sections/AboutSnapshotSection.tsx`) — fixed a flat, un-responsive `py-24` (excess whitespace on mobile); switched the paragraph from justified to left-aligned text (justification was creating uneven "rivers" in a narrow column); added an eyebrow accent line, two subtle blurred background glows for depth, and per-stat icons (Calendar/Award/Layers, cycling by index so it stays correct for however many stat boxes the admin has configured) on the existing stat cards. Copy text itself unchanged.
+- **Why Choose Zexora Corporation?** (`src/components/home-sections/WhyChooseUsSection.tsx`, `src/components/WhyChooseGrid.tsx`) — the section was a flat solid-blue block with bare icon+text (no card boundary); added a subtle dot-grid texture and two blurred glow accents for depth, an eyebrow badge above the heading, and turned each reason into an actual bordered glass-morphism card (hover lift, border brighten) with a large faint index number (01, 02, …) and a squared icon badge that fills solid on hover. Applied to both the `grid` and `list` variants of the shared `WhyChooseGrid` component; the reasons array (`title`/`desc`) and the admin editor are untouched. (The separate, unshared `WhyChooseUsSection` on the Vision & Mission page was intentionally left as-is - out of scope, not what was asked.)
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds.
+- Screenshotted all three sections on desktop (1440px) and mobile (390px) viewports via Playwright after each change and visually reviewed them - caught and corrected a timing-only artifact in an early screenshot (page captured mid entrance-animation looked washed out; a longer wait confirmed the actual steady-state render is crisp) rather than mistaking it for a real bug.
+- Confirmed stat cards and reason cards don't overflow or get clipped on mobile by scrolling section-by-section rather than relying on a single full-page capture (which misses scroll-triggered fade-in content entirely).
+- Re-ran the admin-CRUD regression suite (16/16) and the full cross-browser/responsive public-route smoke suite twice (450 checks each) after the changes - 432/450 both times, matching the known pre-existing WebKit/Windows HSTS baseline exactly, confirming no new regressions from the redesign.
+
+**Deliverable:** ✅ Hero slider, "Who We Are", and "Why Choose Zexora Corporation?" all have a more polished, professional visual treatment (better contrast, card-based layout, subtle depth/texture, refined typography) while remaining fully driven by the same admin-editable settings as before.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
@@ -671,5 +691,6 @@
 | 16 | Done | 2026-09-26 |
 | 16.5 | Done | 2026-09-27 |
 | 16.6 | Done | 2026-09-27 |
+| 16.7 | Done | 2026-09-27 |
 | 17 | Not Started | — |
 | 18 | Not Started | — |
