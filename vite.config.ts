@@ -19,6 +19,7 @@ function devSeoPlaceholders(): Plugin {
           /%%SEO_DESCRIPTION%%/g,
           'Zexora Corporation is a leading diversified business group in Bangladesh offering industrial chemicals, printing solutions, global sourcing, logistics, garments, power solutions and more.'
         )
+        .replace(/%%SEO_ROBOTS%%/g, 'index, follow')
         .replace(/%%SEO_CANONICAL%%/g, 'https://zexora.com.bd/')
         .replace(/%%SEO_OG_IMAGE%%/g, 'https://zexora.com.bd/logo.png')
         .replace(/%%SEO_FAVICON%%/g, '/favicon.png')

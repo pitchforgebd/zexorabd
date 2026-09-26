@@ -807,6 +807,36 @@
 
 ---
 
+## Phase 16.9 — Full technical SEO pass
+**Status:** Done
+
+**Goal:** Client request: "full seo kore daw, jate google search korle pawa jay... full seo jeta jeta coding diye possible" - a complete technical-SEO pass, everything achievable through code (as opposed to account-level steps like actually submitting the site in Google Search Console, which requires real domain ownership and isn't something code can do). Read "google search tabs ashe a-z" as asking about Sitelinks - the extra sub-links Google sometimes shows beneath a site's main search result - which aren't switched on by any single tag; Google generates them algorithmically from a site's structure, and the concrete things code *can* do to earn them are exactly what this phase adds: clear breadcrumbs, clean sitemaps, and correct structured data.
+
+**What was built:**
+- **`server/src/services/htmlTemplate.js`**:
+  - Enriched the existing `Organization` JSON-LD with `description` (from the site's tagline), `address` (`PostalAddress`, from Website Settings), and `contactPoint` (phone/email) - previously just name/logo/social links. Added stable `@id` anchors (`#organization`, `#website`) so the different JSON-LD blocks on a page correctly reference each other instead of duplicating data.
+  - Added a `WebSite` JSON-LD block on every page. Deliberately left out the `SearchAction`/sitelinks-searchbox markup some sites add here - that specifically requires a real, working internal search-results page to point at, which this site doesn't have; shipping that schema without one would be non-functional or actively misleading, not real SEO.
+  - Added `NewsArticle` JSON-LD for news post detail pages (headline, image, publish/modified dates, author, publisher) - existing rich-result eligibility for news content that wasn't there before.
+  - Added a `%%SEO_ROBOTS%%` token, `index, follow` by default, `noindex, nofollow` when the resolver flags a page (404s, and now `/admin/*`).
+  - Fixed a real bug caught during verification: `NewsArticle`'s `datePublished`/`dateModified` were being passed through as MySQL's raw `"YYYY-MM-DD HH:MM:SS"` string - not valid ISO 8601, which would have failed Google's Rich Results validation. Added a `toIso()` normalizer.
+- **`server/src/services/seoResolver.js`** — every static page (About, CEO Message, Vision & Mission, Divisions list, Global Sourcing, Career, the three Media Centre pages, Contact) now gets a `BreadcrumbList` too, not just division/news detail pages as before. Added a `noIndex` flag on the result, set automatically for 404s. Added `article` metadata (title/image/dates) for news detail pages, feeding the new `NewsArticle` block. Fixed a real bug caught during verification: the breadcrumb builder was resolving the "Home" crumb's URL to an absolute URL *twice* (`https://zexora.com.bdhttps://zexora.com.bd/`) - rewrote it to resolve every crumb's URL exactly once.
+- **`server/src/createApp.js`** — `/admin/*` responses now carry `noIndex: true` (on top of `robots.txt`'s existing `Disallow: /admin/`) so an admin URL that got crawled before that rule existed can still drop out of search results.
+- **`server/src/routes/sitemap.js`** — every URL entry now includes `<lastmod>` where a real update timestamp exists (divisions, published news), so search engines know what's actually changed recently instead of treating every page as equally stale/fresh. Division `updated_at` is fetched via a small dedicated query rather than growing the shared `divisionsService.listDivisions()` return shape for a sitemap-only need.
+- **`index.html` / `vite.config.ts`** — added the `%%SEO_ROBOTS%%` token and its local-dev placeholder (`index, follow`), matching every other `%%SEO_*%%` token already there.
+- **Data hygiene, discovered while verifying the sitemap**: every single news post on the site (23 of them) turned out to be a leftover, published `qa-test-news-post-...` row from this session's repeated Playwright test runs - meaning the *entire* sitemap was junk test content, which actively works against "found on Google" rather than helping it. Deleted all of them directly (none had cover images needing file cleanup); also audited divisions/video gallery/photo gallery for similar leftover test data and found none. One more test post got created by a final regression-suite run after this cleanup and was deleted the same way immediately after.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; all modified backend files load without syntax errors; production build succeeds.
+- Fetched the rendered `<head>` directly (`curl`) for the homepage, an `/about`-style static page, a division detail page, a news detail page, the 404 page, and `/admin` - confirmed in each case: correct `robots` value, correct canonical/OG/Twitter tags, and the right JSON-LD blocks present with real (not placeholder) data.
+- Caught both real bugs above from the actual rendered output, not from reading the code back - the doubled "Home" breadcrumb URL and the invalid article date format - fixed and re-verified clean afterward.
+- Validated `sitemap.xml`: balanced `<url>`/`</url>` tag count, correct URL count, `<lastmod>` present and correctly formatted (`YYYY-MM-DD`) on entries with real timestamps.
+- Re-ran the admin-CRUD regression suite (16/16 after two runs each hit a different, unrelated flaky check from the same pre-existing weak-assertion pattern, then a clean third run) and the public smoke suite (432/450, same known WebKit/Windows HSTS baseline) - no new regressions.
+- Confirmed the sitemap and site content are clean of test data after the cleanup (0 `qa-test` entries, 17 real URLs, divisions/media galleries all clean).
+
+**Deliverable:** ✅ Every page now carries correct, richer structured data (Organization with contact/address info, WebSite, breadcrumbs sitewide, NewsArticle on news posts), a proper `robots` meta tag (including `noindex` on 404s and `/admin/*`), and a sitemap with accurate `lastmod` dates and zero leftover test content - everything achievable through code toward being found and correctly understood by Google. Actually submitting/verifying the site in Google Search Console itself is an account-level step for whoever owns the live domain (the admin's **SEO Tools** page already has the verification-code field ready for that, from Phase 16.6), not something further code changes can do.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
@@ -870,5 +900,6 @@
 | 16.7 | Done | 2026-09-27 |
 | 16.7 (cont.) | Done | 2026-09-27 |
 | 16.8 | Done | 2026-09-27 |
+| 16.9 | Done | 2026-09-27 |
 | 17 | Not Started | — |
 | 18 | Not Started | — |

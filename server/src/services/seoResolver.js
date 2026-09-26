@@ -26,8 +26,39 @@ const STATIC_PAGE_KEYS = {
   '/contact': 'contact',
 };
 
+// Breadcrumb trail per static route (Home is implicit/first for all of
+// these, so it isn't repeated in the map) - lets Google understand and
+// display the site's structure (e.g. as breadcrumb-style sitelinks under
+// the main search result) on every page, not just division/news detail
+// pages. The homepage itself has no breadcrumbs - a single "Home" crumb on
+// "/" would be redundant.
+const STATIC_BREADCRUMBS = {
+  '/about': [{ name: 'About Us' }],
+  '/ceo-message': [{ name: 'About Us', url: '/about' }, { name: "CEO's Message" }],
+  '/vision-mission': [{ name: 'About Us', url: '/about' }, { name: 'Vision & Mission' }],
+  '/divisions': [{ name: 'Our Divisions' }],
+  '/global-sourcing': [{ name: 'Global Sourcing' }],
+  '/career': [{ name: 'Career' }],
+  '/media-centre': [{ name: 'Media Centre' }],
+  '/media-centre/news': [{ name: 'Media Centre', url: '/media-centre' }, { name: 'News' }],
+  '/media-centre/photo-gallery': [{ name: 'Media Centre', url: '/media-centre' }, { name: 'Photo Gallery' }],
+  '/media-centre/video-gallery': [{ name: 'Media Centre', url: '/media-centre' }, { name: 'Video Gallery' }],
+  '/contact': [{ name: 'Contact' }],
+};
+
 function absoluteUrl(pathname) {
   return `${config.siteUrl}${pathname}`;
+}
+
+// Prefixes "Home" and resolves each crumb's (optional, relative) url to an
+// absolute one - the trail's own current page is intentionally left
+// without a url in STATIC_BREADCRUMBS/callers, filled in here from pathname.
+function buildBreadcrumbs(pathname, trail) {
+  const crumbs = [{ name: 'Home', url: '/' }, ...trail];
+  return crumbs.map((crumb, index) => ({
+    name: crumb.name,
+    url: absoluteUrl(crumb.url || (index === crumbs.length - 1 ? pathname : '/')),
+  }));
 }
 
 function truncate(text, max = 160) {
@@ -44,7 +75,7 @@ function resolveImageUrl(image) {
   return image.startsWith('/') ? absoluteUrl(image) : image;
 }
 
-function buildResult({ pathname, title, description, ogImage, canonicalUrl, breadcrumbs, notFound }) {
+function buildResult({ pathname, title, description, ogImage, canonicalUrl, breadcrumbs, notFound, article, noIndex }) {
   return {
     title: title || DEFAULT_TITLE,
     description: truncate(description) || DEFAULT_DESCRIPTION,
@@ -54,7 +85,12 @@ function buildResult({ pathname, title, description, ogImage, canonicalUrl, brea
     ogImage: resolveImageUrl(ogImage),
     canonicalUrl: canonicalUrl || absoluteUrl(pathname),
     breadcrumbs: breadcrumbs || null,
+    article: article || null,
     notFound: !!notFound,
+    // A 404 is never worth indexing; explicit noIndex covers anything else
+    // that shouldn't be (there's currently nothing else, but the hook is
+    // here so a future draft/private page type doesn't need new plumbing).
+    noIndex: !!(noIndex || notFound),
   };
 }
 
@@ -91,11 +127,7 @@ async function resolveCore(pathname) {
         description: override?.metaDescription || division.tagline || division.overview,
         ogImage: override?.ogImage || division.coverImage,
         canonicalUrl: override?.canonicalUrl,
-        breadcrumbs: [
-          { name: 'Home', url: absoluteUrl('/') },
-          { name: 'Divisions', url: absoluteUrl('/divisions') },
-          { name: division.name, url: absoluteUrl(pathname) },
-        ],
+        breadcrumbs: buildBreadcrumbs(pathname, [{ name: 'Divisions', url: '/divisions' }, { name: division.name }]),
       });
     }
   }
@@ -113,12 +145,18 @@ async function resolveCore(pathname) {
         description: override?.metaDescription || post.excerpt,
         ogImage: override?.ogImage || post.coverImage,
         canonicalUrl: override?.canonicalUrl,
-        breadcrumbs: [
-          { name: 'Home', url: absoluteUrl('/') },
-          { name: 'Media Centre', url: absoluteUrl('/media-centre/news') },
-          { name: 'News', url: absoluteUrl('/media-centre/news') },
-          { name: post.title, url: absoluteUrl(pathname) },
-        ],
+        breadcrumbs: buildBreadcrumbs(pathname, [
+          { name: 'Media Centre', url: '/media-centre' },
+          { name: 'News', url: '/media-centre/news' },
+          { name: post.title },
+        ]),
+        article: {
+          title: post.title,
+          image: resolveImageUrl(post.coverImage),
+          datePublished: post.publishedAt || post.createdAt,
+          dateModified: post.updatedAt,
+          url: absoluteUrl(pathname),
+        },
       });
     }
   }
@@ -127,12 +165,14 @@ async function resolveCore(pathname) {
   const pageKey = STATIC_PAGE_KEYS[pathname];
   if (pageKey) {
     const entry = await seoMetaService.get(pageKey);
+    const trail = STATIC_BREADCRUMBS[pathname];
     return buildResult({
       pathname,
       title: entry?.title,
       description: entry?.metaDescription,
       ogImage: entry?.ogImage,
       canonicalUrl: entry?.canonicalUrl,
+      breadcrumbs: trail ? buildBreadcrumbs(pathname, trail) : null,
     });
   }
 

@@ -129,7 +129,10 @@ function createApp() {
       res.status(!isAdminPath && meta.notFound ? 404 : 200);
       res.set('Content-Type', 'text/html');
       res.set('Cache-Control', 'no-store');
-      return res.send(htmlTemplate.renderPage(meta));
+      // Belt-and-suspenders alongside robots.txt's Disallow: /admin/ - a
+      // noindex meta tag also stops an already-indexed admin URL (e.g. one
+      // crawled before robots.txt existed) from lingering in search results.
+      return res.send(htmlTemplate.renderPage(isAdminPath ? { ...meta, noIndex: true } : meta));
     } catch (err) {
       return next(err);
     }
