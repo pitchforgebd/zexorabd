@@ -15,27 +15,41 @@ const industries = [
 
 export default function IndustriesSection() {
   return (
-    <section className="py-24 bg-white relative">
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-light-gray -skew-x-12 transform origin-top hidden lg:block opacity-50"></div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <FadeIn className="text-center mb-16">
-          <h3 className="text-sm font-bold text-primary-blue uppercase tracking-[2px] mb-2">Our Reach</h3>
+    <section className="relative py-20 sm:py-24 lg:py-28 bg-white overflow-hidden">
+      {/* Decorative depth - subtle glows + dot grid, matching the rest of the homepage's visual language */}
+      <div className="absolute -top-32 -right-32 w-105 h-105 rounded-full bg-primary-blue/5 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-90 h-90 rounded-full bg-primary-blue/5 blur-3xl pointer-events-none" />
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, #2B2B9B 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <FadeIn className="text-center mb-14 lg:mb-16">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <span className="w-8 h-0.5 bg-primary-blue" />
+            <h3 className="text-sm font-bold text-primary-blue uppercase tracking-[2px]">Our Reach</h3>
+            <span className="w-8 h-0.5 bg-primary-blue" />
+          </div>
           <h2 className="text-3xl md:text-5xl font-bold text-primary-dark mb-4 tracking-tight">Industries We Serve</h2>
-          <p className="text-lg text-body-text max-w-3xl mx-auto leading-relaxed text-justify">
+          <p className="text-lg text-body-text max-w-3xl mx-auto leading-relaxed">
             Zexora provides premium raw materials, specialized equipment, and comprehensive supply chain solutions
             to the most dynamic, high-growth industries in Bangladesh.
           </p>
         </FadeIn>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 xl:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-5xl mx-auto">
           {industries.map((ind, idx) => {
             const Icon = ind.icon;
             return (
               <FadeIn key={idx} delay={idx * 0.05} className="group cursor-pointer">
-                <div className="border border-gray-100 bg-white hover:bg-blue-50 hover:border-blue-100 shadow-sm hover:shadow-md rounded-2xl p-6 text-center transition-all duration-300 h-full flex flex-col items-center justify-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-blue-50/50 group-hover:bg-primary-blue/10 flex items-center justify-center transition-colors">
-                    <Icon className="w-7 h-7 text-gray-400 group-hover:text-primary-blue transition-colors" />
+                <div className="border border-gray-100 bg-white hover:border-primary-blue/20 shadow-sm hover:shadow-xl hover:shadow-primary-blue/5 rounded-2xl p-6 text-left transition-all duration-300 h-full flex items-center gap-4 hover:-translate-y-1">
+                  <div className="w-14 h-14 shrink-0 rounded-xl bg-light-gray group-hover:bg-primary-blue flex items-center justify-center transition-colors duration-300">
+                    <Icon className="w-7 h-7 text-primary-blue group-hover:text-white transition-colors duration-300" />
                   </div>
-                  <span className="font-semibold text-primary-dark text-sm lg:text-base">{ind.name}</span>
+                  <span className="font-semibold text-primary-dark text-sm lg:text-base leading-snug">{ind.name}</span>
                 </div>
               </FadeIn>
             );
