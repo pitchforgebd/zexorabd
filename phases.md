@@ -888,6 +888,10 @@
 
 **Deliverable:** Live production site fully functional on the real domain, with all current content (settings, suppliers, sister concerns, SEO tools, divisions, admin account, everything already configured through the admin) carried over automatically - nothing re-entered by hand.
 
+**Deployment log (issues hit while actually running the runbook above, on the client's real cPanel account):**
+- `mysqldump ENOENT` running `backupDatabase.js` locally on Windows - Laragon's MySQL bundle isn't on PATH by default. Fixed for that PowerShell session with `$env:PATH += ";C:\laragon\bin\mysql\mysql-8.0.30-winx64\bin"` before re-running the backup (session-only, not a permanent system PATH change).
+- `npm install` on the cPanel server failed with `ERESOLVE unable to resolve dependency tree`: `react-simple-maps@3.0.0`'s `peerDependencies` only list React 16-18, while this project is on React 19. This is a real, fixable dependency-metadata gap, not a runtime incompatibility - the library has been running correctly under React 19 all through Phase 16.7's map work. Added an `overrides` block to the root `package.json` forcing `react-simple-maps`'s internal `react`/`react-dom` resolution to the project's own versions (the modern npm-native fix, works from npm 8.3+; both the local machine at npm 10.9.2 and the cPanel server at npm 10.8.2 support it), rather than telling the client to pass `--legacy-peer-deps` by hand on every install (easy to forget, and it disables strict peer-checking project-wide instead of just for this one package). Verified with a genuine from-scratch install locally (`rm -rf node_modules package-lock.json && npm install`) - no ERESOLVE error, clean `tsc`/build, and the sourcing-network map confirmed still rendering correctly at runtime (300 SVG country paths, zero console errors) with React 19 forced via the override.
+
 ---
 
 ## Phase 18 — Documentation & Handover
