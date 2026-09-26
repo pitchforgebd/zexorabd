@@ -659,6 +659,8 @@
 
 **Deliverable:** ✅ "Our Business Divisions" is now an interactive showcase instead of a static grid - a distinct pattern from every other homepage section, as requested, while the underlying division data and the alternate compact-grid variant are both unchanged.
 
+**Superseded same-day:** client feedback after seeing it live was that the original card grid was the right layout ("card e thik chilo") and asked for that to be made more beautiful instead, not replaced with a different interaction pattern. Reverted the showcase and polished the original `CardsVariant` in place: `rounded-3xl` corners, a hover ring/lift/shadow-glow, a refined bordered icon badge that fills solid blue on hover, and a faint index number per card (same visual device used on "Why Choose Us" and "Industries We Serve" for cross-section consistency) - all on the *same* full-bleed image-card grid layout that was already there. Reverted the admin variant label back to "Large Image Cards". Re-verified with fresh screenshots (including the hover state) and re-ran both regression suites (admin-CRUD 16/16 after a re-run ruled out one flaky check unrelated to this change; public smoke 432/450, same known baseline).
+
 ---
 
 ## Phase 17 — cPanel Deployment
