@@ -27,19 +27,26 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-function organizationJsonLd() {
+const DEFAULT_SOCIAL = {
+  facebook: 'https://www.facebook.com/zexoracorporation',
+  instagram: 'https://www.instagram.com/zexoracorporation',
+  linkedin: 'https://www.linkedin.com/company/zexoracorporation',
+  youtube: 'https://www.youtube.com/@zexoracorporation',
+};
+
+// Falls back to these defaults if the admin hasn't saved Website Settings
+// yet (siteInfo is undefined) - keeps this schema working even before
+// Phase 13's global.siteInfo row exists.
+function organizationJsonLd(siteInfo) {
+  const logo = siteInfo?.logo || '/logo.png';
+  const social = siteInfo?.social || DEFAULT_SOCIAL;
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Zexora Corporation',
+    name: siteInfo?.companyName || 'Zexora Corporation',
     url: config.siteUrl,
-    logo: `${config.siteUrl}/logo.png`,
-    sameAs: [
-      'https://www.facebook.com/zexoracorporation',
-      'https://www.instagram.com/zexoracorporation',
-      'https://www.linkedin.com/company/zexoracorporation',
-      'https://www.youtube.com/@zexoracorporation',
-    ],
+    logo: logo.startsWith('http') ? logo : `${config.siteUrl}${logo}`,
+    sameAs: [social.facebook, social.instagram, social.linkedin, social.youtube].filter(Boolean),
   };
 }
 
@@ -61,7 +68,7 @@ function breadcrumbJsonLd(breadcrumbs) {
  * the %%SEO_*%% tokens (see index.html). meta comes from seoResolver.
  */
 function renderPage(meta) {
-  const jsonLdBlocks = [organizationJsonLd()];
+  const jsonLdBlocks = [organizationJsonLd(meta.siteInfo)];
   if (meta.breadcrumbs) jsonLdBlocks.push(breadcrumbJsonLd(meta.breadcrumbs));
   // JSON.stringify doesn't escape "<", so a division name or news title
   // (admin-editable, e.g. via breadcrumbJsonLd) containing "</script>" would

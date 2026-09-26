@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { useSiteInfo } from '../lib/useSiteSettings';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const location = useLocation();
+  const { logo, companyName } = useSiteInfo();
 
   const isHome = location.pathname === '/';
   const isSolid = scrolled || !isHome;
@@ -59,9 +61,9 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center w-full">
           <Link to="/" className="flex-shrink-0 flex items-center">
-            <img 
-              src="/logo.png" 
-              alt="Zexora Corporation" 
+            <img
+              src={logo}
+              alt={companyName}
               className={`h-10 lg:h-12 w-auto transition-all duration-300 ${!isSolid ? 'brightness-0 invert' : ''}`}
             />
           </Link>

@@ -2,6 +2,7 @@ const config = require('../config');
 const seoMetaService = require('./seoMeta');
 const divisionsService = require('./divisions');
 const newsService = require('./news');
+const siteSettingsService = require('./siteSettings');
 
 const SITE_NAME = 'Zexora Corporation';
 const DEFAULT_TITLE = 'Zexora Corporation | Diversified Multi-Sector Business Group Bangladesh';
@@ -61,6 +62,13 @@ function buildResult({ pathname, title, description, ogImage, canonicalUrl, brea
  * override. Static pages are entirely admin-editable via seo_meta.
  */
 async function resolveForPath(pathname) {
+  const [settings, result] = await Promise.all([siteSettingsService.getAll(), resolveCore(pathname)]);
+  return { ...result, siteInfo: settings['global.siteInfo'] };
+}
+
+// Does the actual route matching/lookup; siteInfo is merged in by the
+// wrapper above so every return site here doesn't need to thread it through.
+async function resolveCore(pathname) {
   // /divisions/:slug
   const divisionMatch = pathname.match(/^\/divisions\/([a-z0-9-]+)\/?$/);
   if (divisionMatch) {

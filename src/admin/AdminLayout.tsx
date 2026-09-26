@@ -8,12 +8,14 @@ import {
   Mail,
   Briefcase,
   Search,
+  Settings,
   LogOut,
 } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/settings', label: 'Website Settings', icon: Settings },
   { to: '/admin/divisions', label: 'Divisions & Products', icon: Boxes },
   { to: '/admin/media', label: 'News & Media', icon: Newspaper },
   { to: '/admin/homepage', label: 'Homepage & Suppliers', icon: Home },

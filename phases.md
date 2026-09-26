@@ -427,7 +427,7 @@
 ---
 
 ## Phase 13 — Global Website Settings
-**Status:** Not Started
+**Status:** Done
 
 **Goal:** Move site-wide content (contact info, logo, social links, and similar global config) out of hardcoded component source and into a single admin-managed settings panel — currently `Header.tsx`/`Footer.tsx`/`Contact.tsx` hardcode the email, phone, address, and social links, and the logo is a static file in `public/` with no admin upload path.
 
@@ -437,7 +437,27 @@
 - Refactor `Header.tsx`, `Footer.tsx`, and `Contact.tsx` to read these values from the API instead of hardcoded strings/JSX.
 - SEO/JSON-LD (`Organization` schema in `htmlTemplate.js`) should also pull from these settings rather than its own hardcoded copy, so the two never drift apart.
 
-**Deliverable:** Every piece of site-wide contact/brand info is editable from one admin screen; zero hardcoded contact info or logo path left in component source.
+**What was built:**
+
+- **No new backend routes at all** — the existing generic `site_settings` machinery from Phase 6 (`siteSettingsService.set(key, value)`, the admin `PUT /api/admin/site-settings/:key` endpoint, and the generic `upload-image` endpoint) already handled an arbitrary new key and a logo upload without any code changes. Just added a new key: `global.siteInfo`.
+- `global.siteInfo` covers: logo, company name, tagline, email, phone, WhatsApp number, address, business hours, Google Maps embed URL, and 4 social links — a full inventory of everything that was hardcoded across `Header.tsx`, `Footer.tsx`, and `Contact.tsx`.
+- New admin page `src/admin/settings/AdminWebsiteSettings.tsx` (sidebar entry: "Website Settings", placed second, right under Dashboard) — same save-per-section pattern as `AdminHomepage.tsx`, logo upload reuses the Phase 11 image-optimization pipeline.
+- `src/lib/useSiteSettings.ts` gained a `useSiteInfo()` convenience hook (and an exported `DEFAULT_SITE_INFO` matching the seed data) so `Header`/`Footer`/`Contact` don't each need their own null-handling/merge logic — one shared source of defaults instead of three copies drifting apart.
+- `Header.tsx` (logo), `Footer.tsx` (logo, tagline, social links, email, phone, address), and `Contact.tsx` (email, phone, address, business hours, Google Maps embed URL) all refactored to read from `useSiteInfo()` instead of hardcoded JSX/strings.
+- **WhatsApp QR code is now generated live** from the settings-driven WhatsApp number (via the same `api.qrserver.com` service the old `onError` fallback already used), instead of a static pre-generated file — so changing the number in Website Settings immediately produces a correct QR code with no regeneration step. The static `public/whatsapp-qr.png` (from the earlier content-gap fix) is kept only as an `onError` fallback if the QR-generation service itself is ever unreachable.
+- Server-side JSON-LD `Organization` schema (`htmlTemplate.js`) now takes an optional `siteInfo` argument and pulls company name/logo/social links from it, with the original hardcoded values kept as its own fallback defaults (so it still works correctly even before `global.siteInfo` exists). `seoResolver.js` fetches `global.siteInfo` once per request and merges it into every `resolveForPath()` result via a wrapper (`resolveForPath` → `resolveCore` + merge), rather than threading it through all 5 of `resolveCore`'s individual return sites.
+- `server/scripts/seedSiteInfo.js` — one-time seed script (matches the `migrateExternalImages.js`/`createAdmin.js` precedent) that populates `global.siteInfo` with the exact values that were previously hardcoded, so switching the components to read from the API didn't change anything visually until the admin actually edits something.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean after every change.
+- Ran the seed script, then confirmed via `curl` that the server-rendered JSON-LD `Organization` block on `/` now reflects the seeded settings (not the old hardcoded literals).
+- Full Playwright pass confirming Header logo, Footer email/phone/address, the live WhatsApp QR code's encoded URL, and the Contact page's email/map all correctly reflect `global.siteInfo` — zero console errors.
+- **Live edit-to-publish round-trip test**: logged into the real admin UI, changed the tagline, saved, reloaded the admin page to confirm persistence, then loaded the actual public homepage and confirmed the new tagline appeared in the footer immediately — not just that the save API call succeeded.
+- **Logo upload round-trip test**: uploaded a real test image through the admin UI's file picker, confirmed the returned `/uploads/homepage/...` path updated the preview, saved, and confirmed the new logo rendered on the public homepage's header — then reverted and deleted the test upload file.
+- Re-ran the full Phase 12 admin-CRUD regression suite (16/16) and the cross-browser/responsive public-route smoke suite after this phase's changes, since `Header`/`Footer` render on every single public page — any regression here would have shown up everywhere, not just on one page.
+- All test edits (tagline, logo) explicitly reverted; confirmed via direct DB query that `global.siteInfo` was back to its seeded values before sign-off.
+
+**Deliverable:** ✅ Every piece of site-wide contact/brand info is editable from one admin screen (`/admin/settings`); zero hardcoded contact info or logo path left in `Header.tsx`/`Footer.tsx`/`Contact.tsx` source, and the server-rendered SEO schema stays in sync automatically.
 
 ---
 
@@ -534,7 +554,7 @@
 | 10 | Done | 2026-09-26 |
 | 11 | Done | 2026-09-26 |
 | 12 | Done | 2026-09-26 |
-| 13 | Not Started | — |
+| 13 | Done | 2026-09-26 |
 | 14 | Not Started | — |
 | 15 | Not Started | — |
 | 16 | Not Started | — |

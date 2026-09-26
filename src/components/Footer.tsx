@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Youtube, ChevronRight } from 'lucide-react';
 import { useDivisionsList } from '../lib/useDivisions';
+import { useSiteInfo } from '../lib/useSiteSettings';
 
 export default function Footer() {
   const { divisions } = useDivisionsList();
+  const info = useSiteInfo();
+  const whatsappDigits = info.whatsapp.replace(/\D/g, '');
 
   return (
     <footer className="relative bg-[#0A0D14] text-white pt-20 pb-10 border-t border-gray-800/50 overflow-hidden">
@@ -17,28 +20,36 @@ export default function Footer() {
           {/* Column 1: About */}
           <div className="lg:col-span-4 pr-0 lg:pr-8">
             <Link to="/" className="inline-block mb-6 group">
-              <img 
-                src="/logo.png" 
-                alt="Zexora Corporation" 
-                className="h-14 w-auto brightness-0 invert group-hover:opacity-90 transition-opacity" 
+              <img
+                src={info.logo}
+                alt={info.companyName}
+                className="h-14 w-auto brightness-0 invert group-hover:opacity-90 transition-opacity"
               />
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-8">
-              A diversified multi-sector business group committed to excellence, innovation, and long-term value creation across industries.
+              {info.tagline}
             </p>
             <div className="flex space-x-3">
-              <a href="https://www.facebook.com/zexoracorporation" target="_blank" rel="noopener noreferrer" className="bg-white/5 hover:bg-primary-blue border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-lg transition-all duration-300 group">
-                <Facebook className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-              <a href="https://www.instagram.com/zexoracorporation" target="_blank" rel="noopener noreferrer" className="bg-white/5 hover:bg-primary-blue border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-lg transition-all duration-300 group">
-                <Instagram className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-              <a href="https://www.linkedin.com/company/zexoracorporation" target="_blank" rel="noopener noreferrer" className="bg-white/5 hover:bg-primary-blue border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-lg transition-all duration-300 group">
-                <Linkedin className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-              <a href="https://www.youtube.com/@zexoracorporation" target="_blank" rel="noopener noreferrer" className="bg-white/5 hover:bg-red-600 border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-lg transition-all duration-300 group">
-                <Youtube className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
+              {info.social.facebook && (
+                <a href={info.social.facebook} target="_blank" rel="noopener noreferrer" className="bg-white/5 hover:bg-primary-blue border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-lg transition-all duration-300 group">
+                  <Facebook className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </a>
+              )}
+              {info.social.instagram && (
+                <a href={info.social.instagram} target="_blank" rel="noopener noreferrer" className="bg-white/5 hover:bg-primary-blue border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-lg transition-all duration-300 group">
+                  <Instagram className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </a>
+              )}
+              {info.social.linkedin && (
+                <a href={info.social.linkedin} target="_blank" rel="noopener noreferrer" className="bg-white/5 hover:bg-primary-blue border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-lg transition-all duration-300 group">
+                  <Linkedin className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </a>
+              )}
+              {info.social.youtube && (
+                <a href={info.social.youtube} target="_blank" rel="noopener noreferrer" className="bg-white/5 hover:bg-red-600 border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-lg transition-all duration-300 group">
+                  <Youtube className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </a>
+              )}
             </div>
           </div>
 
@@ -73,8 +84,8 @@ export default function Footer() {
                 </div>
                 <div className="flex flex-col pt-1">
                   <span className="text-xs text-gray-500 uppercase tracking-wider mb-1">Email Us</span>
-                  <a href="mailto:info@zexora.com.bd" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
-                    info@zexora.com.bd
+                  <a href={`mailto:${info.email}`} className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+                    {info.email}
                   </a>
                 </div>
               </li>
@@ -84,8 +95,8 @@ export default function Footer() {
                 </div>
                 <div className="flex flex-col pt-1">
                   <span className="text-xs text-gray-500 uppercase tracking-wider mb-1">Call Us</span>
-                  <a href="tel:+8801855939450" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
-                    +880 1855 939 450
+                  <a href={`tel:${info.phone}`} className="text-gray-300 hover:text-white transition-colors text-sm font-medium">
+                    {info.phone}
                   </a>
                 </div>
               </li>
@@ -96,7 +107,7 @@ export default function Footer() {
                 <div className="flex flex-col pt-1">
                   <span className="text-xs text-gray-500 uppercase tracking-wider mb-1">Head Office</span>
                   <span className="text-gray-300 text-sm font-medium leading-relaxed">
-                    292, Inner Circular Road, Shatabdi Centre, Fakirapool, Motijheel, Dhaka-1000
+                    {info.address}
                   </span>
                 </div>
               </li>
@@ -111,13 +122,16 @@ export default function Footer() {
             <div className="bg-white p-3 rounded-2xl shadow-xl w-40 h-40 flex items-center justify-center group overflow-hidden relative">
               <div className="absolute inset-0 bg-primary-blue/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
               <img
-                src="/whatsapp-qr.png"
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/${whatsappDigits}`}
                 alt="WhatsApp QR Code"
                 className="w-full h-full object-contain rounded-xl relative z-10"
                 onError={(e) => {
-                  /* Fallback in case the local file is ever missing */
+                  /* Generated live from the WhatsApp number in Website
+                     Settings, so it's always correct - falls back to the
+                     static file only if the QR-generation service itself
+                     is unreachable. */
                   const target = e.target as HTMLImageElement;
-                  target.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8801855939450";
+                  target.src = "/whatsapp-qr.png";
                 }}
               />
             </div>

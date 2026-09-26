@@ -47,6 +47,7 @@ import AdminVideoGallery from './admin/media/AdminVideoGallery';
 import AdminHomepage from './admin/homepage/AdminHomepage';
 import AdminSuppliers from './admin/homepage/AdminSuppliers';
 import AdminPageSections from './admin/sections/AdminPageSections';
+import AdminWebsiteSettings from './admin/settings/AdminWebsiteSettings';
 import AdminContactMessages from './admin/inbox/AdminContactMessages';
 import AdminCareerApplications from './admin/inbox/AdminCareerApplications';
 import AdminSeoSettings from './admin/seo/AdminSeoSettings';
@@ -93,6 +94,7 @@ export default function App() {
             <Route path="admin" element={<ProtectedRoute />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
+                <Route path="settings" element={<AdminWebsiteSettings />} />
                 <Route path="divisions" element={<AdminDivisionsList />} />
                 <Route path="divisions/:id" element={<AdminDivisionEdit />} />
                 <Route path="media" element={<AdminMediaHub />} />

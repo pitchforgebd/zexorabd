@@ -86,11 +86,30 @@ export type HeroSlide = { image: string; title: string; subtitle: string; descri
 export type StatItem = { value: string; label: string };
 export type WhyChooseReason = { title: string; desc: string };
 
+export type SiteInfo = {
+  logo: string;
+  companyName: string;
+  tagline: string;
+  email: string;
+  phone: string;
+  whatsapp: string;
+  address: string;
+  businessHours: string;
+  mapEmbedUrl: string;
+  social: {
+    facebook: string;
+    instagram: string;
+    linkedin: string;
+    youtube: string;
+  };
+};
+
 export type SiteSettings = {
   'home.hero'?: { slides: HeroSlide[] };
   'home.stats'?: { items: StatItem[] };
   'home.whyChooseUs'?: { heading: string; subheading: string; reasons: WhyChooseReason[] };
   'home.suppliers'?: { heading: string; subheading: string; description: string };
+  'global.siteInfo'?: SiteInfo;
 };
 
 export type PageSection = {

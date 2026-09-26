@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
 import { apiFetch, ApiError } from '../lib/api';
+import { useSiteInfo } from '../lib/useSiteSettings';
 
 const EMPTY_FORM = { name: '', company: '', email: '', phone: '', subject: '', message: '' };
 
 export default function Contact() {
+  const info = useSiteInfo();
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -111,28 +113,35 @@ export default function Contact() {
                   <Mail className="w-6 h-6 text-primary-blue mr-4 flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="text-sm text-gray-400 font-medium mb-1">Email</h3>
-                    <a href="mailto:info@zexora.com.bd" className="text-lg font-bold text-white hover:text-primary-blue transition-colors">info@zexora.com.bd</a>
+                    <a href={`mailto:${info.email}`} className="text-lg font-bold text-white hover:text-primary-blue transition-colors">{info.email}</a>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Phone className="w-6 h-6 text-primary-blue mr-4 flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="text-sm text-gray-400 font-medium mb-1">Phone</h3>
-                    <a href="tel:+8801855939450" className="text-lg font-bold text-white hover:text-primary-blue transition-colors">+880 1855 939 450</a>
+                    <a href={`tel:${info.phone}`} className="text-lg font-bold text-white hover:text-primary-blue transition-colors">{info.phone}</a>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <MapPin className="w-6 h-6 text-primary-blue mr-4 flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="text-sm text-gray-400 font-medium mb-1">Head Office</h3>
-                    <p className="text-white font-medium">292, Inner Circular Road,<br/>Shatabdi Centre, Fakirapool,<br/>Motijheel, Dhaka-1000</p>
+                    <p className="text-white font-medium">{info.address}</p>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Clock className="w-6 h-6 text-primary-blue mr-4 flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="text-sm text-gray-400 font-medium mb-1">Business Hours</h3>
-                    <p className="text-white font-medium">Saturday–Thursday: 9:00 AM – 6:00 PM<br/><span className="text-primary-blue">Friday: Closed</span></p>
+                    <p className="text-white font-medium">
+                      {info.businessHours.split('\n').map((line, i) => (
+                        <span key={i} className={i > 0 ? 'text-primary-blue' : undefined}>
+                          {i > 0 && <br />}
+                          {line}
+                        </span>
+                      ))}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -141,7 +150,7 @@ export default function Contact() {
             {/* Map Placeholder */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm h-64 border border-gray-100 relative">
   <iframe
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.3843701617134!2d90.4185923!3d23.733669!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b9e75f0afbbd%3A0x5f71646b22407002!2sZexora%20Corporation!5e0!3m2!1sen!2sbd!4v1782203946425!5m2!1sen!2sbd"
+    src={info.mapEmbedUrl}
     className="w-full h-full"
     style={{ border: 0 }}
     allowFullScreen
