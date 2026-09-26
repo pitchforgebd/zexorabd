@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Share2 } from 'lucide-react';
 import FadeIn from '../FadeIn';
 import { useSiteSettings } from '../../lib/useSiteSettings';
 import type { SisterConcernsContent } from '../../lib/types';
@@ -44,13 +44,20 @@ export default function SisterConcernsSection() {
         <div className="max-w-5xl mx-auto space-y-6">
           {c.items.map((concern, idx) => (
             <FadeIn key={idx} delay={idx * 0.1}>
-              <div className="group relative bg-white/3 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-3xl p-8 md:p-12 transition-all duration-500 overflow-hidden">
+              <div className="group relative bg-gradient-to-br from-white/8 via-white/3 to-transparent border border-white/10 hover:border-white/25 rounded-3xl p-8 md:p-14 transition-all duration-500 overflow-hidden">
+                {/* Top accent line */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-blue to-transparent opacity-70" />
+                {/* Large decorative "ecosystem" watermark */}
+                <Share2 className="absolute -bottom-12 -right-12 w-72 h-72 text-white/4 rotate-12 pointer-events-none" />
                 <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary-blue/10 group-hover:bg-primary-blue/20 blur-3xl transition-colors duration-500 pointer-events-none" />
 
                 <div className="relative flex flex-col md:flex-row items-center gap-10 md:gap-16">
                   <div className="w-full md:w-1/3 flex flex-col items-center text-center">
-                    <div className="w-36 h-36 sm:w-40 sm:h-40 rounded-3xl bg-white shadow-2xl flex items-center justify-center p-6 mb-6 group-hover:-translate-y-1 transition-transform duration-500">
-                      <img src={concern.logo} alt={concern.name} className="max-w-full max-h-full object-contain" />
+                    <div className="relative mb-6">
+                      <div className="absolute inset-0 rounded-3xl bg-primary-blue/25 blur-xl scale-110 group-hover:scale-125 transition-transform duration-500" />
+                      <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-white shadow-2xl ring-4 ring-white/10 flex items-center justify-center p-6 group-hover:-translate-y-1 transition-transform duration-500">
+                        <img src={concern.logo} alt={concern.name} className="max-w-full max-h-full object-contain" />
+                      </div>
                     </div>
                     {concern.websiteUrl && (
                       <a
@@ -65,10 +72,10 @@ export default function SisterConcernsSection() {
                   </div>
 
                   <div className="w-full md:w-2/3 text-center md:text-left">
-                    <span className="block text-primary-light text-sm font-bold uppercase tracking-[2px] mb-3">
+                    <span className="inline-block px-3.5 py-1.5 rounded-full bg-primary-blue/20 border border-primary-blue/30 text-primary-light text-xs font-bold uppercase tracking-[2px] mb-4">
                       {concern.tagline}
                     </span>
-                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">{concern.name}</h3>
+                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-5 tracking-tight">{concern.name}</h3>
                     <div className="text-blue-100/80 space-y-4 text-[15px] md:text-base leading-relaxed">
                       {concern.description.split('\n\n').map((p, pIdx) => (
                         <p key={pIdx}>{p}</p>

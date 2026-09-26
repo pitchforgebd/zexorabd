@@ -781,6 +781,9 @@
 
 **Deliverable:** ✅ "Our Sister Concerns" is now a dark spotlight section with a floating logo plate per company, both more visually distinctive on its own and fixing a page-rhythm issue where three light sections ran back-to-back.
 
+**Enriched same day:** client feedback that it still read as too plain/simple. Made the card itself notably richer without changing its structure: a gradient card background (was flat translucent white) with a glowing top accent line, a large faint "ecosystem" network-icon watermark in the corner, a soft blurred halo glow behind the logo plate, the tagline promoted from plain text to a bordered pill badge, and a larger/bolder company name. Re-verified with fresh screenshots (desktop/mobile) and the admin-CRUD suite (16/16 after a re-run ruled out one more flaky, unrelated check).
+  During this verification pass, the public smoke suite surfaced 52 *new* failures (`ERR_CERT_DATE_INVALID` for `api.qrserver.com`, the third-party service Footer.tsx uses to render the WhatsApp QR code) across routes that don't even render this section (e.g. `/about`, `/contact`) - confirming it's an external SSL certificate issue on that third party's end, not caused by this change. Re-ran the suite a second time and got the identical 380/450 result, confirming it's stable/real rather than a one-off flake, and confirmed Footer.tsx's existing `onError` fallback (to a local static QR image, already in place since Phase 13/15) still protects the actual visible page - so real visitors aren't affected, only this automated check's stricter "no failed network requests" assertion. Left as a known, tracked, external issue rather than something to "fix" in the app; the pre-existing 18-failure WebKit/Windows HSTS baseline is unaffected and still applies on top of it.
+
 ---
 
 ## Phase 17 — cPanel Deployment
