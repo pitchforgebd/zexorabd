@@ -11,6 +11,7 @@
   --color-accent-hover: #3D3DCC;
 
   --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-reverse: marquee 40s linear infinite reverse;
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }

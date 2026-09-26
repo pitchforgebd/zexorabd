@@ -684,6 +684,26 @@
 
 ---
 
+## Phase 16.7 (cont.) — Partner Network logo wall redesign
+**Status:** Done
+
+**Goal:** Client asked for "Partner Network" (the "Our Global Suppliers" logo marquee) to be arranged more beautifully too.
+
+**What was built:**
+- **`src/components/SupplierLogos.tsx`** — added the same dot-grid background texture used elsewhere on the page for depth (this section had been left flat white); added a real, data-driven trust badge under the intro copy (`{suppliers.length}+ Manufacturing Partners Worldwide` - computed from the actual supplier count, not a fabricated number); replaced the single scrolling logo row with **two rows counter-scrolling in opposite directions** for a fuller "wall of partners" feel that doesn't thin out regardless of how many suppliers are configured; and switched each logo tile to grayscale-by-default with a smooth reveal to full color plus a slight zoom on hover (a common, polished "trusted-by" wall treatment) instead of always-color logos.
+- **`src/index.css`** — added a new `animate-marquee-reverse` utility (same `marquee` keyframe, `animation-direction: reverse`) alongside the existing `animate-marquee`, so the two rows scroll toward each other rather than in lockstep.
+- No data changes - still reads the same `useSuppliers()`/`home.suppliers` settings; the admin's supplier-logo manager is untouched.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds; zero browser console/page errors on a fresh load of the section.
+- Screenshotted desktop and mobile; confirmed the trust badge shows the real live count (32+, matching the actual number of suppliers currently configured, not a guess).
+- Confirmed hover-to-pause on the marquee still works (compared logo positions between two screenshots taken seconds apart while hovering - unchanged, i.e. genuinely paused, not coincidentally similar).
+- Re-ran the admin-CRUD regression suite (16/16) and the public smoke suite (432/450, same known WebKit/Windows HSTS baseline) - no new regressions.
+
+**Deliverable:** ✅ "Our Global Suppliers" is now a fuller, livelier dual-direction logo wall with a real partner-count badge and a grayscale-to-color hover reveal, instead of a single flat scrolling row.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
