@@ -792,15 +792,18 @@
 **Goal:** Ship to production.
 
 **Tasks:**
-- Create production MySQL database + user via cPanel, import schema.
+- Create production MySQL database + user via cPanel.
+- **Bring over all real data, not just empty tables**: run `node scripts/backupDatabase.js` against the local dev database to produce a full `.sql.gz` dump (schema *and* every row - `site_settings`, `suppliers`, `divisions`, `sister concerns`, SEO tools, everything customized through the admin so far), upload that dump to the production server, and run `node scripts/restoreDatabase.js --file <dump>` against the production DB. This is the actual data-migration mechanism for this project (already built, used for backups too) - `database/schema.sql` alone only creates empty tables and should *not* be used as the deployment path, since it would silently lose every real setting/logo/division already configured.
+- **Copy the `server/uploads/` directory** to production as well - uploaded images (supplier logos, hero slides, division photos, footer/site logos, etc.) live on disk, not in the database, so the DB restore alone won't bring them over. Missing this step would leave every uploaded image broken even though the DB rows referencing them look correct.
 - Set up the Node.js app via cPanel's "Setup Node.js App", pointing it at the deployed backend code; run `npm install` through the provided interface/terminal.
 - Upload/build the React frontend (`dist/`) to the appropriate served directory.
 - Configure `.htaccess`/Passenger routing so `/api/*` hits the Node app and other routes serve the SPA (or SSR output, per Phase 9).
 - Set environment variables via cPanel's Node.js App UI (DB credentials, mail settings, session secret) — not committed to git.
 - SSL certificate check (AutoSSL/Let's Encrypt via cPanel).
 - DNS/domain pointing verification.
+- Smoke-test the live site afterward and confirm no admin-configured content needed to be manually re-entered - if anything is missing, it means either the DB restore or the uploads copy was incomplete, not that content needs re-creating by hand.
 
-**Deliverable:** Live production site fully functional on the real domain.
+**Deliverable:** Live production site fully functional on the real domain, with all current content (settings, suppliers, sister concerns, SEO tools, divisions, everything already configured through the admin) carried over automatically - nothing re-entered by hand.
 
 ---
 
