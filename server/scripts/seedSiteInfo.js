@@ -13,12 +13,15 @@ const pool = require('../src/db/pool');
 
 const SEED = {
   logo: '/logo.png',
+  favicon: '/favicon.png',
+  ogImage: '/logo.png',
   companyName: 'Zexora Corporation',
   tagline:
     'A diversified multi-sector business group committed to excellence, innovation, and long-term value creation across industries.',
   email: 'info@zexora.com.bd',
   phone: '+880 1855 939 450',
   whatsapp: '+8801855939450',
+  whatsappQrImage: '',
   address: '292, Inner Circular Road, Shatabdi Centre, Fakirapool, Motijheel, Dhaka-1000',
   businessHours: 'Saturday–Thursday: 9:00 AM – 6:00 PM\nFriday: Closed',
   mapEmbedUrl:

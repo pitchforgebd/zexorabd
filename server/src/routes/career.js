@@ -4,6 +4,8 @@ const { created, fail, ApiError } = require('../utils/response');
 const { createDocumentUpload, publicPathFor } = require('../middleware/documentUpload');
 const { formSubmitLimiter } = require('../middleware/rateLimiters');
 const { sendMail } = require('../services/mail');
+const { renderNotificationEmail } = require('../services/emailTemplates');
+const config = require('../config');
 
 const router = Router();
 const cvUpload = createDocumentUpload('cv');
@@ -34,6 +36,22 @@ router.post('/', formSubmitLimiter, (req, res, next) => {
         consent: consent === 'true' || consent === true,
       });
 
+      const html = await renderNotificationEmail({
+        heading: 'New Job Application',
+        intro: `${fullName} — ${position || 'General application'}`,
+        rows: [
+          { label: 'Name', value: fullName },
+          { label: 'Email', value: email },
+          { label: 'Phone', value: phone },
+          { label: 'Position', value: position },
+          { label: 'Education', value: education },
+          { label: 'Experience', value: experience ? `${experience} years` : null },
+          { label: 'Cover Letter', value: coverLetter, multiline: true },
+          { label: 'Message', value: message, multiline: true },
+          { label: 'CV / Resume', value: 'Download attached CV', href: `${config.siteUrl}${cvFilePath}` },
+        ],
+        cta: { label: 'View in Admin Panel', url: `${config.siteUrl}/admin/career-applications` },
+      });
       await sendMail({
         subject: `New Job Application: ${fullName} (${position || 'General'})`,
         text: [
@@ -48,8 +66,9 @@ router.post('/', formSubmitLimiter, (req, res, next) => {
           '',
           `Message:\n${message || '-'}`,
           '',
-          `CV: ${cvFilePath}`,
+          `CV: ${config.siteUrl}${cvFilePath}`,
         ].join('\n'),
+        html,
       });
 
       return created(res, { id });

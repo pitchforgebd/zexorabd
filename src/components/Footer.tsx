@@ -122,14 +122,17 @@ export default function Footer() {
             <div className="bg-white p-3 rounded-2xl shadow-xl w-40 h-40 flex items-center justify-center group overflow-hidden relative">
               <div className="absolute inset-0 bg-primary-blue/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
               <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/${whatsappDigits}`}
+                src={
+                  info.whatsappQrImage ||
+                  `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/${whatsappDigits}`
+                }
                 alt="WhatsApp QR Code"
                 className="w-full h-full object-contain rounded-xl relative z-10"
                 onError={(e) => {
-                  /* Generated live from the WhatsApp number in Website
-                     Settings, so it's always correct - falls back to the
-                     static file only if the QR-generation service itself
-                     is unreachable. */
+                  /* A custom-uploaded QR (Website Settings) is used as-is if
+                     set; otherwise generated live from the WhatsApp number,
+                     so it's always correct. Falls back to the static file
+                     only if the active source is ever unreachable. */
                   const target = e.target as HTMLImageElement;
                   target.src = "/whatsapp-qr.png";
                 }}

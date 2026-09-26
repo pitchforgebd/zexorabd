@@ -21,6 +21,7 @@ function devSeoPlaceholders(): Plugin {
         )
         .replace(/%%SEO_CANONICAL%%/g, 'https://zexora.com.bd/')
         .replace(/%%SEO_OG_IMAGE%%/g, 'https://zexora.com.bd/logo.png')
+        .replace(/%%SEO_FAVICON%%/g, '/favicon.png')
         .replace(/%%SEO_JSONLD%%/g, '');
     },
   };

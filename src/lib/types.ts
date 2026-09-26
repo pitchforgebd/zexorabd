@@ -88,11 +88,14 @@ export type WhyChooseReason = { title: string; desc: string };
 
 export type SiteInfo = {
   logo: string;
+  favicon: string;
+  ogImage: string;
   companyName: string;
   tagline: string;
   email: string;
   phone: string;
   whatsapp: string;
+  whatsappQrImage: string; // '' = auto-generate from `whatsapp` instead of a custom upload
   address: string;
   businessHours: string;
   mapEmbedUrl: string;

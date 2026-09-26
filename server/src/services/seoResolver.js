@@ -48,7 +48,10 @@ function buildResult({ pathname, title, description, ogImage, canonicalUrl, brea
   return {
     title: title || DEFAULT_TITLE,
     description: truncate(description) || DEFAULT_DESCRIPTION,
-    ogImage: resolveImageUrl(ogImage) || DEFAULT_OG_IMAGE,
+    // No hardcoded fallback here - the wrapper (resolveForPath) fills in
+    // siteInfo.ogImage first, only reaching DEFAULT_OG_IMAGE if that's
+    // unset too, since siteInfo isn't available until after this returns.
+    ogImage: resolveImageUrl(ogImage),
     canonicalUrl: canonicalUrl || absoluteUrl(pathname),
     breadcrumbs: breadcrumbs || null,
     notFound: !!notFound,
@@ -63,7 +66,12 @@ function buildResult({ pathname, title, description, ogImage, canonicalUrl, brea
  */
 async function resolveForPath(pathname) {
   const [settings, result] = await Promise.all([siteSettingsService.getAll(), resolveCore(pathname)]);
-  return { ...result, siteInfo: settings['global.siteInfo'] };
+  const siteInfo = settings['global.siteInfo'];
+  // Fallback chain: this page's own og:image -> the site-wide default set
+  // in Website Settings -> the hardcoded logo, so every page has always
+  // had *something* correct to show even before Phase 13/16.5 existed.
+  const ogImage = result.ogImage || resolveImageUrl(siteInfo?.ogImage) || DEFAULT_OG_IMAGE;
+  return { ...result, ogImage, siteInfo };
 }
 
 // Does the actual route matching/lookup; siteInfo is merged in by the

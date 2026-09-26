@@ -79,11 +79,15 @@ function renderPage(meta) {
     .map((block) => `<script type="application/ld+json">${JSON.stringify(block).replace(/</g, '\\u003c')}</script>`)
     .join('\n  ');
 
+  const favicon = meta.siteInfo?.favicon || '/favicon.png';
+  const faviconUrl = favicon.startsWith('http') ? favicon : `${config.siteUrl}${favicon}`;
+
   return loadTemplate()
     .replace(/%%SEO_TITLE%%/g, escapeHtml(meta.title))
     .replace(/%%SEO_DESCRIPTION%%/g, escapeHtml(meta.description))
     .replace(/%%SEO_CANONICAL%%/g, escapeHtml(meta.canonicalUrl))
     .replace(/%%SEO_OG_IMAGE%%/g, escapeHtml(meta.ogImage))
+    .replace(/%%SEO_FAVICON%%/g, escapeHtml(faviconUrl))
     .replace('%%SEO_JSONLD%%', jsonLdHtml);
 }
 

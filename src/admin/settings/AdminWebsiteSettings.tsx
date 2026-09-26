@@ -1,20 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
-import { ImagePlus } from 'lucide-react';
+import { ImagePlus, X } from 'lucide-react';
 import { apiFetch, ApiError } from '../../lib/api';
 import type { SiteInfo, SiteSettings } from '../../lib/types';
 
 const EMPTY: SiteInfo = {
   logo: '',
+  favicon: '',
+  ogImage: '',
   companyName: '',
   tagline: '',
   email: '',
   phone: '',
   whatsapp: '',
+  whatsappQrImage: '',
   address: '',
   businessHours: '',
   mapEmbedUrl: '',
   social: { facebook: '', instagram: '', linkedin: '', youtube: '' },
 };
+
+type ImageField = 'logo' | 'favicon' | 'ogImage' | 'whatsappQrImage';
 
 export default function AdminWebsiteSettings() {
   const [info, setInfo] = useState<SiteInfo>(EMPTY);
@@ -22,8 +27,13 @@ export default function AdminWebsiteSettings() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingField, setUploadingField] = useState<ImageField | null>(null);
+  const fileInputRefs = {
+    logo: useRef<HTMLInputElement>(null),
+    favicon: useRef<HTMLInputElement>(null),
+    ogImage: useRef<HTMLInputElement>(null),
+    whatsappQrImage: useRef<HTMLInputElement>(null),
+  };
 
   useEffect(() => {
     apiFetch<SiteSettings>('/api/admin/site-settings')
@@ -42,20 +52,21 @@ export default function AdminWebsiteSettings() {
     setInfo((s) => ({ ...s, social: { ...s.social, [key]: value } }));
   }
 
-  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageUpload(field: ImageField, e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadingLogo(true);
+    setUploadingField(field);
     try {
       const fd = new FormData();
       fd.append('image', file);
       const result = await apiFetch<{ url: string }>('/api/admin/site-settings/upload-image', { method: 'POST', body: fd });
-      update('logo', result.url);
+      update(field, result.url);
     } catch (err) {
-      alert(err instanceof ApiError ? err.message : 'Logo upload failed');
+      alert(err instanceof ApiError ? err.message : 'Image upload failed');
     } finally {
-      setUploadingLogo(false);
-      if (logoInputRef.current) logoInputRef.current.value = '';
+      setUploadingField(null);
+      const ref = fileInputRefs[field].current;
+      if (ref) ref.value = '';
     }
   }
 
@@ -81,7 +92,7 @@ export default function AdminWebsiteSettings() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-primary-dark">Website Settings</h1>
-          <p className="text-body-text text-sm">Logo, contact info, and social links shown across the whole site.</p>
+          <p className="text-body-text text-sm">Logo, contact info, social links, and social-sharing details for the whole site.</p>
         </div>
         <div className="flex items-center gap-3">
           {savedMsg && <span className="text-sm text-green-600 font-medium">{savedMsg}</span>}
@@ -107,15 +118,39 @@ export default function AdminWebsiteSettings() {
             )}
           </div>
           <div>
-            <input ref={logoInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" />
+            <p className="text-sm font-medium text-gray-700 mb-1">Logo</p>
+            <input ref={fileInputRefs.logo} type="file" accept="image/*" onChange={(e) => handleImageUpload('logo', e)} className="hidden" id="logo-upload" />
             <label
               htmlFor="logo-upload"
               className="cursor-pointer inline-flex items-center gap-2 text-sm font-medium text-primary-blue hover:text-accent-hover border border-primary-blue/30 rounded-lg px-4 py-2"
             >
-              <ImagePlus className="w-4 h-4" /> {uploadingLogo ? 'Uploading…' : 'Upload logo'}
+              <ImagePlus className="w-4 h-4" /> {uploadingField === 'logo' ? 'Uploading…' : 'Upload logo'}
             </label>
+            <p className="text-xs text-gray-400 mt-1">Shown in the header and footer.</p>
           </div>
         </div>
+
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-xl bg-light-gray border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+            {info.favicon ? (
+              <img src={info.favicon} alt="Favicon" className="w-8 h-8 object-contain" />
+            ) : (
+              <span className="text-gray-300 text-[10px]">None</span>
+            )}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-1">Favicon</p>
+            <input ref={fileInputRefs.favicon} type="file" accept="image/*" onChange={(e) => handleImageUpload('favicon', e)} className="hidden" id="favicon-upload" />
+            <label
+              htmlFor="favicon-upload"
+              className="cursor-pointer inline-flex items-center gap-2 text-sm font-medium text-primary-blue hover:text-accent-hover border border-primary-blue/30 rounded-lg px-4 py-2"
+            >
+              <ImagePlus className="w-4 h-4" /> {uploadingField === 'favicon' ? 'Uploading…' : 'Upload favicon'}
+            </label>
+            <p className="text-xs text-gray-400 mt-1">The small icon shown in browser tabs. A square image works best (e.g. 512×512).</p>
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
           <input value={info.companyName} onChange={(e) => update('companyName', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
@@ -123,6 +158,33 @@ export default function AdminWebsiteSettings() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
           <textarea value={info.tagline} onChange={(e) => update('tagline', e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm resize-none" />
+        </div>
+      </section>
+
+      {/* Social Sharing */}
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+        <h2 className="font-bold text-primary-dark">Social Sharing</h2>
+        <div className="flex items-center gap-4">
+          <div className="w-32 h-20 rounded-xl bg-light-gray border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+            {info.ogImage ? (
+              <img src={info.ogImage} alt="Social share image" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-gray-300 text-xs">No image</span>
+            )}
+          </div>
+          <div>
+            <input ref={fileInputRefs.ogImage} type="file" accept="image/*" onChange={(e) => handleImageUpload('ogImage', e)} className="hidden" id="ogimage-upload" />
+            <label
+              htmlFor="ogimage-upload"
+              className="cursor-pointer inline-flex items-center gap-2 text-sm font-medium text-primary-blue hover:text-accent-hover border border-primary-blue/30 rounded-lg px-4 py-2"
+            >
+              <ImagePlus className="w-4 h-4" /> {uploadingField === 'ogImage' ? 'Uploading…' : 'Upload share image'}
+            </label>
+            <p className="text-xs text-gray-400 mt-1">
+              Shown when a page is shared on Facebook, WhatsApp, LinkedIn, etc. Used as the default for any page that
+              doesn't set its own image in SEO. Recommended size: 1200×630.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -141,7 +203,7 @@ export default function AdminWebsiteSettings() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number (with country code)</label>
             <input value={info.whatsapp} onChange={(e) => update('whatsapp', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
-            <p className="text-xs text-gray-400 mt-1">Used for the footer's "Connect on WhatsApp" QR code link.</p>
+            <p className="text-xs text-gray-400 mt-1">Used to auto-generate the footer's QR code, unless a custom one is uploaded below.</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Business Hours</label>
@@ -156,6 +218,43 @@ export default function AdminWebsiteSettings() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Google Maps Embed URL</label>
           <input value={info.mapEmbedUrl} onChange={(e) => update('mapEmbedUrl', e.target.value)} placeholder="https://www.google.com/maps/embed?..." className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono" />
           <p className="text-xs text-gray-400 mt-1">From Google Maps: Share → Embed a map → copy the src="..." URL.</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp QR Code</label>
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-24 rounded-xl bg-light-gray border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+              {info.whatsappQrImage ? (
+                <img src={info.whatsappQrImage} alt="Custom WhatsApp QR" className="w-full h-full object-contain p-1" />
+              ) : (
+                <span className="text-gray-300 text-[10px] text-center px-2">Auto-generated</span>
+              )}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <input ref={fileInputRefs.whatsappQrImage} type="file" accept="image/*" onChange={(e) => handleImageUpload('whatsappQrImage', e)} className="hidden" id="qr-upload" />
+                <label
+                  htmlFor="qr-upload"
+                  className="cursor-pointer inline-flex items-center gap-2 text-sm font-medium text-primary-blue hover:text-accent-hover border border-primary-blue/30 rounded-lg px-4 py-2"
+                >
+                  <ImagePlus className="w-4 h-4" /> {uploadingField === 'whatsappQrImage' ? 'Uploading…' : 'Upload custom QR'}
+                </label>
+                {info.whatsappQrImage && (
+                  <button
+                    type="button"
+                    onClick={() => update('whatsappQrImage', '')}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-red-600 border border-gray-200 rounded-lg px-3 py-2"
+                  >
+                    <X className="w-4 h-4" /> Use auto-generated
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Optional. By default the QR code is generated automatically from the WhatsApp number above. Upload
+                your own branded QR image here to use that instead.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
