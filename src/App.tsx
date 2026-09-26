@@ -28,7 +28,8 @@ import NewsDetail from './pages/media/NewsDetail';
 import PhotoGallery from './pages/media/PhotoGallery';
 import VideoGallery from './pages/media/VideoGallery';
 import NotFound from './pages/NotFound';
-import LegalPlaceholder from './pages/LegalPlaceholder';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 // Admin (Phase 3+)
 import { AuthProvider } from './admin/AuthContext';
@@ -75,12 +76,11 @@ export default function App() {
             <Route path="media-centre/photo-gallery" element={<PhotoGallery />} />
             <Route path="media-centre/video-gallery" element={<VideoGallery />} />
             <Route path="contact" element={<Contact />} />
-            {/* Footer links to these; real legal copy is pending from the
-                client - see phases.md Phase 12 note. Placeholder, not
-                fabricated legal text, so the links aren't dead in the
-                meantime. */}
-            <Route path="privacy-policy" element={<LegalPlaceholder title="Privacy Policy" />} />
-            <Route path="terms-of-service" element={<LegalPlaceholder title="Terms of Service" />} />
+            {/* Draft policies based on this site's actual data practices -
+                each page carries a visible notice that it needs legal
+                review before being relied on as a compliance document. */}
+            <Route path="privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="terms-of-service" element={<TermsOfService />} />
             <Route path="*" element={<NotFound />} />
           </Route>
 

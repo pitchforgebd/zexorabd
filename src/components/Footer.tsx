@@ -110,12 +110,12 @@ export default function Footer() {
             </h4>
             <div className="bg-white p-3 rounded-2xl shadow-xl w-40 h-40 flex items-center justify-center group overflow-hidden relative">
               <div className="absolute inset-0 bg-primary-blue/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-              <img 
-                src="/whatsapp-qr.jpeg" 
-                alt="WhatsApp QR Code" 
+              <img
+                src="/whatsapp-qr.png"
+                alt="WhatsApp QR Code"
                 className="w-full h-full object-contain rounded-xl relative z-10"
                 onError={(e) => {
-                  /* Fallback if user hasn't uploaded the image yet */
+                  /* Fallback in case the local file is ever missing */
                   const target = e.target as HTMLImageElement;
                   target.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8801855939450";
                 }}
