@@ -745,6 +745,26 @@
 
 ---
 
+## Phase 16.7 (cont.) — Who We Are redesign + Hero cinematic zoom
+**Status:** Done
+
+**Goal:** Client asked for "Who We Are" to be made more innovative, and if possible the hero slider's design too ("parle slider er design tao").
+
+**What was built:**
+- **`src/components/home-sections/AboutSnapshotSection.tsx`** — replaced the single flat photo with floating glass stat-cards with a **layered photo collage** (a smaller accent image offset behind/above a larger primary image, each with its own rounded corners/shadow/ring, plus a floating "Since 2024" pill badge straddling the primary image's corner) - a distinctly different visual composition from the plain image-with-overlay pattern used elsewhere. The three stat boxes moved off the image into their own dedicated white card row beneath the collage, and now **count up from 0** the first time they scroll into view (new `CountUpStat` component using `motion/react`'s `useInView` + `animate`, extracting a stat's leading digits so it still works for any admin-configured value like "15+" or "6" - non-numeric values just render as-is, no animation attempted).
+- **`src/components/HeroSlider.tsx`** — added a slow, continuous "Ken Burns" zoom (scale 1 → 1.08 over the slide's autoplay duration) to each slide's background photo instead of a static frame, for a more cinematic feel. Deliberately subtle (barely perceptible frame-to-frame, the point is the sense of life over several seconds) and low-risk since it's a single added `motion.div` wrapper - no change to the slide-transition, controls, or text-overlay logic already in place from the earlier hero redesign.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds; zero browser console/page errors.
+- Confirmed via Playwright that the count-up genuinely animates (captured it mid-count on a fast mobile screenshot, e.g. "1953"/"14+" before settling) and always lands on the real configured values (2024/15+/6) once finished - not just a static render.
+- Caught and fixed a real layout bug from the first mobile screenshot: the "Since 2024" badge floated in an empty gap above the image on mobile (where the secondary accent image is hidden and the primary image didn't fill the full collage height) instead of overlapping its corner as on desktop. Fixed by making the primary image full-height on mobile and un-conditionally bottom-anchoring the badge; re-verified clean.
+- Screenshotted the hero at two points a few seconds apart within the same load to confirm the zoom is actually progressing (not just written and assumed).
+- Re-ran the admin-CRUD regression suite (16/16) and the public smoke suite (432/450, same known WebKit/Windows HSTS baseline) - no new regressions.
+
+**Deliverable:** ✅ "Who We Are" now has a layered photo collage and animated count-up stats instead of a flat image with static numbers; the hero slider's background photos now have a subtle cinematic zoom instead of sitting static.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 

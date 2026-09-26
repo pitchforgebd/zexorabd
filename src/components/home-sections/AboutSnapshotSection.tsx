@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Calendar, Award, Layers } from 'lucide-react';
+import { animate, useInView } from 'motion/react';
 import FadeIn from '../FadeIn';
 import { useSiteSettings } from '../../lib/useSiteSettings';
 
@@ -10,6 +12,31 @@ const DEFAULT_STATS = [
 ];
 
 const STAT_ICONS = [Calendar, Award, Layers];
+
+// Animates a stat's leading digits counting up from 0 once it scrolls into
+// view (e.g. "15+" counts 0 -> 15 then keeps the "+"; non-numeric values
+// like a plain word just render as-is, no animation attempted).
+function CountUpStat({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '-40px' });
+  const match = value.match(/^(\d+)(.*)$/);
+  const [display, setDisplay] = useState(match ? '0' + match[2] : value);
+
+  useEffect(() => {
+    if (!isInView || !match) return;
+    const target = parseInt(match[1], 10);
+    const suffix = match[2];
+    const controls = animate(0, target, {
+      duration: 1.4,
+      ease: 'easeOut',
+      onUpdate: (v) => setDisplay(Math.round(v) + suffix),
+    });
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInView]);
+
+  return <span ref={ref}>{display}</span>;
+}
 
 export default function AboutSnapshotSection() {
   const { settings } = useSiteSettings();
@@ -43,33 +70,48 @@ export default function AboutSnapshotSection() {
           </Link>
         </FadeIn>
 
-        <FadeIn
-          direction="left"
-          className="relative h-full min-h-[400px] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5 flex flex-col justify-end p-6 sm:p-8"
-        >
-          <img
-            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80"
-            alt="Corporate Excellence"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/90 via-primary-dark/40 to-transparent"></div>
+        <div>
+          {/* Layered photo collage - two offset images instead of one flat panel */}
+          <FadeIn direction="left" className="relative h-80 sm:h-96">
+            <div className="absolute top-0 right-0 w-2/3 h-2/3 rounded-3xl overflow-hidden shadow-xl ring-4 ring-white hidden sm:block">
+              <img
+                src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&w=800&q=80"
+                alt="Zexora team collaboration"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-full sm:w-3/4 sm:h-4/5 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5">
+              <img
+                src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80"
+                alt="Corporate Excellence"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/50 to-transparent" />
+            </div>
+            <span className="absolute -bottom-4 left-4 sm:left-8 bg-white shadow-lg rounded-full px-4 py-2 text-xs font-bold text-primary-dark tracking-wide">
+              Since 2024
+            </span>
+          </FadeIn>
 
-          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mt-auto">
+          {/* Stats row - own card row beneath the collage, with count-up numbers */}
+          <FadeIn direction="left" delay={0.15} className="grid grid-cols-3 gap-3 sm:gap-4 mt-10 sm:mt-8">
             {statBoxes.map((stat, idx) => {
               const Icon = STAT_ICONS[idx % STAT_ICONS.length];
               return (
                 <div
                   key={idx}
-                  className="bg-white/10 backdrop-blur-md text-white p-4 sm:p-6 rounded-xl text-center border border-white/20 transition-all hover:-translate-y-1 hover:bg-white/15"
+                  className="bg-white p-4 sm:p-5 rounded-2xl text-center shadow-md ring-1 ring-black/5 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                 >
-                  <Icon className="w-5 h-5 mx-auto mb-2 text-blue-200" />
-                  <div className="text-3xl sm:text-4xl font-bold mb-1">{stat.value}</div>
-                  <div className="text-xs sm:text-sm font-medium text-blue-100 uppercase tracking-wider">{stat.label}</div>
+                  <Icon className="w-5 h-5 mx-auto mb-2 text-primary-blue" />
+                  <div className="text-2xl sm:text-3xl font-bold text-primary-dark mb-1">
+                    <CountUpStat value={stat.value} />
+                  </div>
+                  <div className="text-[10px] sm:text-xs font-medium text-body-text uppercase tracking-wider">{stat.label}</div>
                 </div>
               );
             })}
-          </div>
-        </FadeIn>
+          </FadeIn>
+        </div>
       </div>
     </section>
   );

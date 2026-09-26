@@ -96,8 +96,13 @@ export default function HeroSlider({ variant = 'slider' }: HeroSliderProps) {
           exit="exit"
           className="absolute inset-0 w-full h-full"
         >
-          <div
-            className="absolute inset-0 bg-cover bg-center scale-105"
+          {/* Slow continuous zoom (Ken Burns effect) for a more cinematic,
+              "alive" feel instead of a static background photo. */}
+          <motion.div
+            initial={{ scale: 1 }}
+            animate={{ scale: 1.08 }}
+            transition={{ duration: AUTOPLAY_MS / 1000, ease: 'linear' }}
+            className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url("${slides[currentSlide].image}")` }}
           />
           {/* Base scrim, kept dark enough to read text over any photo */}
