@@ -15,6 +15,17 @@
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
   }
+
+  /* Flowing dash effect for the sourcing-network map's connection lines -
+     referenced via inline `animation` (not the `animate-dash-flow` utility)
+     since react-simple-maps' <Line> doesn't reliably forward className. */
+  @keyframes dash-flow {
+    to { stroke-dashoffset: -20; }
+  }
+
+  @keyframes marker-ping {
+    75%, 100% { transform: scale(2.2); opacity: 0; }
+  }
 }
 
 @layer utilities {

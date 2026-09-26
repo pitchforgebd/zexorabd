@@ -8,7 +8,7 @@ const countries = ['🇨🇳 China', '🇮🇳 India', '🇩🇪 Germany', '🇰
 export default function GlobalSourcingSection() {
   return (
     <section className="py-24 bg-[#0A0D14] overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary-blue/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-200 h-200 bg-primary-blue/5 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <FadeIn direction="right">
@@ -38,9 +38,21 @@ export default function GlobalSourcingSection() {
               View Our Sourcing Network <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
           </FadeIn>
-          <FadeIn direction="left" className="relative h-[350px] md:h-[450px] w-full rounded-3xl overflow-hidden flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(43,43,155,0.15),transparent_70%)]"></div>
-            <WorldMap />
+          <FadeIn direction="left" className="relative rounded-3xl border border-white/10 bg-white/2 backdrop-blur-sm overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                </span>
+                Live Sourcing Network
+              </span>
+              <span className="text-xs text-gray-500 font-medium">9 Countries</span>
+            </div>
+            <div className="relative h-96 md:h-125 w-full flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(43,43,155,0.15),transparent_70%)]"></div>
+              <WorldMap />
+            </div>
           </FadeIn>
         </div>
       </div>

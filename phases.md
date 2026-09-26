@@ -665,6 +665,25 @@
 
 ---
 
+## Phase 16.7 (cont.) — Global Sourcing Network map made interactive
+**Status:** Done
+
+**Goal:** Client asked for "Global Presence" (the "Our Global Sourcing Network" section) to be styled more beautifully, specifically calling out the world map as needing to be more innovative.
+
+**What was built:**
+- **`src/components/WorldMap.tsx`** — the map previously rendered all 9 sourcing-country labels simultaneously, which overlapped into an unreadable cluster (visible in an earlier screenshot review of this same section). Replaced that with one **active country at a time**: it auto-cycles through all 9 every 2.2s (`setInterval` driving an `activeIdx`), and hovering a marker pins that country as active instead (auto-cycle pauses while hovered, resumes on mouse-leave). Only the active country's label is shown and its HQ-to-country connection line is bright with a looping "flowing dash" animation (new `dash-flow` keyframe in `index.css`, applied via inline `animation` style since `react-simple-maps`' `Line` doesn't reliably forward `className`); every other line stays dim and static so the map reads as one clear story at a time instead of nine overlapping ones. Both the HQ marker and the active country marker get an expanding "ping" ring (new `marker-ping` keyframe) for a live, radar-like feel. Added a small always-visible legend (red dot = Zexora HQ, blue dot = Sourcing Partner) directly on the map so the color coding is self-explanatory without reading the surrounding section text.
+- **`src/components/home-sections/GlobalSourcingSection.tsx`** — wrapped the map in a bordered glass panel with its own header bar: a pulsing-green "LIVE SOURCING NETWORK" badge on the left and a "9 Countries" counter on the right, framing the map as a live dashboard widget rather than a bare graphic floating in the dark section background. Also swapped two arbitrary-pixel glow-blob dimensions for their canonical Tailwind equivalents per the project's linter.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds; zero browser console/page errors captured during a fresh Playwright load of the section.
+- Screenshotted the map at two different points in time within the same page load and confirmed the active country actually changed (India, then later Germany, each with its own correctly-matched flowing line) - proof the auto-cycle timer is really driving the map, not a static screenshot coincidence.
+- Confirmed the map panel (header badge, legend, and map) all render correctly on a 390px mobile viewport, stacked below the text column as expected.
+- Re-ran the admin-CRUD regression suite (16/16) and the public smoke suite (432/450, same known WebKit/Windows HSTS baseline) - no new regressions.
+
+**Deliverable:** ✅ The sourcing-network map now tells one clear story at a time (auto-cycling or hover-driven), framed as a live-dashboard-style panel, instead of nine overlapping labels competing for attention on a bare graphic.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
