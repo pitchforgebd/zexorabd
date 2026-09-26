@@ -104,12 +104,70 @@ export type SiteInfo = {
   };
 };
 
+// Phase 14: content for the four previously-100%-hardcoded pages. Each
+// page's headings/paragraphs/list-item text is admin-editable; page layout,
+// decorative structure, and which icons appear where stay in code (see
+// phases.md Phase 14 for the reasoning).
+export type IconItem = { name: string; icon: string };
+export type TitledIconItem = { icon: string; title: string; desc: string };
+
+export type AboutContent = {
+  hero: { title: string; subtitle: string };
+  whoWeAre: { heading: string; paragraphs: string[] };
+  divisionsSection: { heading: string; description: string; items: IconItem[] };
+  competitiveAdvantage: { heading: string; paragraphs: string[] };
+  ourVision: { heading: string; paragraphs: string[] };
+};
+
+export type CeoMessageContent = {
+  hero: { eyebrow: string; title: string; quote: string };
+  photo: string;
+  name: string;
+  title: string;
+  sections: { heading: string; paragraphs: string[] }[];
+  emphasisHeading: string;
+  emphasisItems: string[];
+  closingQuote: string;
+};
+
+export type VisionMissionContent = {
+  hero: { title: string; subtitle: string };
+  vision: { heading: string; text: string };
+  mission: { heading: string; intro: string; commitmentHeading: string; commitments: string[] };
+  coreValues: { heading: string; items: TitledIconItem[] };
+  whyChooseUs: { heading: string; items: { title: string; desc: string }[] };
+  industries: { heading: string; items: IconItem[] };
+};
+
+export type GlobalSourcingContent = {
+  hero: { title: string; subtitle: string };
+  intro: {
+    eyebrow: string;
+    heading: string;
+    description: string;
+    stat1Value: string;
+    stat1Label: string;
+    stat2Value: string;
+    stat2Label: string;
+    mapCalloutHeading: string;
+    mapCalloutText: string;
+  };
+  countries: { heading: string; subheading: string; items: { flag: string; name: string; items: string }[] };
+  businessModels: { heading: string; items: TitledIconItem[] };
+  commitment: { heading: string; items: string[] };
+  cta: { heading: string; text: string };
+};
+
 export type SiteSettings = {
   'home.hero'?: { slides: HeroSlide[] };
   'home.stats'?: { items: StatItem[] };
   'home.whyChooseUs'?: { heading: string; subheading: string; reasons: WhyChooseReason[] };
   'home.suppliers'?: { heading: string; subheading: string; description: string };
   'global.siteInfo'?: SiteInfo;
+  'page.about'?: AboutContent;
+  'page.ceoMessage'?: CeoMessageContent;
+  'page.visionMission'?: VisionMissionContent;
+  'page.globalSourcing'?: GlobalSourcingContent;
 };
 
 export type PageSection = {

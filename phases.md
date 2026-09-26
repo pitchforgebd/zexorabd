@@ -462,7 +462,7 @@
 ---
 
 ## Phase 14 — Dynamic Static Pages
-**Status:** Not Started
+**Status:** Done
 
 **Goal:** Bring About, CEO Message, Vision & Mission, and Global Sourcing under CMS control — these four pages are currently 100% hardcoded (confirmed zero `apiFetch`/data-hook usage), unlike Home/Divisions/News which are already fully dynamic.
 
@@ -472,7 +472,25 @@
 - Refactor the four public page components to render from fetched data instead of hardcoded JSX/text.
 - SEO meta for these pages (already server-resolved via `seoResolver.js`'s `STATIC_PAGE_KEYS`) continues to work unchanged.
 
-**Deliverable:** All four pages editable from the admin panel with no code deploy required for a content change.
+**What was built:**
+
+- **Content schema decision**: one JSON blob per page in `site_settings` (`page.about`, `page.ceoMessage`, `page.visionMission`, `page.globalSourcing`), matching the existing `home.*` key convention exactly rather than inventing a new mechanism — no new tables, no new backend routes (same generic `site_settings` machinery Phase 13 also relied on).
+- **Deliberate scope line, matching the Phase 7 precedent** (Section Manager scoped to visibility/order, not a full page builder): every heading, paragraph, and list item's *text* is admin-editable, including full add/remove control over repeating lists (division items, core values, industries, countries, business models, etc.). Page *layout and decorative structure* (which section appears where, gradient/card treatment, the CEO page's alternating timeline-dot colors, the emphasis-box/pull-quote placement) stays in code. This was a conscious call, not a limitation discovered late — making every layout choice admin-configurable for four bespoke, differently-structured pages would be page-builder-scope work, not "make the content editable" scope.
+- **Icon selection reuses the existing Divisions precedent** (`src/lib/icons.ts`'s small, explicitly-imported `ICON_MAP` — chosen in Phase 4 specifically to avoid a ~700KB bundle bloat from lucide-react's full icon registry) rather than introducing a new, less safe mechanism. Extended it with the ~18 new icons these four pages actually use (Beaker, Globe, Truck, Plane, Target, ShieldCheck, Heart, TrendingUp, Award, Package, Pill, Layers, PaintRoller, Droplet, Factory, Ship, Handshake, Box) and exported `ICON_NAMES` for the new admin `<select>` icon pickers.
+- Four new admin pages under `/admin/pages/*` (About, CEO Message, Vision & Mission, Global Sourcing), grouped behind a hub page (`AdminPagesHub.tsx`) matching the existing `AdminMediaHub.tsx` pattern, plus one new sidebar entry ("Static Pages") rather than four separate top-level nav items.
+- Four reusable editor sub-components (`src/admin/pages/editors.tsx`: `ParagraphListEditor`, `IconItemsEditor`, `TitledIconItemsEditor`, `TitledItemsEditor`) shared across all four admin pages' repeating-list fields, plus reuse of the existing `StringListEditor` from the Divisions admin — avoided writing the same add/remove/edit list logic four-to-six times over.
+- `server/scripts/seedStaticPages.js` — one-time seed capturing the exact current hardcoded content for all four pages (same pattern as `seedSiteInfo.js`/`migrateExternalImages.js`), so switching the public pages to read from the API changed nothing visually until an admin edits something.
+- All four public page components (`About.tsx`, `CeoMessage.tsx`, `VisionMission.tsx`, `GlobalSourcing.tsx`) refactored to render from `useSiteSettings()` with an inline default matching the seed data (same established pattern as `WhyChooseUsSection.tsx`), so a missing/not-yet-saved settings key never breaks the page.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean after every change.
+- Ran the seed script, rebuilt, and did a full visual diff pass (Playwright screenshots) of all four refactored pages against the original design — caught and correctly diagnosed a false alarm: `fullPage` screenshots taken without first scrolling left several `FadeIn` (scroll-triggered, `IntersectionObserver`-based) sections showing as blank, even though the text was genuinely present in the DOM (confirmed via `innerText` extraction and zero console/page errors). Re-captured with an explicit scroll-through step first, which confirmed every section, icon, and list item renders identically to the original hardcoded version.
+- Live edit-to-publish round trip on the About page: logged into the real admin UI, changed the hero title, saved, confirmed persistence via reload, then confirmed the new title appeared on the live public page - then reverted.
+- Spot-tested the reusable list editors' add/remove interactions directly (not just that the save button works): added and removed a division item, added a paragraph - confirmed the DOM count changes correctly, and confirmed via direct DB query that unsaved test interactions never touched the database.
+- Re-ran the full Phase 12 admin-CRUD regression suite (16/16) and the cross-browser/responsive public-route smoke suite (same pass rate as Phase 13, modulo the already-documented WebKit/Windows HSTS-cache artifact) after adding 4 new admin routes and a new sidebar entry, since routing/layout changes here risk every admin page, not just the new ones.
+- All test edits reverted or deleted; confirmed via direct DB query that every `page.*` settings key was back to its seeded values before sign-off.
+
+**Deliverable:** ✅ All four pages (About, CEO Message, Vision & Mission, Global Sourcing) are fully editable from the admin panel — every heading, paragraph, and list item, with full add/remove control — with no code deploy required for a content change. SEO meta for these routes was unaffected (still resolved via `seoResolver.js`'s existing `STATIC_PAGE_KEYS`, untouched by this phase).
 
 ---
 
@@ -555,7 +573,7 @@
 | 11 | Done | 2026-09-26 |
 | 12 | Done | 2026-09-26 |
 | 13 | Done | 2026-09-26 |
-| 14 | Not Started | — |
+| 14 | Done | 2026-09-26 |
 | 15 | Not Started | — |
 | 16 | Not Started | — |
 | 17 | Not Started | — |

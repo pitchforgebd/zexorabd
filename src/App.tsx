@@ -48,6 +48,11 @@ import AdminHomepage from './admin/homepage/AdminHomepage';
 import AdminSuppliers from './admin/homepage/AdminSuppliers';
 import AdminPageSections from './admin/sections/AdminPageSections';
 import AdminWebsiteSettings from './admin/settings/AdminWebsiteSettings';
+import AdminPagesHub from './admin/pages/AdminPagesHub';
+import AdminAboutPage from './admin/pages/AdminAboutPage';
+import AdminCeoMessagePage from './admin/pages/AdminCeoMessagePage';
+import AdminVisionMissionPage from './admin/pages/AdminVisionMissionPage';
+import AdminGlobalSourcingPage from './admin/pages/AdminGlobalSourcingPage';
 import AdminContactMessages from './admin/inbox/AdminContactMessages';
 import AdminCareerApplications from './admin/inbox/AdminCareerApplications';
 import AdminSeoSettings from './admin/seo/AdminSeoSettings';
@@ -95,6 +100,11 @@ export default function App() {
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="settings" element={<AdminWebsiteSettings />} />
+                <Route path="pages" element={<AdminPagesHub />} />
+                <Route path="pages/about" element={<AdminAboutPage />} />
+                <Route path="pages/ceo-message" element={<AdminCeoMessagePage />} />
+                <Route path="pages/vision-mission" element={<AdminVisionMissionPage />} />
+                <Route path="pages/global-sourcing" element={<AdminGlobalSourcingPage />} />
                 <Route path="divisions" element={<AdminDivisionsList />} />
                 <Route path="divisions/:id" element={<AdminDivisionEdit />} />
                 <Route path="media" element={<AdminMediaHub />} />
