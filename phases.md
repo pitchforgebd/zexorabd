@@ -786,6 +786,27 @@
 
 ---
 
+## Phase 16.8 — Admin self-service email/password change
+**Status:** Done
+
+**Goal:** Client request: "admin mail and password change korar system kore daw, jate admin theke kora jay" - a way to change the admin login email and password from inside the admin panel itself, instead of the only existing path being `node scripts/createAdmin.js` on the server.
+
+**What was built:**
+- **`server/src/routes/auth.js`** — new `PUT /api/auth/account` route, `requireAuth` + reuses the existing `loginLimiter` (10 attempts/15 min - the same brute-force guard already protecting `/login`, since this endpoint also checks a password). Requires the account's **current password** to authorize any change (re-auth-before-sensitive-change, standard practice), then accepts an optional new `email` and/or `newPassword` - at least one must be provided. Validates the new email is a valid address and not already used by another admin account (`admin_users.email` has a unique constraint); validates the new password is at least 8 characters, matching `createAdmin.js`'s own rule. Returns the updated `{id, name, email, role}` on success.
+- **`src/admin/AdminAccount.tsx`** (new) — "Account Settings" page: an email field (prefilled with the current one), optional new-password + confirm-password fields, and a current-password field to authorize the change. Client-side checks confirm-matches-new-password and the 8-character minimum before ever calling the API, so obviously-invalid submissions never round-trip. Wired up at `/admin/account`.
+- **`src/admin/AuthContext.tsx`** — added `updateUser()` so a successful account change updates the app's in-memory user state immediately (sidebar name/email, session checks) without requiring a page reload.
+- **`src/admin/AdminLayout.tsx`** — the existing name/email block at the bottom of the sidebar is now a link to `/admin/account`, so the entry point is discoverable without adding a new top-level nav item for something that isn't really "content."
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; backend route file loads without syntax errors; production build succeeds.
+- Full Playwright pass against the real running app (not just code review): wrong current password is correctly rejected with an error and no change applied; mismatched new/confirm password is caught client-side; a correct current password with a new email *and* new password succeeds, and the sidebar reflects the new email immediately with no reload; logging in with the new credentials afterward works; the *old* credentials are correctly rejected once changed.
+- This test exercises the real admin account, not a disposable one - after confirming the feature works, restored the account back to its original email/password. The test's own automated revert step hit an unrelated script bug (a `waitForURL` assertion too strict for the app's own, correct, "return to where you were" post-login redirect) and didn't complete, so the account was manually restored directly via a DB fix, including cleaning up a duplicate row that a naive `createAdmin.js` re-run created (it inserts-by-email, so it couldn't find and fix the renamed row) - fixed by updating the original row's email/password back directly and deleting the duplicate, rather than leaving two admin rows behind. Re-verified login with the original credentials via a real browser afterward, then re-ran the full admin-CRUD suite (16/16) to confirm the account was genuinely back to normal.
+- Re-ran the public smoke suite (432/450, back to the standard known WebKit/Windows HSTS baseline - the `api.qrserver.com` cert issue from the previous phase's verification pass did not recur, consistent with it being an external/transient condition) - no new regressions.
+
+**Deliverable:** ✅ The admin can change their own login email and/or password from **Account Settings** inside the admin panel (linked from the sidebar), with current-password confirmation required - no server/CLI access needed for routine credential changes anymore.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
@@ -848,5 +869,6 @@
 | 16.6 | Done | 2026-09-27 |
 | 16.7 | Done | 2026-09-27 |
 | 16.7 (cont.) | Done | 2026-09-27 |
+| 16.8 | Done | 2026-09-27 |
 | 17 | Not Started | — |
 | 18 | Not Started | — |

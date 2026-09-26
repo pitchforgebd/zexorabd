@@ -63,6 +63,70 @@ router.post('/logout', (req, res, next) => {
   });
 });
 
+router.put(
+  '/account',
+  requireAuth,
+  loginLimiter,
+  validate([
+    body('currentPassword').isString().isLength({ min: 1 }).withMessage('Current password is required'),
+    body('email').optional({ checkFalsy: true }).isEmail().withMessage('A valid email is required').normalizeEmail(),
+    body('newPassword')
+      .optional({ checkFalsy: true })
+      .isString()
+      .isLength({ min: 8 })
+      .withMessage('New password must be at least 8 characters'),
+  ]),
+  async (req, res, next) => {
+    try {
+      const { currentPassword, email, newPassword } = req.body;
+      if (!email && !newPassword) {
+        return fail(res, 'Provide a new email and/or a new password', 422, 'VALIDATION_ERROR');
+      }
+
+      const [rows] = await pool.query(
+        'SELECT id, name, email, password_hash, role FROM admin_users WHERE id = :id LIMIT 1',
+        { id: req.session.userId }
+      );
+      const user = rows[0];
+      if (!user) {
+        req.session.destroy(() => {});
+        return fail(res, 'Session is no longer valid', 401, 'UNAUTHENTICATED');
+      }
+
+      const matches = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!matches) return fail(res, 'Current password is incorrect', 401, 'INVALID_CREDENTIALS');
+
+      const updates = {};
+      if (email && email !== user.email) {
+        const [existing] = await pool.query(
+          'SELECT id FROM admin_users WHERE email = :email AND id != :id LIMIT 1',
+          { email, id: user.id }
+        );
+        if (existing[0]) return fail(res, 'That email is already in use by another account', 409, 'EMAIL_TAKEN');
+        updates.email = email;
+      }
+      if (newPassword) {
+        updates.password_hash = await bcrypt.hash(newPassword, 12);
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const setClause = Object.keys(updates)
+          .map((key) => `${key} = :${key}`)
+          .join(', ');
+        await pool.query(`UPDATE admin_users SET ${setClause} WHERE id = :id`, { ...updates, id: user.id });
+      }
+
+      const [updatedRows] = await pool.query(
+        'SELECT id, name, email, role FROM admin_users WHERE id = :id LIMIT 1',
+        { id: user.id }
+      );
+      return ok(res, toPublicUser(updatedRows[0]));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 router.get('/me', requireAuth, async (req, res, next) => {
   try {
     const [rows] = await pool.query(

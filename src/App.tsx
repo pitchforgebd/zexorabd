@@ -58,6 +58,7 @@ import AdminCareerApplications from './admin/inbox/AdminCareerApplications';
 import AdminSeoHub from './admin/seo/AdminSeoHub';
 import AdminSeoSettings from './admin/seo/AdminSeoSettings';
 import AdminSeoTools from './admin/seo/AdminSeoTools';
+import AdminAccount from './admin/AdminAccount';
 
 export default function App() {
   return (
@@ -122,6 +123,7 @@ export default function App() {
                 <Route path="seo" element={<AdminSeoHub />} />
                 <Route path="seo/pages" element={<AdminSeoSettings />} />
                 <Route path="seo/tools" element={<AdminSeoTools />} />
+                <Route path="account" element={<AdminAccount />} />
               </Route>
             </Route>
           </Route>

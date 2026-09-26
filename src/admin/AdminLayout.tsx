@@ -55,10 +55,15 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div className="px-3 py-4 border-t border-white/10">
-          <div className="px-3 mb-2">
+          <NavLink
+            to="/admin/account"
+            className={({ isActive }) =>
+              `block px-3 py-2 mb-2 rounded-lg transition-colors ${isActive ? 'bg-white/10' : 'hover:bg-white/10'}`
+            }
+          >
             <p className="text-sm font-medium text-white truncate">{user?.name}</p>
             <p className="text-xs text-white/50 truncate">{user?.email}</p>
-          </div>
+          </NavLink>
           <button
             onClick={() => logout()}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
