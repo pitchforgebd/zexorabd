@@ -706,6 +706,24 @@
 
 ---
 
+## Phase 16.7 (cont.) — Vision & Mission redesign
+**Status:** Done
+
+**Goal:** Client asked for "Our Foundation / Our Vision & Mission" to be styled more beautifully too.
+
+**What was built:**
+- **`src/components/home-sections/VisionMissionSnapshotSection.tsx`** — the Vision and Mission statements were plain text blocks with only a left border accent, no visual weight of their own next to the photo alongside them. Rebuilt each as an elevated white card: a rounded icon badge (fills solid `primary-blue` on hover, matching the icon-badge hover pattern already used on Divisions/Industries/Why-Choose-Us), a large faint decorative quote-mark watermark in the corner for an editorial feel, and its own shadow/ring that strengthens on hover. The accompanying photo gained a bottom gradient and a floating caption pill ("Guiding Every Decision We Make") instead of a flat color-tint overlay, consistent with the caption-badge treatment used on the sourcing-network map panel.
+- No content or data changes - the Vision/Mission copy, the stats/badge elsewhere on the page, and the "Our Values & Principles" link are all unchanged.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds; zero browser console/page errors on a fresh load of the section.
+- Screenshotted desktop and mobile; confirmed both cards render with their icon badge, quote watermark, and text intact, and that the image caption pill displays correctly over the gradient.
+- Re-ran the admin-CRUD regression suite (16/16) and the public smoke suite (432/450, same known WebKit/Windows HSTS baseline) - no new regressions.
+
+**Deliverable:** ✅ "Our Vision & Mission" now presents as two elevated, editorial-style cards next to the photo instead of plain bordered text, consistent with the icon-badge/hover language used across the rest of the homepage.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
