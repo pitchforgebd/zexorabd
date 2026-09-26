@@ -840,23 +840,53 @@
 ---
 
 ## Phase 17 — cPanel Deployment
-**Status:** Not Started
+**Status:** In Progress - runbook below, execution happens on the client's own cPanel account/terminal
 
-**Goal:** Ship to production.
+**Goal:** Ship to production on cPanel (Node.js 20+, terminal access confirmed available). Repo: `https://github.com/pitchforgebd/zexorabd.git` (branch `main`, already up to date with local as of this phase).
 
-**Tasks:**
-- Create production MySQL database + user via cPanel.
-- **Bring over all real data, not just empty tables**: run `node scripts/backupDatabase.js` against the local dev database to produce a full `.sql.gz` dump (schema *and* every row - `site_settings`, `suppliers`, `divisions`, `sister concerns`, SEO tools, everything customized through the admin so far), upload that dump to the production server, and run `node scripts/restoreDatabase.js --file <dump>` against the production DB. This is the actual data-migration mechanism for this project (already built, used for backups too) - `database/schema.sql` alone only creates empty tables and should *not* be used as the deployment path, since it would silently lose every real setting/logo/division already configured.
-- **Copy the `server/uploads/` directory** to production as well - uploaded images (supplier logos, hero slides, division photos, footer/site logos, etc.) live on disk, not in the database, so the DB restore alone won't bring them over. Missing this step would leave every uploaded image broken even though the DB rows referencing them look correct.
-- Set up the Node.js app via cPanel's "Setup Node.js App", pointing it at the deployed backend code; run `npm install` through the provided interface/terminal.
-- Upload/build the React frontend (`dist/`) to the appropriate served directory.
-- Configure `.htaccess`/Passenger routing so `/api/*` hits the Node app and other routes serve the SPA (or SSR output, per Phase 9).
-- Set environment variables via cPanel's Node.js App UI (DB credentials, mail settings, session secret) — not committed to git.
-- SSL certificate check (AutoSSL/Let's Encrypt via cPanel).
-- DNS/domain pointing verification.
-- Smoke-test the live site afterward and confirm no admin-configured content needed to be manually re-entered - if anything is missing, it means either the DB restore or the uploads copy was incomplete, not that content needs re-creating by hand.
+**Runbook** (the concrete sequence - see "Tasks" further down for the original checklist form):
 
-**Deliverable:** Live production site fully functional on the real domain, with all current content (settings, suppliers, sister concerns, SEO tools, divisions, everything already configured through the admin) carried over automatically - nothing re-entered by hand.
+1. **Local: take a fresh data backup.** `cd server && node scripts/backupDatabase.js` → produces `server/backups/zexora-<timestamp>.sql.gz`. This is a full `mysqldump` (schema *and* every row), the actual data-migration mechanism for this project - `database/schema.sql` alone only creates empty tables and must *not* be used as the deployment path, since it would silently lose every setting/division/logo already configured through the admin. Upload this file to the server (cPanel File Manager, or `scp`/SFTP if available) to somewhere in the home directory, e.g. `~/zexora-backup.sql.gz`.
+2. **cPanel → MySQL Databases:** create a database and a database user, add the user to the database with all privileges. Note the full (cPanel-prefixed) database name and username - they go in `.env` in step 5.
+3. **Terminal: clone the repo** into a folder *outside* `public_html` (Passenger serves it via the Node.js App config, not as static files) - e.g. `git clone https://github.com/pitchforgebd/zexorabd.git ~/zexorabd`.
+4. **cPanel → Setup Node.js App → Create Application:**
+   - Node.js version: 20.x (or newer, whatever's offered - `server/package.json` declares `"engines": {"node": ">=18"}`).
+   - Application mode: Production.
+   - Application root: the folder from step 3 (e.g. `zexorabd`).
+   - Application URL: the live domain/subdomain.
+   - Application startup file: `server/app.js`.
+   - Creating the app gives a command to enter its virtual environment, e.g. `source /home/<user>/nodevenv/zexorabd/20/bin/activate && cd /home/<user>/zexorabd` - use that for every `npm`/`node` command below instead of the system Node.
+5. **Terminal: `server/.env`.** Copy `server/.env.example` to `server/.env` and fill in real values: `DB_HOST` (usually `localhost`), `DB_USER`/`DB_PASSWORD`/`DB_NAME` (from step 2), `SITE_URL` (the live domain, `https://...`, no trailing slash), `SMTP_*`/`MAIL_FROM`/`MAIL_TO` (real mailbox), and a fresh `SESSION_SECRET` - generate one on the server itself rather than reusing any value written down elsewhere: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Leave `PORT` alone - cPanel's Node.js App manager sets its own `PORT` env var for Passenger automatically, and `server/src/config/index.js` already respects `process.env.PORT` when set.
+6. **Terminal: install + build.**
+   ```
+   npm install            # project root - frontend deps
+   npm run build           # produces dist/ (gitignored, must be built here)
+   cd server && npm install   # backend deps
+   ```
+7. **Terminal: restore the real data.** `node scripts/restoreDatabase.js --file ~/zexora-backup.sql.gz` (from inside `server/`, with `.env` from step 5 already in place so it points at the *production* DB). This one command brings over every setting, division, supplier, sister concern, SEO tool value, and admin account (login email/password-hash) exactly as configured locally - nothing needs re-entering through the admin UI afterward.
+8. **Copy `server/uploads/`.** The DB restore does *not* bring uploaded files (supplier logos, hero slides, division photos, footer/site logos, career-application CVs) - those live on disk. Zip the local `server/uploads/` folder, upload and extract it into `~/zexorabd/server/uploads/` via cPanel File Manager (or `scp`/SFTP). Skipping this leaves every uploaded image broken even though the DB rows referencing them look correct.
+9. **Routing: replace the legacy `.htaccess`.** The repo's root `.htaccess` predates the Node/Express architecture (Phase 9's decision: the Node app serves the built frontend itself and injects per-route SEO meta - see `createApp.js` - rather than splitting between Apache-static and Node-API). cPanel's Node.js App setup auto-manages its own Passenger `.htaccess` in the application's public-facing location once the app is created; **do not** let this repo's legacy static-SPA `.htaccess` (a plain `RewriteRule ^ index.html`) sit alongside or override it - rename/remove it if cPanel didn't already replace it, so every request actually reaches the Node app instead of being served as a static file.
+10. **cPanel → Setup Node.js App → Restart.**
+11. **SSL:** cPanel → SSL/TLS Status → run AutoSSL for the domain (or confirm it's already issued).
+12. **DNS:** point the domain at this hosting account (A record to the server IP, or nameservers, depending on where the domain is registered) if not already live here.
+13. **Smoke test the live site**: homepage loads with real content (not placeholders), `/admin/login` works with the existing admin credentials, `/sitemap.xml` and `/robots.txt` return real content (not the SPA's 404 - the same class of gap fixed for local dev this phase, worth double-checking in production too), a few uploaded images render, and a contact-form submission actually sends mail. If anything is missing, it means the DB restore or the uploads copy was incomplete, not that content needs re-creating by hand.
+
+**Tasks (checklist form of the above):**
+- [ ] Local data backup taken and uploaded to the server.
+- [ ] Production MySQL database + user created via cPanel.
+- [ ] Repo cloned to the server via terminal.
+- [ ] Node.js App created in cPanel (Node 20+, startup file `server/app.js`).
+- [ ] `server/.env` filled in with production values and a freshly-generated `SESSION_SECRET`.
+- [ ] `npm install` (root) + `npm run build` + `npm install` (server) run on the server.
+- [ ] Database restored via `restoreDatabase.js` against the production DB.
+- [ ] `server/uploads/` copied over.
+- [ ] Legacy static-SPA `.htaccess` removed/replaced so Passenger routing isn't overridden.
+- [ ] Node app restarted from cPanel.
+- [ ] SSL certificate active (AutoSSL).
+- [ ] DNS pointed at the hosting account.
+- [ ] Live site smoke-tested (homepage, admin login, sitemap.xml/robots.txt, images, contact form email).
+
+**Deliverable:** Live production site fully functional on the real domain, with all current content (settings, suppliers, sister concerns, SEO tools, divisions, admin account, everything already configured through the admin) carried over automatically - nothing re-entered by hand.
 
 ---
 
@@ -903,5 +933,5 @@
 | 16.7 (cont.) | Done | 2026-09-27 |
 | 16.8 | Done | 2026-09-27 |
 | 16.9 | Done | 2026-09-27 |
-| 17 | Not Started | — |
+| 17 | In Progress | 2026-09-27 |
 | 18 | Not Started | — |
