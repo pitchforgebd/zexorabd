@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Trash2, ImagePlus } from 'lucide-react';
 import { apiFetch, ApiError } from '../../lib/api';
-import type { HeroSlide, SiteSettings, StatItem, WhyChooseReason } from '../../lib/types';
+import type { HeroSlide, SiteSettings, StatItem, WhyChooseReason, SisterConcern } from '../../lib/types';
 
 function emptySlide(): HeroSlide {
   return { image: '', title: '', subtitle: '', description: '' };
@@ -12,6 +12,9 @@ function emptyStat(): StatItem {
 }
 function emptyReason(): WhyChooseReason {
   return { title: '', desc: '' };
+}
+function emptyConcern(): SisterConcern {
+  return { logo: '', name: '', tagline: '', description: '', websiteUrl: '' };
 }
 
 function SavedBadge({ message }: { message: string | null }) {
@@ -31,15 +34,22 @@ export default function AdminHomepage() {
   const [supHeading, setSupHeading] = useState('');
   const [supSubheading, setSupSubheading] = useState('');
   const [supDescription, setSupDescription] = useState('');
+  const [concernHeading, setConcernHeading] = useState('');
+  const [concernSubheading, setConcernSubheading] = useState('');
+  const [concerns, setConcerns] = useState<SisterConcern[]>([]);
 
   const [savedHero, setSavedHero] = useState<string | null>(null);
   const [savedStats, setSavedStats] = useState<string | null>(null);
   const [savedWhy, setSavedWhy] = useState<string | null>(null);
   const [savedSuppliers, setSavedSuppliers] = useState<string | null>(null);
+  const [savedConcerns, setSavedConcerns] = useState<string | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
   const [uploadingSlideIdx, setUploadingSlideIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingUploadIdx = useRef<number | null>(null);
+  const [uploadingConcernIdx, setUploadingConcernIdx] = useState<number | null>(null);
+  const concernFileInputRef = useRef<HTMLInputElement>(null);
+  const pendingConcernUploadIdx = useRef<number | null>(null);
 
   useEffect(() => {
     apiFetch<SiteSettings>('/api/admin/site-settings')
@@ -52,6 +62,9 @@ export default function AdminHomepage() {
         setSupHeading(settings['home.suppliers']?.heading || '');
         setSupSubheading(settings['home.suppliers']?.subheading || '');
         setSupDescription(settings['home.suppliers']?.description || '');
+        setConcernHeading(settings['home.sisterConcerns']?.heading || '');
+        setConcernSubheading(settings['home.sisterConcerns']?.subheading || '');
+        setConcerns(settings['home.sisterConcerns']?.items || []);
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to load settings'))
       .finally(() => setLoading(false));
@@ -97,6 +110,33 @@ export default function AdminHomepage() {
     }
   }
 
+  function updateConcern(i: number, patch: Partial<SisterConcern>) {
+    setConcerns((c) => c.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
+  }
+
+  function triggerConcernLogoUpload(i: number) {
+    pendingConcernUploadIdx.current = i;
+    concernFileInputRef.current?.click();
+  }
+
+  async function handleConcernLogoSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const idx = pendingConcernUploadIdx.current;
+    if (!file || idx === null) return;
+    setUploadingConcernIdx(idx);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const result = await apiFetch<{ url: string }>('/api/admin/site-settings/upload-image', { method: 'POST', body: fd });
+      updateConcern(idx, { logo: result.url });
+    } catch (err) {
+      alert(err instanceof ApiError ? err.message : 'Logo upload failed');
+    } finally {
+      setUploadingConcernIdx(null);
+      if (concernFileInputRef.current) concernFileInputRef.current.value = '';
+    }
+  }
+
   if (loading) return <p className="text-body-text">Loading…</p>;
   if (error) return <p className="text-red-600">{error}</p>;
 
@@ -108,6 +148,7 @@ export default function AdminHomepage() {
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleSlideImageSelected} className="hidden" />
+      <input ref={concernFileInputRef} type="file" accept="image/*" onChange={handleConcernLogoSelected} className="hidden" />
 
       {/* Hero Slider */}
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -272,6 +313,66 @@ export default function AdminHomepage() {
         <Link to="/admin/homepage/suppliers" className="inline-flex items-center gap-2 text-sm font-medium text-primary-blue hover:text-accent-hover border border-primary-blue/30 rounded-lg px-4 py-2">
           Manage Supplier Logos →
         </Link>
+      </section>
+
+      {/* Sister Concerns */}
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-primary-dark">Sister Concerns</h2>
+          <div className="flex items-center gap-3">
+            <SavedBadge message={savedConcerns} />
+            <button
+              onClick={() => saveKey('home.sisterConcerns', { heading: concernHeading, subheading: concernSubheading, items: concerns }, setSavedConcerns)}
+              disabled={saving === 'home.sisterConcerns'}
+              className="bg-primary-blue text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
+            >
+              {saving === 'home.sisterConcerns' ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+        </div>
+        <p className="text-body-text text-sm mb-4">Related/subsidiary companies shown on the homepage. Leave empty to hide the section entirely.</p>
+        <div className="space-y-3 mb-4">
+          <input value={concernSubheading} onChange={(e) => setConcernSubheading(e.target.value)} placeholder="Eyebrow text (e.g. Subsidiaries & Ecosystem)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+          <input value={concernHeading} onChange={(e) => setConcernHeading(e.target.value)} placeholder="Heading (e.g. Our Sister Concerns)" className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+        </div>
+        <div className="space-y-4">
+          {concerns.map((concern, i) => (
+            <div key={i} className="border border-gray-200 rounded-xl p-4 flex gap-4">
+              <div className="w-24 h-24 rounded-lg overflow-hidden bg-light-gray shrink-0 relative">
+                {concern.logo ? (
+                  <img src={concern.logo} alt={concern.name} className="w-full h-full object-contain p-1" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No logo</div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => triggerConcernLogoUpload(i)}
+                  className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+                >
+                  <ImagePlus className="w-5 h-5 text-white" />
+                </button>
+                {uploadingConcernIdx === i && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs">…</div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input value={concern.name} onChange={(e) => updateConcern(i, { name: e.target.value })} placeholder="Company name" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                <input value={concern.tagline} onChange={(e) => updateConcern(i, { tagline: e.target.value })} placeholder="Tagline" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                <textarea value={concern.description} onChange={(e) => updateConcern(i, { description: e.target.value })} placeholder="Description (use a blank line between paragraphs)" rows={3} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
+                <input value={concern.websiteUrl} onChange={(e) => updateConcern(i, { websiteUrl: e.target.value })} placeholder="Website URL (optional - hides the button if blank)" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+              </div>
+              <button onClick={() => setConcerns((c) => c.filter((_, idx) => idx !== i))} className="text-gray-400 hover:text-red-600 p-2 self-start">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => setConcerns((c) => [...c, emptyConcern()])}
+          className="mt-4 flex items-center gap-2 text-sm font-medium text-primary-blue hover:text-accent-hover border border-dashed border-primary-blue/40 rounded-xl px-4 py-2.5 w-full justify-center"
+        >
+          <Plus className="w-4 h-4" /> Add sister concern
+        </button>
       </section>
     </div>
   );

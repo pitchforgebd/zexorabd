@@ -5,6 +5,7 @@ import type { SiteInfo, SiteSettings } from '../../lib/types';
 
 const EMPTY: SiteInfo = {
   logo: '',
+  footerLogo: '',
   favicon: '',
   ogImage: '',
   companyName: '',
@@ -19,7 +20,7 @@ const EMPTY: SiteInfo = {
   social: { facebook: '', instagram: '', linkedin: '', youtube: '' },
 };
 
-type ImageField = 'logo' | 'favicon' | 'ogImage' | 'whatsappQrImage';
+type ImageField = 'logo' | 'footerLogo' | 'favicon' | 'ogImage' | 'whatsappQrImage';
 
 export default function AdminWebsiteSettings() {
   const [info, setInfo] = useState<SiteInfo>(EMPTY);
@@ -30,6 +31,7 @@ export default function AdminWebsiteSettings() {
   const [uploadingField, setUploadingField] = useState<ImageField | null>(null);
   const fileInputRefs = {
     logo: useRef<HTMLInputElement>(null),
+    footerLogo: useRef<HTMLInputElement>(null),
     favicon: useRef<HTMLInputElement>(null),
     ogImage: useRef<HTMLInputElement>(null),
     whatsappQrImage: useRef<HTMLInputElement>(null),
@@ -126,7 +128,46 @@ export default function AdminWebsiteSettings() {
             >
               <ImagePlus className="w-4 h-4" /> {uploadingField === 'logo' ? 'Uploading…' : 'Upload logo'}
             </label>
-            <p className="text-xs text-gray-400 mt-1">Shown in the header and footer.</p>
+            <p className="text-xs text-gray-400 mt-1">Shown in the header, and in the footer too unless a footer-specific logo is set below.</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="w-24 h-24 rounded-xl bg-[#0A0D14] border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+            {info.footerLogo ? (
+              <img src={info.footerLogo} alt="Footer logo" className="w-full h-full object-contain p-2" />
+            ) : info.logo ? (
+              <img src={info.logo} alt="Footer logo (auto)" className="w-full h-full object-contain p-2 brightness-0 invert" />
+            ) : (
+              <span className="text-gray-500 text-xs">No logo</span>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-gray-700 mb-1">Footer Logo (optional)</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input ref={fileInputRefs.footerLogo} type="file" accept="image/*" onChange={(e) => handleImageUpload('footerLogo', e)} className="hidden" id="footer-logo-upload" />
+              <label
+                htmlFor="footer-logo-upload"
+                className="cursor-pointer inline-flex items-center gap-2 text-sm font-medium text-primary-blue hover:text-accent-hover border border-primary-blue/30 rounded-lg px-4 py-2"
+              >
+                <ImagePlus className="w-4 h-4" /> {uploadingField === 'footerLogo' ? 'Uploading…' : 'Upload footer logo'}
+              </label>
+              {info.footerLogo && (
+                <button
+                  type="button"
+                  onClick={() => update('footerLogo', '')}
+                  className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-red-600 border border-gray-200 rounded-lg px-3 py-2"
+                >
+                  <X className="w-4 h-4" /> Use main logo
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              The footer background is dark, so the main logo is auto-inverted to white by default. Upload a
+              dedicated version here (e.g. one with its own colors) to use that instead.
+            </p>
           </div>
         </div>
 

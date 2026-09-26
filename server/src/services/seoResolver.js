@@ -67,11 +67,12 @@ function buildResult({ pathname, title, description, ogImage, canonicalUrl, brea
 async function resolveForPath(pathname) {
   const [settings, result] = await Promise.all([siteSettingsService.getAll(), resolveCore(pathname)]);
   const siteInfo = settings['global.siteInfo'];
+  const seoTools = settings['global.seoTools'];
   // Fallback chain: this page's own og:image -> the site-wide default set
   // in Website Settings -> the hardcoded logo, so every page has always
   // had *something* correct to show even before Phase 13/16.5 existed.
   const ogImage = result.ogImage || resolveImageUrl(siteInfo?.ogImage) || DEFAULT_OG_IMAGE;
-  return { ...result, ogImage, siteInfo };
+  return { ...result, ogImage, siteInfo, seoTools };
 }
 
 // Does the actual route matching/lookup; siteInfo is merged in by the

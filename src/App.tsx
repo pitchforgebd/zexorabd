@@ -55,7 +55,9 @@ import AdminVisionMissionPage from './admin/pages/AdminVisionMissionPage';
 import AdminGlobalSourcingPage from './admin/pages/AdminGlobalSourcingPage';
 import AdminContactMessages from './admin/inbox/AdminContactMessages';
 import AdminCareerApplications from './admin/inbox/AdminCareerApplications';
+import AdminSeoHub from './admin/seo/AdminSeoHub';
 import AdminSeoSettings from './admin/seo/AdminSeoSettings';
+import AdminSeoTools from './admin/seo/AdminSeoTools';
 
 export default function App() {
   return (
@@ -117,7 +119,9 @@ export default function App() {
                 <Route path="sections" element={<AdminPageSections />} />
                 <Route path="career-applications" element={<AdminCareerApplications />} />
                 <Route path="contact-messages" element={<AdminContactMessages />} />
-                <Route path="seo" element={<AdminSeoSettings />} />
+                <Route path="seo" element={<AdminSeoHub />} />
+                <Route path="seo/pages" element={<AdminSeoSettings />} />
+                <Route path="seo/tools" element={<AdminSeoTools />} />
               </Route>
             </Route>
           </Route>

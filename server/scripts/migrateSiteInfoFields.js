@@ -1,8 +1,9 @@
 /**
- * One-time migration: adds the favicon/ogImage/whatsappQrImage fields to an
- * existing global.siteInfo row without touching anything the admin may have
- * already customized (unlike seedSiteInfo.js, which resets everything back
- * to defaults). Safe to re-run - only fills in fields that are missing.
+ * One-time migration: adds any new global.siteInfo fields to an existing
+ * row without touching anything the admin may have already customized
+ * (unlike seedSiteInfo.js, which resets everything back to defaults). Safe
+ * to re-run, including after new fields are added here later - only fills
+ * in whatever's still missing.
  *
  * Usage: node scripts/migrateSiteInfoFields.js
  */
@@ -13,6 +14,7 @@ const NEW_FIELD_DEFAULTS = {
   favicon: '/favicon.png',
   ogImage: '/logo.png',
   whatsappQrImage: '',
+  footerLogo: '',
 };
 
 async function main() {

@@ -21,9 +21,9 @@ export default function Footer() {
           <div className="lg:col-span-4 pr-0 lg:pr-8">
             <Link to="/" className="inline-block mb-6 group">
               <img
-                src={info.logo}
+                src={info.footerLogo || info.logo}
                 alt={info.companyName}
-                className="h-14 w-auto brightness-0 invert group-hover:opacity-90 transition-opacity"
+                className={`h-14 w-auto group-hover:opacity-90 transition-opacity ${info.footerLogo ? '' : 'brightness-0 invert'}`}
               />
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-8">

@@ -22,6 +22,7 @@ export function useSiteSettings() {
 // resolves) and never break if global.siteInfo hasn't been saved yet.
 export const DEFAULT_SITE_INFO: SiteInfo = {
   logo: '/logo.png',
+  footerLogo: '',
   favicon: '/favicon.png',
   ogImage: '/logo.png',
   companyName: 'Zexora Corporation',

@@ -585,6 +585,35 @@
 
 ---
 
+## Phase 16.6 — Dynamic Sister Concerns, SEO Tools, robots.txt & Footer Logo
+**Status:** Done
+
+**Goal:** Client-requested follow-up: the "Our Sister Concerns" home section was hardcoded to a single company and needed to be admin-manageable; add an SEO Tools area covering sitemap visibility, an editable `robots.txt`, and site-wide tracking/verification codes (Google Search Console, GA4, GTM) plus a raw custom-code escape hatch; and add a dedicated footer-specific logo option (distinct from the header logo, which is CSS-inverted to white for the dark footer background).
+
+**What was built:**
+
+- **Sister Concerns made dynamic** — new `home.sisterConcerns` settings key (`{heading, subheading, items: SisterConcern[]}`, each item `{logo, name, tagline, description, websiteUrl}`). `SisterConcernsSection.tsx` now reads this via `useSiteSettings()` instead of hardcoding Proactive Trade International, and renders `null` (hiding the whole section) when `items` is empty. `AdminHomepage.tsx` gained a full "Sister Concerns" editor: heading/subheading inputs, per-item logo upload + name/tagline/description/website fields, add/remove controls, reusing the existing generic image-upload endpoint.
+- **SEO Tools admin area** — the single "SEO" admin page was split into a hub (`AdminSeoHub.tsx`, matching the existing Media/Pages hub pattern) with two sub-pages: **Page SEO** (the pre-existing per-page title/description/OG editor, moved to `/admin/seo/pages`) and new **SEO Tools** (`/admin/seo/tools`, `global.seoTools` settings key):
+  - **Sitemap** — framed honestly as always-current/auto-generated (it already was, since Phase 9/10's sitemap route queries live data) rather than adding a fake "regenerate" button; a "Check now" button fetches the live `/sitemap.xml` and reports the current URL count.
+  - **robots.txt** — a raw-text admin field, served by new `server/src/routes/robots.js` at `GET /robots.txt` (falls back to a sensible default if unset), registered before `express.static` so it takes priority over the static file that ships in `dist/`. Deliberately gives the admin full raw-content control (no auto-appended `Sitemap:` line) to avoid a duplicate-line bug if their own text already includes one.
+  - **Tracking & Verification** — three plain-ID fields (Google Search Console verification value, GA4 Measurement ID, GTM Container ID) that each generate the correct standard snippet automatically, plus one raw "Custom Code" textarea for anything else (Facebook Pixel, etc.), injected verbatim/unescaped by design — the same admin-trust boundary every CMS's "custom code" feature relies on. Wired into `index.html`/`htmlTemplate.js` via a new `%%SEO_TRACKING%%` token (and the Vite dev-placeholder plugin, for parity in local dev) and a new `trackingHtml()` builder in `htmlTemplate.js`; `seoResolver.js`'s `resolveForPath` wrapper now also fetches and passes through `global.seoTools`.
+- **Footer Logo** — new `footerLogo` field on `SiteInfo`. `Footer.tsx` now renders `info.footerLogo || info.logo`, applying the invert-to-white CSS filter only when falling back to the main logo (a dedicated footer logo is assumed to already be styled correctly for a dark background). `AdminWebsiteSettings.tsx` gained an upload control with a dark-background preview and a "Use main logo" button to clear it back to the default auto-invert behavior.
+- Migration/seed scripts updated: `migrateSiteInfoFields.js` now also backfills `footerLogo: ''` on existing rows (safe to re-run); `seedSiteInfo.js`'s fresh-install defaults include it too; new `seedSisterConcernsAndSeoTools.js` seeds `home.sisterConcerns` (with the previously-hardcoded Proactive content as the default single entry) and `global.seoTools` (default `robotsTxt` matching the prior static file, tracking fields blank).
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds.
+- **Sister Concerns**: added a second test concern via the real admin UI, confirmed the save request/response and DB round-trip via intercepted network traffic, confirmed both entries render on the live public Home page; separately confirmed that setting `items: []` correctly hides the entire section (returns `null`, no empty heading left behind); restored the seeded single-entry default afterward via `seedSisterConcernsAndSeoTools.js` and confirmed via the public API.
+- **Footer Logo**: uploaded a real test image through the admin UI, confirmed the upload response, the save PUT, and a full page reload all reflect it; confirmed the live public footer renders that image *without* the invert filter; cleared it via "Use main logo" and confirmed the public footer reverts to the inverted main logo. Test upload file deleted afterward.
+- **robots.txt**: edited via the admin textarea, confirmed `GET /robots.txt` on the live server immediately reflects the change (ahead of the static file), reverted and confirmed the live output matches again; confirmed the endpoint falls back to the default when `global.seoTools` doesn't define it.
+- **SEO Tools tracking codes**: set a GSC verification code, GA4 ID, GTM ID, and a custom `<meta>` tag; confirmed all four appear correctly in the live served HTML `<head>` (correct standard snippets for the three ID fields, verbatim injection for the custom code); cleared all four and confirmed none remain in the served HTML, with no leftover `%%SEO_TRACKING%%` token when everything is blank. Confirmed the Sitemap "Check now" button reports the correct live URL count.
+- **SEO hub navigation**: confirmed `/admin/seo` shows the two-card hub, `/admin/seo/pages` renders the (relocated) Page SEO editor with a working back-link, and `/admin/seo/tools` renders the new SEO Tools page — no sidebar changes needed since the `seo` route path itself didn't move.
+- Re-ran the admin-CRUD regression suite (16/16 pass) and the full cross-browser/responsive public-route smoke suite; no new regressions beyond the pre-existing, previously-diagnosed WebKit/Windows HSTS artifact.
+- All test settings reverted to seeded defaults and orphaned test-upload files deleted; confirmed via direct DB/API queries.
+
+**Deliverable:** ✅ Sister Concerns is now a fully admin-manageable list (add/edit/remove companies, auto-hides if empty) instead of one hardcoded company. Admins can edit `robots.txt`, check the sitemap's live URL count, and configure Search Console/GA4/GTM/custom tracking codes without a developer, all from a new SEO Tools page. A dedicated footer logo can be uploaded independently of the header logo.
+
+---
+
 ## Phase 17 — cPanel Deployment
 **Status:** Not Started
 
@@ -641,5 +670,6 @@
 | 15 | Done | 2026-09-26 |
 | 16 | Done | 2026-09-26 |
 | 16.5 | Done | 2026-09-27 |
+| 16.6 | Done | 2026-09-27 |
 | 17 | Not Started | — |
 | 18 | Not Started | — |

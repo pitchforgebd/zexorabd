@@ -13,6 +13,7 @@ const csrf = require('./middleware/csrf');
 const { apiLimiter } = require('./middleware/rateLimiters');
 const apiRouter = require('./routes');
 const sitemapRouter = require('./routes/sitemap');
+const robotsRouter = require('./routes/robots');
 const seoResolver = require('./services/seoResolver');
 const htmlTemplate = require('./services/htmlTemplate');
 const notFound = require('./middleware/notFound');
@@ -84,6 +85,7 @@ function createApp() {
   );
   app.use('/api', apiRouter);
   app.use(sitemapRouter);
+  app.use(robotsRouter);
 
   // In production the Node app serves the built frontend directly (not
   // split between Apache-static + Node-API) so it can inject per-route SEO

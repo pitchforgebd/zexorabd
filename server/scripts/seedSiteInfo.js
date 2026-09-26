@@ -13,6 +13,7 @@ const pool = require('../src/db/pool');
 
 const SEED = {
   logo: '/logo.png',
+  footerLogo: '',
   favicon: '/favicon.png',
   ogImage: '/logo.png',
   companyName: 'Zexora Corporation',

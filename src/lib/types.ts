@@ -88,6 +88,7 @@ export type WhyChooseReason = { title: string; desc: string };
 
 export type SiteInfo = {
   logo: string;
+  footerLogo: string; // '' = reuse `logo` in the footer, same as before this field existed
   favicon: string;
   ogImage: string;
   companyName: string;
@@ -105,6 +106,32 @@ export type SiteInfo = {
     linkedin: string;
     youtube: string;
   };
+};
+
+export type SisterConcern = {
+  logo: string;
+  name: string;
+  tagline: string;
+  description: string;
+  websiteUrl: string;
+};
+
+export type SisterConcernsContent = {
+  heading: string;
+  subheading: string;
+  items: SisterConcern[];
+};
+
+// SEO Tools: robots.txt content and tracking/verification codes injected
+// site-wide. Kept as one JSON blob (global.seoTools) rather than several
+// site_settings keys, matching the global.siteInfo precedent - one admin
+// screen, one save.
+export type SeoToolsContent = {
+  robotsTxt: string;
+  googleAnalyticsId: string; // GA4 Measurement ID, e.g. G-XXXXXXX - '' disables
+  googleTagManagerId: string; // GTM Container ID, e.g. GTM-XXXXXXX - '' disables
+  googleSearchConsoleVerification: string; // the content="..." value from GSC's HTML tag method - '' disables
+  customHeadCode: string; // raw HTML/script injected just before </head> - anything not covered above
 };
 
 // Phase 14: content for the four previously-100%-hardcoded pages. Each
@@ -166,7 +193,9 @@ export type SiteSettings = {
   'home.stats'?: { items: StatItem[] };
   'home.whyChooseUs'?: { heading: string; subheading: string; reasons: WhyChooseReason[] };
   'home.suppliers'?: { heading: string; subheading: string; description: string };
+  'home.sisterConcerns'?: SisterConcernsContent;
   'global.siteInfo'?: SiteInfo;
+  'global.seoTools'?: SeoToolsContent;
   'page.about'?: AboutContent;
   'page.ceoMessage'?: CeoMessageContent;
   'page.visionMission'?: VisionMissionContent;

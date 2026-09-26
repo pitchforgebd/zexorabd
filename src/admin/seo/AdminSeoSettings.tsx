@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { apiFetch, ApiError } from '../../lib/api';
 import type { SeoMetaEntry } from '../../lib/types';
@@ -77,7 +78,8 @@ export default function AdminSeoSettings() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-2xl font-bold text-primary-dark">SEO</h1>
+      <Link to="/admin/seo" className="text-sm text-body-text hover:text-primary-blue mb-2 inline-block">← SEO</Link>
+      <h1 className="text-2xl font-bold text-primary-dark">Page SEO</h1>
       <p className="text-body-text text-sm mb-2">
         Per-page title, description, and social preview image. These are what search engines and links shared on
         WhatsApp/Facebook/LinkedIn actually see.

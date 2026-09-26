@@ -50,6 +50,41 @@ function organizationJsonLd(siteInfo) {
   };
 }
 
+// Builds the standard GA4/GTM/Search-Console snippets from just an ID/token
+// (the admin pastes an ID, not a whole script - less error-prone for a
+// non-technical user, and avoids storing arbitrary <script> content from
+// three separate "paste your tracking code here" boxes that all do the
+// same handful of things). customHeadCode is the escape hatch for anything
+// else and IS injected as raw HTML by design - it's an admin-auth-gated
+// "custom code" field, the same trust boundary every CMS with this feature
+// relies on, not user-facing input.
+function trackingHtml(seoTools) {
+  if (!seoTools) return '';
+  const parts = [];
+
+  if (seoTools.googleSearchConsoleVerification) {
+    parts.push(`<meta name="google-site-verification" content="${escapeHtml(seoTools.googleSearchConsoleVerification)}">`);
+  }
+  if (seoTools.googleTagManagerId) {
+    const id = escapeHtml(seoTools.googleTagManagerId);
+    parts.push(
+      `<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${id}');</script>`
+    );
+  }
+  if (seoTools.googleAnalyticsId) {
+    const id = escapeHtml(seoTools.googleAnalyticsId);
+    parts.push(
+      `<script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>` +
+        `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${id}');</script>`
+    );
+  }
+  if (seoTools.customHeadCode) {
+    parts.push(seoTools.customHeadCode);
+  }
+
+  return parts.join('\n  ');
+}
+
 function breadcrumbJsonLd(breadcrumbs) {
   return {
     '@context': 'https://schema.org',
@@ -88,7 +123,8 @@ function renderPage(meta) {
     .replace(/%%SEO_CANONICAL%%/g, escapeHtml(meta.canonicalUrl))
     .replace(/%%SEO_OG_IMAGE%%/g, escapeHtml(meta.ogImage))
     .replace(/%%SEO_FAVICON%%/g, escapeHtml(faviconUrl))
-    .replace('%%SEO_JSONLD%%', jsonLdHtml);
+    .replace('%%SEO_JSONLD%%', jsonLdHtml)
+    .replace('%%SEO_TRACKING%%', trackingHtml(meta.seoTools));
 }
 
 module.exports = { renderPage, templateExists };
