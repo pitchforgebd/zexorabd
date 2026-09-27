@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, ArrowRight } from 'lucide-react';
 import { useSiteInfo } from '../lib/useSiteSettings';
 
 export default function Header() {
@@ -28,8 +28,8 @@ export default function Header() {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { 
-      name: 'About Us', 
+    {
+      name: 'About Us',
       path: '/about',
       submenu: [
         { name: 'Message from Founder & CEO', path: '/ceo-message' },
@@ -58,7 +58,7 @@ export default function Header() {
   };
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-500 ${isSolid ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 py-3 lg:py-4' : 'bg-transparent py-4 lg:py-6'}`}>
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${isSolid ? 'bg-white/90 backdrop-blur-lg shadow-[0_4px_24px_-8px_rgba(15,23,42,0.1)] border-b border-gray-100 py-3 lg:py-3.5' : 'bg-transparent py-4 lg:py-6'}`}>
       <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center w-full">
           <Link to="/" className="flex-shrink-0 flex items-center">
@@ -73,33 +73,52 @@ export default function Header() {
               (1024px) is too narrow to fit a single line without wrapping,
               so those widths get the mobile hamburger menu instead. */}
           <div className="hidden xl:flex items-center mt-1">
-            <div className="flex space-x-3 2xl:space-x-5">
-              {navLinks.map((link) => (
-                <div key={link.name} className="relative group">
-                  <Link
-                    to={link.path}
-                    className={`flex items-center whitespace-nowrap text-[12px] 2xl:text-[13px] uppercase tracking-wider font-semibold hover:text-accent-hover transition-colors py-2 ${
-                      (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path
-                        ? 'text-primary-blue'
-                        : isSolid ? 'text-body-text' : 'text-gray-200 hover:text-white'
-                    }`}
-                  >
-                    {link.name}
-                    {link.submenu && <ChevronDown className="ml-1 w-4 h-4" />}
-                  </Link>
+            <div className="flex items-center space-x-1 2xl:space-x-1.5">
+              {navLinks.map((link) => {
+                const isActive =
+                  (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path;
+                return (
+                  <div key={link.name} className="relative group">
+                    <Link
+                      to={link.path}
+                      className={`relative flex items-center whitespace-nowrap text-[12px] 2xl:text-[13px] uppercase tracking-wider font-semibold transition-all duration-300 py-2 px-3.5 2xl:px-4 rounded-full ${
+                        isActive
+                          ? isSolid
+                            ? 'text-primary-blue bg-primary-blue/8'
+                            : 'text-white bg-white/15'
+                          : isSolid
+                            ? 'text-body-text hover:text-primary-blue hover:bg-primary-blue/5'
+                            : 'text-gray-200 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {link.name}
+                      {link.submenu && (
+                        <ChevronDown className="ml-1 w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-180" />
+                      )}
+                    </Link>
 
                     {/* Desktop Dropdown */}
                     {link.submenu && (
-                      <div className="absolute left-0 top-full -mt-1 pt-4 w-60 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:mt-0 transition-all duration-300 ease-out z-50">
-                        <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden py-3">
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 w-64 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 ease-out z-50">
+                        <div className="bg-white rounded-2xl shadow-xl shadow-slate-900/10 border border-gray-100 overflow-hidden py-2.5 relative">
+                          <div className="absolute top-0 left-0 w-full h-0.5 bg-linear-to-r from-primary-blue via-accent-hover to-primary-blue" />
                           {link.submenu.map((subItem) => (
                             <Link
                               key={subItem.name}
                               to={subItem.path}
-                              className={`block px-5 py-2.5 text-[14px] font-medium hover:bg-gray-50 hover:text-primary-blue transition-colors ${
-                                location.pathname === subItem.path ? 'text-primary-blue bg-blue-50/50' : 'text-gray-700'
+                              className={`group/item flex items-center gap-2.5 px-5 py-2.5 text-[13px] font-medium transition-all ${
+                                location.pathname === subItem.path
+                                  ? 'text-primary-blue bg-primary-blue/5'
+                                  : 'text-gray-600 hover:text-primary-blue hover:bg-gray-50'
                               }`}
                             >
+                              <span
+                                className={`w-1 h-1 rounded-full shrink-0 transition-all duration-300 ${
+                                  location.pathname === subItem.path
+                                    ? 'bg-primary-blue scale-100'
+                                    : 'bg-gray-300 scale-0 group-hover/item:scale-100'
+                                }`}
+                              />
                               {subItem.name}
                             </Link>
                           ))}
@@ -107,24 +126,29 @@ export default function Header() {
                       </div>
                     )}
                   </div>
-                ))}
-                
-                <Link
-                  to="/contact"
-                  className="bg-primary-blue hover:bg-accent-hover text-white px-5 py-2 2xl:px-7 2xl:py-2.5 rounded-full text-[12px] 2xl:text-[13px] uppercase tracking-wider font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 ml-3 whitespace-nowrap"
-                >
-                  Contact
-                </Link>
-              </div>
+                );
+              })}
+
+              <Link
+                to="/contact"
+                className="group relative flex items-center gap-1.5 overflow-hidden bg-primary-blue text-white px-5 py-2.5 2xl:px-6 2xl:py-2.5 rounded-full text-[12px] 2xl:text-[13px] uppercase tracking-wider font-bold transition-all shadow-md shadow-primary-blue/25 hover:shadow-lg hover:shadow-primary-blue/35 hover:-translate-y-0.5 ml-3"
+              >
+                <span className="absolute inset-0 bg-linear-to-r from-accent-hover to-primary-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="relative">Contact</span>
+                <ArrowRight className="relative w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+              </Link>
             </div>
+          </div>
 
           {/* Mobile menu button */}
           <div className="xl:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`${isSolid ? 'text-primary-dark' : 'text-white'} hover:text-primary-blue focus:outline-none`}
+              className={`p-2 rounded-full transition-colors ${
+                isSolid ? 'text-primary-dark hover:bg-gray-100' : 'text-white hover:bg-white/10'
+              }`}
             >
-              {isOpen ? <X size={28} /> : <Menu size={28} />}
+              {isOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
           </div>
         </div>
@@ -132,59 +156,63 @@ export default function Header() {
 
       {/* Mobile Nav */}
       {isOpen && (
-        <div className="xl:hidden bg-white shadow-lg absolute w-full left-0 top-full max-h-[85vh] overflow-y-auto">
+        <div className="xl:hidden bg-white shadow-xl shadow-slate-900/10 absolute w-full left-0 top-full max-h-[85vh] overflow-y-auto border-t border-gray-100">
           <div className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
-              <div key={link.name}>
-                <div className="flex justify-between items-center">
-                  <Link
-                    to={link.path}
-                    className={`flex-grow block py-3 text-base font-medium border-b border-gray-50 ${
-                      location.pathname === link.path || (location.pathname.startsWith(link.path) && link.path !== '/')
-                        ? 'text-primary-blue'
-                        : 'text-body-text hover:text-primary-blue'
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                  {link.submenu && (
-                    <button
-                      onClick={(e) => handleMobileExpand(link.name, e)}
-                      className="p-3 text-gray-500 hover:text-primary-blue border-b border-gray-50 flex-shrink-0"
+            {navLinks.map((link) => {
+              const isActive =
+                location.pathname === link.path || (location.pathname.startsWith(link.path) && link.path !== '/');
+              return (
+                <div key={link.name}>
+                  <div className="flex items-center gap-1">
+                    <Link
+                      to={link.path}
+                      className={`grow py-3 px-3.5 rounded-xl text-base font-medium transition-colors ${
+                        isActive ? 'text-primary-blue bg-primary-blue/5' : 'text-body-text hover:bg-gray-50'
+                      }`}
                     >
-                      <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${mobileExpanded === link.name ? 'rotate-180' : ''}`} />
-                    </button>
+                      {link.name}
+                    </Link>
+                    {link.submenu && (
+                      <button
+                        onClick={(e) => handleMobileExpand(link.name, e)}
+                        className="p-3 text-gray-400 hover:text-primary-blue shrink-0"
+                      >
+                        <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${mobileExpanded === link.name ? 'rotate-180' : ''}`} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Mobile Submenu */}
+                  {link.submenu && (
+                    <div className={`overflow-hidden transition-all duration-300 bg-gray-50 rounded-xl ${mobileExpanded === link.name ? 'max-h-96 opacity-100 mt-1 mb-2' : 'max-h-0 opacity-0'}`}>
+                      <div className="py-2">
+                        {link.submenu.map((subItem) => (
+                          <Link
+                            key={subItem.name}
+                            to={subItem.path}
+                            className={`flex items-center gap-2.5 px-5 py-2.5 text-sm font-medium ${
+                              location.pathname === subItem.path
+                                ? 'text-primary-blue'
+                                : 'text-gray-600 hover:text-primary-blue'
+                            }`}
+                          >
+                            <span className={`w-1 h-1 rounded-full shrink-0 ${location.pathname === subItem.path ? 'bg-primary-blue' : 'bg-gray-300'}`} />
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
-                
-                {/* Mobile Submenu */}
-                {link.submenu && (
-                  <div className={`overflow-hidden transition-all duration-300 bg-gray-50 rounded-lg ${mobileExpanded === link.name ? 'max-h-96 opacity-100 mt-1 mb-2' : 'max-h-0 opacity-0'}`}>
-                    <div className="py-2">
-                      {link.submenu.map((subItem) => (
-                        <Link
-                          key={subItem.name}
-                          to={subItem.path}
-                          className={`block px-4 py-2.5 text-sm font-medium ${
-                            location.pathname === subItem.path
-                              ? 'text-primary-blue'
-                              : 'text-gray-600 hover:text-primary-blue'
-                          }`}
-                        >
-                          {subItem.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
             <div className="pt-4 pb-2">
               <Link
                 to="/contact"
-                className="block text-center bg-primary-blue hover:bg-accent-hover text-white px-6 py-3 rounded-xl text-base font-bold transition-all shadow-md"
+                className="flex items-center justify-center gap-2 bg-primary-blue hover:bg-accent-hover text-white px-6 py-3 rounded-xl text-base font-bold transition-all shadow-md"
               >
                 Contact
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
@@ -193,4 +221,3 @@ export default function Header() {
     </nav>
   );
 }
-
