@@ -46,13 +46,24 @@
        on mobile. Found via cross-browser QA (Phase 12): a horizontal
        scrollbar on load, before anything below the fold had animated in.
        Set on both html and body - html.scrollWidth is what actually
-       determines page-level horizontal scroll, not body alone. */
-    overflow-x: hidden;
+       determines page-level horizontal scroll, not body alone.
+       Uses `clip`, not `hidden`: any overflow value other than "visible"
+       (including hidden) makes that element a scroll container, and
+       position:sticky descendants then compute their stuck offset against
+       THAT element's own (always-zero, nothing ever scrolls it) scroll
+       position instead of the real page scroll - silently never engaging.
+       `clip` still clips the paint and still constrains scrollWidth the
+       same way, but per spec does not establish a scroll container, so it
+       doesn't break sticky. Found via Phase 17.4 QA: the CEO Message
+       page's sticky photo tracked scroll 1:1 instead of sticking, traced
+       to this exact rule (via `hidden`) after ruling out every other
+       cause (containing blocks, transforms, filters, layout height). */
+    overflow-x: clip;
   }
   body {
     background-color: white;
     line-height: 1.8;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   h1, h2, h3, h4, h5, h6 {
     color: var(--color-primary-dark);
