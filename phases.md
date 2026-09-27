@@ -955,6 +955,29 @@
 
 ---
 
+## Phase 17.3 — Merged subsidiary detail into a single /company page (client's own reference design)
+**Status:** Done
+
+**Goal:** Client sent a screenshot of proactive.com.bd/company's actual content layout (numbered "01 Overview" eyebrow, "What We Do" bullets, "Who We Serve", "How We're Structured", a stats box, a "Company Profile" request box) and asked for Zexora's own `/company` page to look and behave like it: white background, and no more separate per-subsidiary detail page — the sister concern's full write-up should live directly on `/company`, reached via the homepage card's "Company" link.
+
+**What was built:**
+- **Removed `src/pages/SubsidiaryDetail.tsx` and the `/subsidiaries/:slug` route entirely** - along with its `seoResolver.js` branch and its per-concern sitemap entries (dead code once the route was gone).
+- **`src/lib/types.ts`** — `SisterConcern` dropped the unused `story` field (nothing rendered it after the subsidiary page's removal) and gained `whatWeDo: string[]`, `whoWeServe: string`, `howStructured: string`, `stats: SisterConcernStats` (`founded`/`headOffice`/`customersServed`/`leadershipExperience`/`coverage`/`industry`), and `profileNote: string`.
+- **`src/pages/Company.tsx`** — fully rebuilt: white background, a light page header, then one rich profile block per sister concern (numbered Overview, What We Do bullets, Who We Serve, How We're Structured, a bordered stats grid that only shows fields that are actually filled in, and a Company Profile box with "Request Profile" → `/contact` and, when set, "Visit Website" → the concern's own site). Each block gets an `id` (from `slugify(name)`) with a `scroll-mt-28` offset, and the page scrolls to the matching one on load if the URL carries a `#slug` hash.
+- **`src/components/SisterConcernCard.tsx`** (homepage preview card) — now links to `/company#<slug>` instead of a separate route; otherwise unchanged.
+- **`src/admin/homepage/AdminHomepage.tsx`** — the Sister Concerns editor gained a "What We Do" list editor (reusing the existing `StringListEditor` from the divisions admin), Who We Serve / How We're Structured textareas, a 6-field stats grid, and a Company Profile note field; dropped the now-gone "Our Story" textarea; the URL preview line now reads `/company#<slug>`.
+- **Migrated the live database record**: `home.sisterConcerns` still had the old shape (with the unused `story` field, no stats/whatWeDo/etc.) - rewrote it via the admin API using the real content the client's own reference screenshot showed for Proactive Trade International (their actual "What We Do" bullets, stats, and profile note), not placeholder text.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds.
+- Playwright: clicking a homepage card lands on `/company` with all the new sections present (confirmed by dumping the actual rendered text rather than trusting a first pass — a case-sensitive text check initially read as failing, traced to the buttons/labels' `uppercase` CSS class changing the *rendered* text Playwright's `innerText()` returns, not a real defect); the old `/subsidiaries/...` URL now correctly 404s (both client-side and via direct server curl); admin editor shows and saves the new fields. Screenshotted desktop and mobile - matches the reference screenshot's structure closely.
+- SEO verified via curl: correct canonical/breadcrumb for `/company`; sitemap no longer lists per-subsidiary URLs.
+- Re-ran the admin-CRUD suite three times after a first run showed one failure ("Suppliers admin page renders"), a second run showed a *different* one ("Homepage settings admin page renders") fail instead, and a third passed 16/16 clean - traced this to a genuine pre-existing race in the test script itself (it checks page content immediately after the `load` event fires, before the admin page's own `apiFetch` for site-settings has resolved and rendered anything past "Loading…") rather than a real bug, confirmed by directly measuring: right after `load`, body text is 8 characters ("Loading…"); 500ms later it's 859. Public smoke suite: 432/450, the same pre-existing 18-failure WebKit/Windows HSTS baseline, no new regressions.
+
+**Deliverable:** ✅ `/company` now matches the client's own reference design - white background, a full company profile per sister concern (Overview/What We Do/Who We Serve/How We're Structured/stats/profile request), no separate detail page to maintain.
+
+---
+
 ## Phase 18 — Documentation & Handover
 **Status:** Not Started
 
