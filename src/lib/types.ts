@@ -190,6 +190,16 @@ export type GlobalSourcingContent = {
   cta: { heading: string; text: string };
 };
 
+export type OurStoryContent = {
+  hero: { eyebrow: string; title: string; subtitle: string };
+  paragraphs: string[];
+  pullQuote: string;
+  // `label` is free text (a year, "15+ Years", "Ongoing"...) rather than a
+  // strict year field - not every milestone has a precise date worth
+  // pinning down, and forcing one would mean fabricating one.
+  milestones: { label: string; title: string; description: string }[];
+};
+
 export type SiteSettings = {
   'home.hero'?: { slides: HeroSlide[] };
   'home.stats'?: { items: StatItem[] };
@@ -202,6 +212,7 @@ export type SiteSettings = {
   'page.ceoMessage'?: CeoMessageContent;
   'page.visionMission'?: VisionMissionContent;
   'page.globalSourcing'?: GlobalSourcingContent;
+  'page.ourStory'?: OurStoryContent;
 };
 
 export type PageSection = {

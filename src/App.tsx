@@ -17,6 +17,8 @@ import Apparel from './pages/divisions/Apparel';
 import PrintPack from './pages/divisions/PrintPack';
 import Fashion from './pages/divisions/Fashion';
 import GlobalSourcing from './pages/GlobalSourcing';
+import OurStory from './pages/OurStory';
+import Company from './pages/Company';
 import Contact from './pages/Contact';
 
 // New Pages
@@ -54,6 +56,7 @@ import AdminAboutPage from './admin/pages/AdminAboutPage';
 import AdminCeoMessagePage from './admin/pages/AdminCeoMessagePage';
 import AdminVisionMissionPage from './admin/pages/AdminVisionMissionPage';
 import AdminGlobalSourcingPage from './admin/pages/AdminGlobalSourcingPage';
+import AdminOurStoryPage from './admin/pages/AdminOurStoryPage';
 import AdminContactMessages from './admin/inbox/AdminContactMessages';
 import AdminCareerApplications from './admin/inbox/AdminCareerApplications';
 import AdminSeoHub from './admin/seo/AdminSeoHub';
@@ -79,6 +82,8 @@ export default function App() {
             <Route path="divisions/printpack" element={<PrintPack />} />
             <Route path="divisions/fashion" element={<Fashion />} />
             <Route path="global-sourcing" element={<GlobalSourcing />} />
+            <Route path="our-story" element={<OurStory />} />
+            <Route path="company" element={<Company />} />
             <Route path="career" element={<Career />} />
             <Route path="media-centre" element={<MediaCentre />} />
             <Route path="media-centre/news" element={<News />} />
@@ -110,6 +115,7 @@ export default function App() {
                 <Route path="pages/ceo-message" element={<AdminCeoMessagePage />} />
                 <Route path="pages/vision-mission" element={<AdminVisionMissionPage />} />
                 <Route path="pages/global-sourcing" element={<AdminGlobalSourcingPage />} />
+                <Route path="pages/our-story" element={<AdminOurStoryPage />} />
                 <Route path="divisions" element={<AdminDivisionsList />} />
                 <Route path="divisions/:id" element={<AdminDivisionEdit />} />
                 <Route path="media" element={<AdminMediaHub />} />

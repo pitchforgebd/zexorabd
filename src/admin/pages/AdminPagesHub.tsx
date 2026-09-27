@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Info, UserCircle, Compass, Globe2 } from 'lucide-react';
+import { Info, UserCircle, Compass, Globe2, BookOpen } from 'lucide-react';
 
 const cards = [
   { to: '/admin/pages/about', icon: Info, title: 'About', desc: 'Who We Are, Business Divisions, Competitive Advantage, Vision.' },
+  { to: '/admin/pages/our-story', icon: BookOpen, title: 'Our Story', desc: 'The company narrative, pull quote, and milestone timeline.' },
   { to: '/admin/pages/ceo-message', icon: UserCircle, title: 'CEO Message', desc: "The Founder & CEO's leadership message." },
   { to: '/admin/pages/vision-mission', icon: Compass, title: 'Vision & Mission', desc: 'Vision, Mission, Core Values, Why Choose Us, Industries We Serve.' },
   { to: '/admin/pages/global-sourcing', icon: Globe2, title: 'Global Sourcing', desc: 'Sourcing network intro, countries, business models, commitment.' },

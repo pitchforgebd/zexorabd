@@ -22,6 +22,8 @@ const STATIC_URLS = [
   { path: '/vision-mission', changefreq: 'monthly', priority: '0.7' },
   { path: '/divisions', changefreq: 'monthly', priority: '0.8' },
   { path: '/global-sourcing', changefreq: 'monthly', priority: '0.8' },
+  { path: '/our-story', changefreq: 'monthly', priority: '0.6' },
+  { path: '/company', changefreq: 'monthly', priority: '0.6' },
   { path: '/career', changefreq: 'monthly', priority: '0.6' },
   { path: '/media-centre/news', changefreq: 'weekly', priority: '0.6' },
   { path: '/media-centre/photo-gallery', changefreq: 'monthly', priority: '0.4' },

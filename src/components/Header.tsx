@@ -36,9 +36,10 @@ export default function Header() {
         { name: 'Vision & Mission', path: '/vision-mission' }
       ]
     },
+    { name: 'Our Story', path: '/our-story' },
     { name: 'Our Divisions', path: '/divisions' },
     { name: 'Global Sourcing', path: '/global-sourcing' },
-    { name: 'Company', path: 'https://proactive.com.bd/', external: true },
+    { name: 'Company', path: '/company' },
     {
       name: 'Media Centre',
       path: '/media-centre',
@@ -73,31 +74,17 @@ export default function Header() {
             <div className="flex space-x-4 xl:space-x-6 2xl:space-x-8">
               {navLinks.map((link) => (
                 <div key={link.name} className="relative group">
-                  {link.external ? (
-                    <a
-                      href={link.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex items-center text-[12px] lg:text-[13px] xl:text-[14px] uppercase tracking-wider font-semibold hover:text-accent-hover transition-colors py-2 ${
-                        isSolid ? 'text-body-text' : 'text-gray-200 hover:text-white'
-                      }`}
-                    >
-                      {link.name}
-                      {link.submenu && <ChevronDown className="ml-1 w-4 h-4" />}
-                    </a>
-                  ) : (
-                    <Link
-                      to={link.path}
-                      className={`flex items-center text-[12px] lg:text-[13px] xl:text-[14px] uppercase tracking-wider font-semibold hover:text-accent-hover transition-colors py-2 ${
-                        (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path
-                          ? 'text-primary-blue'
-                          : isSolid ? 'text-body-text' : 'text-gray-200 hover:text-white'
-                      }`}
-                    >
-                      {link.name}
-                      {link.submenu && <ChevronDown className="ml-1 w-4 h-4" />}
-                    </Link>
-                  )}
+                  <Link
+                    to={link.path}
+                    className={`flex items-center text-[12px] lg:text-[13px] xl:text-[14px] uppercase tracking-wider font-semibold hover:text-accent-hover transition-colors py-2 ${
+                      (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path
+                        ? 'text-primary-blue'
+                        : isSolid ? 'text-body-text' : 'text-gray-200 hover:text-white'
+                    }`}
+                  >
+                    {link.name}
+                    {link.submenu && <ChevronDown className="ml-1 w-4 h-4" />}
+                  </Link>
 
                     {/* Desktop Dropdown */}
                     {link.submenu && (
@@ -148,27 +135,16 @@ export default function Header() {
             {navLinks.map((link) => (
               <div key={link.name}>
                 <div className="flex justify-between items-center">
-                  {link.external ? (
-                    <a
-                      href={link.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex-grow block py-3 text-base font-medium border-b border-gray-50 text-body-text hover:text-primary-blue`}
-                    >
-                      {link.name}
-                    </a>
-                  ) : (
-                    <Link
-                      to={link.path}
-                      className={`flex-grow block py-3 text-base font-medium border-b border-gray-50 ${
-                        location.pathname === link.path || (location.pathname.startsWith(link.path) && link.path !== '/')
-                          ? 'text-primary-blue'
-                          : 'text-body-text hover:text-primary-blue'
-                      }`}
-                    >
-                      {link.name}
-                    </Link>
-                  )}
+                  <Link
+                    to={link.path}
+                    className={`flex-grow block py-3 text-base font-medium border-b border-gray-50 ${
+                      location.pathname === link.path || (location.pathname.startsWith(link.path) && link.path !== '/')
+                        ? 'text-primary-blue'
+                        : 'text-body-text hover:text-primary-blue'
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
                   {link.submenu && (
                     <button
                       onClick={(e) => handleMobileExpand(link.name, e)}

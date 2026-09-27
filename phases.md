@@ -928,6 +928,33 @@
 
 ---
 
+## Phase 17.2 — Sister Concerns editorial card redesign, "Our Story" + "Company" pages
+**Status:** Done
+
+**Goal:** Client sent a screenshot of proactive.com.bd's own "Parent Group" card (numbered eyebrow, bold name, tagline, description, "Visit ↗" link next to a framed logo panel) asking for the homepage Sister Concerns section to look "like this but more beautiful." Separately, asked for two new nav pages matching Proactive's own site structure: an "Our Story" page, and a "Company" page containing the sister concern write-up — noting the current site's own "Company" nav item.
+
+**What was found:** the existing header nav already had a "Company" item, but it linked *externally* to `https://proactive.com.bd/` — a leftover placeholder from before this site had its own subsidiary content. The client's reference screenshot was that external page loading in their browser, not a design mockup.
+
+**What was built:**
+- **`src/components/home-sections/SisterConcernsSection.tsx`** — rebuilt again as light editorial cards: numbered "01 Sister Concern" eyebrow, bold name, tagline, description excerpt, "Explore Company" link with a circular arrow (fills/rotates on hover), next to a dark framed panel with the logo floating on a white plate. Alternates the visual/content sides per row (zebra layout) for when more than one concern exists. Section background changed from dark to `bg-light-gray` — a deliberate, established trick already used by `DivisionsGridSection` elsewhere on this page for tonal variation without going fully dark.
+- **`src/components/SisterConcernCard.tsx`** (new) — the per-concern card extracted out of the section component so the homepage section and the new `/company` page render the *identical* card, not two designs that can drift apart.
+- **`src/pages/Company.tsx`** (new) — a full standalone page at `/company`: dark hero (reusing `home.sisterConcerns`'s own heading/subheading, no separate admin field needed) followed by the same card list. Fixes the nav's dead external link.
+- **`src/pages/OurStory.tsx`** + **`src/components/our-story-sections/`** (`HeroSection`, `StorySection`, `useOurStoryContent`) + **`src/admin/pages/AdminOurStoryPage.tsx`** (new) — a brand-new admin-editable static page at `/our-story`, following the exact same architecture as About/CEO Message/Vision & Mission/Global Sourcing (`usePageSections('our-story')` + `SECTION_REGISTRY` with a fixed-order fallback, one consolidated admin form saving to `page.ourStory`). Content: hero, a 3-paragraph narrative, an optional pull-quote, and a 3-item milestone timeline (`label`/`title`/`description` — `label` is free text rather than a strict year field, since not every milestone has one worth fabricating). Wrote real narrative copy (company's actual founding facts: 15+ years hands-on industry experience, formally established 2024, growing sister-concern ecosystem) rather than lorem-ipsum placeholder, matching every other static page's existing quality bar — then **seeded it into the database** via the admin API, matching how every other static page's real content was seeded at Phase 14 (the frontend fallback in `useOurStoryContent.ts` alone was not enough; the admin editor's own empty-skeleton pattern means an admin who saves before the DB row exists would blank fields the fallback was quietly covering — caught this exact failure mode during verification, see below).
+- **`src/components/Header.tsx`** — added "Our Story" as a top-level nav item; changed "Company" from an external link (`https://proactive.com.bd/`, `target="_blank"`) to an internal `/company` route. Removed the now-fully-unused `external` link branch (desktop + mobile) rather than leaving dead code behind.
+- **`server/src/services/seoResolver.js`** / **`server/src/routes/sitemap.js`** — added `/our-story` and `/company` to `STATIC_PAGE_KEYS`, `STATIC_BREADCRUMBS`, and the sitemap's `STATIC_URLS`.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds.
+- Playwright: nav (desktop + mobile) shows both new items; the external `proactive.com.bd` link is gone from the entire page (checked, zero matches); clicking "Our Story" and "Company" from the nav lands on the right page with the right title; clicking a card on `/company` still routes to the correct `/subsidiaries/:slug` detail page; the homepage section's new "View Full Company Page" link works. Zero console/page errors throughout.
+- SEO verified via curl: correct canonical URL and `BreadcrumbList` JSON-LD for both new pages; both appear in `/sitemap.xml`.
+- **Caught and fixed a self-inflicted bug during verification**: the admin-editor end-to-end test filled in only one field (the hero eyebrow) and saved, which — because `AdminOurStoryPage`'s initial state is an empty skeleton, not the rich default content, exactly like every other static-page editor in this codebase — wrote a mostly-blank `page.ourStory` row to the database, wiping the title/subtitle/paragraphs/milestones/pull-quote that the frontend's fallback had been quietly covering for. Caught immediately by re-reading the settings back via the API rather than assuming the revert worked; fixed by seeding the full real content through the same authenticated admin API. Re-verified afterward that the public page and admin form both show the complete content again.
+- A first full-page Playwright screenshot of `/our-story` appeared to show the pull-quote/milestones missing (a large blank gap before the footer) — investigated with bounding-box/computed-style checks rather than assuming a rendering bug, and confirmed it was a screenshot-timing artifact (the `FadeIn`/`whileInView` scroll-reveal animation on those elements hadn't triggered yet at the moment of a single-shot full-page capture); a manual-scroll screenshot showed the content rendering correctly, matching what a real visitor scrolling the page would see.
+- Re-ran both regression suites: admin-CRUD 16/16 (deleted a leftover "QA Test News Post" the suite's own check doesn't clean up after itself); public smoke 432/450, the same pre-existing 18-failure WebKit/Windows HSTS baseline, no new regressions.
+
+**Deliverable:** ✅ Sister Concerns now matches the referenced editorial card style; the nav's dead external "Company" link is replaced with a real internal page listing all sister concerns; a new admin-editable "Our Story" page tells the company's actual founding narrative with a milestone timeline.
+
+---
+
 ## Phase 18 — Documentation & Handover
 **Status:** Not Started
 
