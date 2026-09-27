@@ -65,8 +65,8 @@ function ConcernProfile({ concern, idx }: { concern: SisterConcern; idx: number 
   return (
     <div id={slugify(concern.name)} className="scroll-mt-28">
       <FadeIn>
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-16 h-16 rounded-xl bg-white border border-gray-100 shadow-sm flex items-center justify-center p-2.5 shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 mb-10">
+          <div className="h-20 w-35 sm:w-auto sm:min-w-35 sm:max-w-55 rounded-xl bg-white border border-gray-100 shadow-sm flex items-center justify-center px-5 py-3 shrink-0">
             <img src={concern.logo} alt={concern.name} className="max-w-full max-h-full object-contain" />
           </div>
           <div>
