@@ -14,32 +14,30 @@ export default function MessageSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
 
-          {/* Left Sidebar - Sticky Image */}
+          {/* Left Sidebar - Photo */}
           <div className="lg:w-1/3">
-            <div className="sticky top-32">
-              <FadeIn delay={0.1}>
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white border border-gray-100 group">
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-primary-dark/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
-                  <img
-                    src={c.photo}
-                    alt={`${c.name} - ${c.title}`}
-                    className="w-full aspect-[4/5] object-cover filter contrast-[1.02] group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 z-20">
-                    <p className="text-white text-sm font-medium tracking-wider uppercase mb-1">Zexora Corporation</p>
-                    <p className="text-accent-hover font-semibold">Leading with Vision</p>
-                  </div>
+            <FadeIn delay={0.1}>
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white border border-gray-100 group">
+                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-primary-dark/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
+                <img
+                  src={c.photo}
+                  alt={`${c.name} - ${c.title}`}
+                  className="w-full aspect-[4/5] object-cover filter contrast-[1.02] group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 z-20">
+                  <p className="text-white text-sm font-medium tracking-wider uppercase mb-1">Zexora Corporation</p>
+                  <p className="text-accent-hover font-semibold">Leading with Vision</p>
                 </div>
+              </div>
 
-                <div className="mt-8 text-center lg:text-left bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-gray-50 rounded-bl-full -z-10"></div>
-                  <div className="w-12 h-1 bg-primary-blue mb-6 mx-auto lg:mx-0"></div>
-                  <h3 className="font-bold text-2xl text-primary-dark mb-1">{c.name}</h3>
-                  <h4 className="font-semibold text-lg text-primary-blue mb-4">{c.title}</h4>
-                  <p className="text-gray-500 text-sm font-bold tracking-widest uppercase">Zexora Corporation</p>
-                </div>
-              </FadeIn>
-            </div>
+              <div className="mt-8 text-center lg:text-left bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-gray-50 rounded-bl-full -z-10"></div>
+                <div className="w-12 h-1 bg-primary-blue mb-6 mx-auto lg:mx-0"></div>
+                <h3 className="font-bold text-2xl text-primary-dark mb-1">{c.name}</h3>
+                <h4 className="font-semibold text-lg text-primary-blue mb-4">{c.title}</h4>
+                <p className="text-gray-500 text-sm font-bold tracking-widest uppercase">Zexora Corporation</p>
+              </div>
+            </FadeIn>
           </div>
 
           {/* Right Content - Message */}
