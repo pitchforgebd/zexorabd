@@ -36,9 +36,9 @@ export default function Header() {
         { name: 'Vision & Mission', path: '/vision-mission' }
       ]
     },
-    { name: 'Our Story', path: '/our-story' },
     { name: 'Our Divisions', path: '/divisions' },
     { name: 'Global Sourcing', path: '/global-sourcing' },
+    { name: 'Our Story', path: '/our-story' },
     { name: 'Company', path: '/company' },
     {
       name: 'Media Centre',
