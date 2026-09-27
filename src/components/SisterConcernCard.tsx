@@ -4,17 +4,17 @@ import FadeIn from './FadeIn';
 import { slugify } from '../lib/slugify';
 import type { SisterConcern } from '../lib/types';
 
-// Shared by the homepage "Sister Concerns" section and the standalone
-// /company page so both present the exact same card, not two designs that
-// can drift out of sync.
+// The homepage "Sister Concerns" preview card - links to that company's own
+// section on the single, full /company page (there's no separate per-company
+// route/page anymore) via an anchor hash.
 export default function SisterConcernCard({ concern, idx, delay = 0 }: { concern: SisterConcern; idx: number; delay?: number }) {
-  const excerpt = concern.description ? concern.description.split('\n\n')[0] : concern.tagline;
+  const excerpt = concern.description || concern.tagline;
   const reverse = idx % 2 === 1;
 
   return (
     <FadeIn delay={delay}>
       <Link
-        to={`/subsidiaries/${slugify(concern.name)}`}
+        to={`/company#${slugify(concern.name)}`}
         className="group block bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 p-6 sm:p-8 lg:p-10"
       >
         <div

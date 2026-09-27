@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Plus, Trash2, ImagePlus } from 'lucide-react';
 import { apiFetch, ApiError } from '../../lib/api';
 import { slugify } from '../../lib/slugify';
+import StringListEditor from '../divisions/StringListEditor';
 import type { HeroSlide, SiteSettings, StatItem, WhyChooseReason, SisterConcern } from '../../lib/types';
 
 function emptySlide(): HeroSlide {
@@ -15,7 +16,19 @@ function emptyReason(): WhyChooseReason {
   return { title: '', desc: '' };
 }
 function emptyConcern(): SisterConcern {
-  return { logo: '', coverImage: '', name: '', tagline: '', description: '', story: '', websiteUrl: '' };
+  return {
+    logo: '',
+    coverImage: '',
+    name: '',
+    tagline: '',
+    description: '',
+    whatWeDo: [],
+    whoWeServe: '',
+    howStructured: '',
+    stats: { founded: '', headOffice: '', customersServed: '', leadershipExperience: '', coverage: '', industry: '' },
+    profileNote: '',
+    websiteUrl: '',
+  };
 }
 
 function SavedBadge({ message }: { message: string | null }) {
@@ -411,16 +424,48 @@ export default function AdminHomepage() {
                 <div className="flex-1 space-y-2">
                   <input value={concern.name} onChange={(e) => updateConcern(i, { name: e.target.value })} placeholder="Company name" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
                   <input value={concern.tagline} onChange={(e) => updateConcern(i, { tagline: e.target.value })} placeholder="Tagline" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
-                  <textarea value={concern.description} onChange={(e) => updateConcern(i, { description: e.target.value })} placeholder="About the Company (shown on the subsidiary's page - use a blank line between paragraphs)" rows={3} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
-                  <textarea value={concern.story} onChange={(e) => updateConcern(i, { story: e.target.value })} placeholder="Our Story (optional - shown on the subsidiary's page - use a blank line between paragraphs)" rows={3} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
-                  <input value={concern.websiteUrl} onChange={(e) => updateConcern(i, { websiteUrl: e.target.value })} placeholder="Official website URL (optional - shown as a secondary link on their page)" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                  <textarea value={concern.description} onChange={(e) => updateConcern(i, { description: e.target.value })} placeholder="Overview (shown on /company)" rows={3} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
+                  <input value={concern.websiteUrl} onChange={(e) => updateConcern(i, { websiteUrl: e.target.value })} placeholder="Official website URL (optional - shown as 'Visit Website' on /company)" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
                   <p className="text-xs text-gray-400">
-                    Page URL: <span className="font-mono">/subsidiaries/{slugify(concern.name) || '...'}</span>
+                    Section on /company: <span className="font-mono">/company#{slugify(concern.name) || '...'}</span>
                   </p>
                 </div>
                 <button onClick={() => setConcerns((c) => c.filter((_, idx) => idx !== i))} className="text-gray-400 hover:text-red-600 p-2 self-start">
                   <Trash2 className="w-4 h-4" />
                 </button>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+                <StringListEditor
+                  label="What We Do"
+                  items={concern.whatWeDo}
+                  onChange={(whatWeDo) => updateConcern(i, { whatWeDo })}
+                  placeholder="e.g. Supply and commission printing, converting and post-press machinery"
+                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Who We Serve</label>
+                  <textarea value={concern.whoWeServe} onChange={(e) => updateConcern(i, { whoWeServe: e.target.value })} rows={2} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">How We're Structured</label>
+                  <textarea value={concern.howStructured} onChange={(e) => updateConcern(i, { howStructured: e.target.value })} rows={2} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Stats box</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input value={concern.stats.founded} onChange={(e) => updateConcern(i, { stats: { ...concern.stats, founded: e.target.value } })} placeholder="Founded (e.g. 2024)" className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                    <input value={concern.stats.headOffice} onChange={(e) => updateConcern(i, { stats: { ...concern.stats, headOffice: e.target.value } })} placeholder="Head Office" className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                    <input value={concern.stats.customersServed} onChange={(e) => updateConcern(i, { stats: { ...concern.stats, customersServed: e.target.value } })} placeholder="Customers Served (e.g. 100+)" className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                    <input value={concern.stats.leadershipExperience} onChange={(e) => updateConcern(i, { stats: { ...concern.stats, leadershipExperience: e.target.value } })} placeholder="Leadership Experience" className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                    <input value={concern.stats.coverage} onChange={(e) => updateConcern(i, { stats: { ...concern.stats, coverage: e.target.value } })} placeholder="Coverage" className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                    <input value={concern.stats.industry} onChange={(e) => updateConcern(i, { stats: { ...concern.stats, industry: e.target.value } })} placeholder="Industry" className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Leave any field blank to hide just that one - the whole box hides itself if all six are empty.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Company Profile box text</label>
+                  <textarea value={concern.profileNote} onChange={(e) => updateConcern(i, { profileNote: e.target.value })} placeholder="e.g. A downloadable PDF profile is being prepared. Request a copy and we will send it directly." rows={2} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
+                </div>
               </div>
             </div>
           ))}

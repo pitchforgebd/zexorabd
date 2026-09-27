@@ -2,16 +2,6 @@ const { Router } = require('express');
 const config = require('../config');
 const pool = require('../db/pool');
 const newsService = require('../services/news');
-const siteSettingsService = require('../services/siteSettings');
-
-// Mirrors src/lib/slugify.ts - home.sisterConcerns has no stored slug/id.
-function slugify(name) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
 const router = Router();
 
@@ -50,17 +40,15 @@ function urlEntry(loc, changefreq, priority, lastmod) {
 // immediately with no cache-invalidation step to remember.
 router.get('/sitemap.xml', async (req, res, next) => {
   try {
-    const [divisionRows, news, settings] = await Promise.all([
+    const [divisionRows, news] = await Promise.all([
       // A lightweight query of its own (slug + updated_at only) rather than
       // reusing divisionsService.listDivisions, which doesn't select
       // updated_at - keeps that shared, app-wide function's return shape
       // untouched instead of growing it for this one sitemap-only need.
       pool.query('SELECT slug, updated_at FROM divisions WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'),
       newsService.listAll(),
-      siteSettingsService.getAll(),
     ]);
     const divisions = divisionRows[0];
-    const subsidiaries = settings['home.sisterConcerns']?.items || [];
 
     const entries = [
       ...STATIC_URLS.map((u) => urlEntry(`${config.siteUrl}${u.path}`, u.changefreq, u.priority)),
@@ -72,7 +60,6 @@ router.get('/sitemap.xml', async (req, res, next) => {
         .map((n) =>
           urlEntry(`${config.siteUrl}/media-centre/news/${n.slug}`, 'monthly', '0.5', toLastmod(n.updatedAt))
         ),
-      ...subsidiaries.map((s) => urlEntry(`${config.siteUrl}/subsidiaries/${slugify(s.name)}`, 'monthly', '0.5')),
     ];
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.join('\n')}\n</urlset>\n`;

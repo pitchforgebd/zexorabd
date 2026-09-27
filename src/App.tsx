@@ -32,7 +32,6 @@ import VideoGallery from './pages/media/VideoGallery';
 import NotFound from './pages/NotFound';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
-import SubsidiaryDetail from './pages/SubsidiaryDetail';
 
 // Admin (Phase 3+)
 import { AuthProvider } from './admin/AuthContext';
@@ -91,7 +90,6 @@ export default function App() {
             <Route path="media-centre/photo-gallery" element={<PhotoGallery />} />
             <Route path="media-centre/video-gallery" element={<VideoGallery />} />
             <Route path="contact" element={<Contact />} />
-            <Route path="subsidiaries/:slug" element={<SubsidiaryDetail />} />
             {/* Draft policies based on this site's actual data practices -
                 each page carries a visible notice that it needs legal
                 review before being relied on as a compliance document. */}
