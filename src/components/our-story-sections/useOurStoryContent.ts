@@ -54,7 +54,7 @@ export const DEFAULT_CONTENT: OurStoryContent = {
       'Today, Zexora Corporation operates across chemicals, machinery, power, apparel, print & pack, and fashion — combining industry knowledge, technical capability, and long-term thinking to deliver value that goes beyond a single transaction.',
       'As we continue to grow, our purpose remains unchanged: to build a trusted, performance-driven, and enduring corporate institution — one division, one partnership, and one sister concern at a time.',
     ],
-    image: '',
+    image: '/uploads/homepage/32b57c8bcf6eec189d899746f50704fa.jpg',
   },
 };
 
