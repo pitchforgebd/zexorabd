@@ -978,6 +978,31 @@
 
 ---
 
+## Phase 17.4 — Our Story page redesign (client's Proactive reference) + Company logo fix
+**Status:** Done
+
+**Goal:** Client sent two reference screenshots of proactive.com.bd/our-story ("our story page ta emon hobe" - the Our Story page should be like this): a dark hero with a punchy all-caps headline, a white "Journey So Far" section with a connected vertical timeline (dot markers on a line, not a grid), and a dark closing section pairing narrative paragraphs with a photo. Separately, reported the sister concern's logo on `/company` was illegible ("logo ta bujhai jacche na").
+
+**What was built:**
+- **`src/lib/types.ts`** — `OurStoryContent` restructured: milestones moved under a new `timeline: { eyebrow, heading, milestones }` group; the old flat `paragraphs`/`pullQuote` fields replaced by `closing: { heading, subheading, paragraphs, image }`.
+- **`src/components/our-story-sections/HeroSection.tsx`** — headline now bold, uppercase, and large, matching the reference's punch instead of the previous plain title treatment.
+- **`src/components/our-story-sections/TimelineSection.tsx`** (new, replaces `StorySection.tsx`) — a proper connected vertical timeline: a single line running top-to-bottom with a dot marker per milestone, label/title/description beside each.
+- **`src/components/our-story-sections/ClosingSection.tsx`** (new) — dark two-column section (narrative left, photo right); collapses to a single centered column when no photo is set, rather than showing an empty gap.
+- **`src/admin/pages/AdminOurStoryPage.tsx`** — reworked to match: Timeline eyebrow/heading + milestone list, Closing heading/subheading/paragraphs + a photo upload (reusing the same generic upload endpoint pattern used elsewhere).
+- **Content rewritten**, not copied - Proactive's reference text is about Proactive; wrote the equivalent narrative using Zexora's own established facts (15+ years hands-on experience, formal 2024 founding, six divisions, the growing sister-concern ecosystem) in the same structure and tone. Live `page.ourStory` database record re-seeded to the new shape via the admin API (same reasoning as Phase 17.1's seeding step - the frontend fallback alone isn't enough once the admin editor can overwrite it with an empty skeleton).
+- **`src/pages/Company.tsx`** — fixed the illegible logo: the box was a fixed 64×64px square, forcing Proactive's wide landscape logo to shrink far past readability. Widened it to a proper landscape box (`h-20`, `min-w-35`/`max-w-55`) and made the header row stack vertically below `sm:` so the wider box doesn't crowd the name/tagline into wrapping on mobile.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds.
+- A first full-page Playwright screenshot of the redesigned `/our-story` again appeared to show most of the timeline and the entire closing section missing (same `FadeIn`/`whileInView` single-shot-capture artifact documented in Phase 17.1/17.2) - confirmed via a gradual-scroll screenshot (stepping `scrollTo` down the page in increments, matching how a real visitor scrolls) that all five milestones and the full closing section render correctly; also confirmed via `innerText` content checks.
+- Admin editor tested end-to-end through the real UI: edited the closing heading, saved, reloaded, confirmed persistence, confirmed the public page reflected it, then reverted.
+- Company logo fix confirmed via screenshot at both desktop and mobile widths - logo fully legible, no more mobile wrapping.
+- Re-ran both regression suites: admin-CRUD 16/16 (deleted a leftover "QA Test News Post" per the established cleanup step); public smoke 432/450, the same pre-existing 18-failure WebKit/Windows HSTS baseline, no new regressions.
+
+**Deliverable:** ✅ `/our-story` now matches the client's reference structure (punchy hero, connected timeline, narrative-plus-photo closing section) with Zexora's own real content; the Company page's sister-concern logo is legible on both desktop and mobile.
+
+---
+
 ## Phase 18 — Documentation & Handover
 **Status:** Not Started
 
