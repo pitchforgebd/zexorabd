@@ -3,36 +3,59 @@ import type { OurStoryContent } from '../../lib/types';
 
 export const DEFAULT_CONTENT: OurStoryContent = {
   hero: {
-    eyebrow: 'Our Journey',
-    title: 'Our Story',
-    subtitle: 'How 15+ years of hands-on industry experience became a diversified, multi-sector corporate platform.',
+    eyebrow: 'Our Story',
+    title: 'Built By People Who Already Knew The Industry.',
+    subtitle:
+      "Zexora Corporation didn't start in a boardroom — it started on the floor, across fifteen-plus years of solving real supply problems. Here's how it became a diversified group.",
   },
-  paragraphs: [
-    'Zexora Corporation did not begin as an idea on paper — it began on the ground, inside the day-to-day realities of printing and packaging, industrial chemicals, global sourcing, and supply chain operations. For more than 15 years, our leadership worked directly within these industries, learning first-hand what reliability, quality, and long-term partnership actually require in practice.',
-    'That hands-on experience is what shaped the decision to build something larger. In 2024, Zexora Corporation was formally established — not as a startup testing an idea, but as a structured, professionally governed platform designed from day one to operate across multiple sectors with discipline, accountability, and measurable performance standards.',
-    "Today, Zexora Corporation operates six specialized business divisions and continues to grow its wider ecosystem of trusted sister concerns, each contributing its own expertise while sharing the same institutional standards of governance, quality, and long-term value creation.",
-  ],
-  pullQuote: 'We did not set out to be the biggest. We set out to be the most trusted.',
-  milestones: [
-    {
-      label: '15+ Years',
-      title: 'Deep Industry Roots',
-      description:
-        'Long before Zexora existed on paper, our leadership was already active across printing, packaging, industrial chemicals, global sourcing, and supply chain operations — building the practical, hands-on expertise that would eventually shape this entire platform.',
-    },
-    {
-      label: '2024',
-      title: 'Zexora Corporation Formally Established',
-      description:
-        'That experience was brought together under one name and one structure: Zexora Corporation — a diversified, professionally governed business group spanning six specialized divisions.',
-    },
-    {
-      label: 'Ongoing',
-      title: 'Growing the Ecosystem',
-      description:
-        "Zexora's ecosystem now extends beyond its own divisions to trusted sister concerns like Proactive Trade International, each operating with the same institutional discipline and long-term commitment to quality.",
-    },
-  ],
+  timeline: {
+    eyebrow: '01 Timeline',
+    heading: 'The Journey So Far.',
+    milestones: [
+      {
+        label: 'Before 2024',
+        title: 'Fifteen-Plus Years on the Ground',
+        description:
+          'Our leadership spent over fifteen years working directly inside printing and packaging, industrial chemicals, global sourcing, and supply chain operations — learning firsthand where industries lose time, money, and trust.',
+      },
+      {
+        label: '2024',
+        title: 'Zexora Corporation Is Founded',
+        description:
+          'Zexora Corporation was formally established in Dhaka on a clear principle: build a diversified, professionally governed platform — not a loose collection of side businesses.',
+      },
+      {
+        label: '2024',
+        title: 'Six Divisions Structured',
+        description:
+          'Six specialized business divisions were organized under one corporate platform — chemicals, machinery, power, apparel, print & pack, and fashion — each built on real operational experience, not assumption.',
+      },
+      {
+        label: '2024 – Present',
+        title: 'The Sister Concern Ecosystem Begins',
+        description:
+          "Zexora's ecosystem extended beyond its own divisions with trusted sister concerns like Proactive Trade International, each operating with the same institutional standards of governance and quality.",
+      },
+      {
+        label: 'Ongoing',
+        title: 'Building Toward Scale',
+        description:
+          'Zexora continues to grow its divisions and its ecosystem, guided by the same discipline that built it: measurable performance, structured governance, and long-term value over short-term expansion.',
+      },
+    ],
+  },
+  closing: {
+    heading: "The Next Chapter Is the One You're In.",
+    subheading: 'From Industry Experience to an Institutional Platform',
+    paragraphs: [
+      "Zexora Corporation was established in 2024 from a clear understanding of what Bangladesh's industrial and commercial sectors actually needed: a single, professionally governed platform capable of operating across multiple industries with real discipline.",
+      'With more than fifteen years of hands-on experience across printing, packaging, industrial chemicals, and global sourcing, our leadership recognized a growing need for reliable, structured, and accountable business partners — not just suppliers.',
+      'That recognition became the foundation of Zexora Corporation — bringing together six specialized divisions and a growing ecosystem of trusted sister concerns under one institutional standard.',
+      'Today, Zexora Corporation operates across chemicals, machinery, power, apparel, print & pack, and fashion — combining industry knowledge, technical capability, and long-term thinking to deliver value that goes beyond a single transaction.',
+      'As we continue to grow, our purpose remains unchanged: to build a trusted, performance-driven, and enduring corporate institution — one division, one partnership, and one sister concern at a time.',
+    ],
+    image: '',
+  },
 };
 
 export function useOurStoryContent(): OurStoryContent {

@@ -205,12 +205,20 @@ export type GlobalSourcingContent = {
 
 export type OurStoryContent = {
   hero: { eyebrow: string; title: string; subtitle: string };
-  paragraphs: string[];
-  pullQuote: string;
-  // `label` is free text (a year, "15+ Years", "Ongoing"...) rather than a
-  // strict year field - not every milestone has a precise date worth
-  // pinning down, and forcing one would mean fabricating one.
-  milestones: { label: string; title: string; description: string }[];
+  timeline: {
+    eyebrow: string;
+    heading: string;
+    // `label` is free text (a year, "15+ Years", "Ongoing"...) rather than a
+    // strict year field - not every milestone has a precise date worth
+    // pinning down, and forcing one would mean fabricating one.
+    milestones: { label: string; title: string; description: string }[];
+  };
+  closing: {
+    heading: string;
+    subheading: string;
+    paragraphs: string[];
+    image: string; // optional - the section collapses to a single column when unset
+  };
 };
 
 export type SiteSettings = {

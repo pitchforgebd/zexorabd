@@ -1,10 +1,12 @@
 import { usePageSections } from '../lib/usePageSections';
 import HeroSection from '../components/our-story-sections/HeroSection';
-import StorySection from '../components/our-story-sections/StorySection';
+import TimelineSection from '../components/our-story-sections/TimelineSection';
+import ClosingSection from '../components/our-story-sections/ClosingSection';
 
 const SECTION_REGISTRY: Record<string, React.ComponentType> = {
   hero: HeroSection,
-  story: StorySection,
+  timeline: TimelineSection,
+  closing: ClosingSection,
 };
 
 const FALLBACK_SECTION_KEYS = Object.keys(SECTION_REGISTRY);
