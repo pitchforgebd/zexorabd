@@ -22,25 +22,27 @@ export default function SisterConcernCard({ concern, idx, delay = 0 }: { concern
             reverse ? 'lg:[&>*:first-child]:order-2' : ''
           }`}
         >
-          <div className="relative rounded-[1.75rem] overflow-hidden bg-primary-dark aspect-[4/3] lg:aspect-square shadow-xl">
+          <div className="relative rounded-[1.75rem] overflow-hidden bg-light-gray border border-gray-100 aspect-[4/3] lg:aspect-square shadow-sm">
             {concern.coverImage ? (
               <img
                 src={concern.coverImage}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700"
+                className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
               />
             ) : (
               <div
-                className="absolute inset-0 opacity-[0.06] pointer-events-none"
+                className="absolute inset-0 opacity-[0.08] pointer-events-none"
                 style={{
-                  backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                  backgroundImage: 'radial-gradient(circle, var(--color-primary-blue) 1px, transparent 1px)',
                   backgroundSize: '24px 24px',
                 }}
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary-dark/30 to-transparent" />
+            {concern.coverImage && (
+              <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/10 to-transparent" />
+            )}
             <div className="absolute inset-0 flex items-center justify-center p-10 sm:p-14">
-              <div className="w-full max-w-[240px] rounded-2xl bg-white shadow-2xl flex items-center justify-center p-7 group-hover:-translate-y-1.5 transition-transform duration-500">
+              <div className="w-full max-w-[240px] rounded-2xl bg-white border border-gray-100 shadow-xl flex items-center justify-center p-7 group-hover:-translate-y-1.5 transition-transform duration-500">
                 <img src={concern.logo} alt={concern.name} className="max-w-full max-h-16 object-contain" />
               </div>
             </div>
