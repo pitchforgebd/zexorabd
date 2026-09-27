@@ -59,7 +59,7 @@ export default function Header() {
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-500 ${isSolid ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 py-3 lg:py-4' : 'bg-transparent py-4 lg:py-6'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center w-full">
           <Link to="/" className="flex-shrink-0 flex items-center">
             <img
@@ -69,14 +69,16 @@ export default function Header() {
             />
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center mt-1">
-            <div className="flex space-x-4 xl:space-x-6 2xl:space-x-8">
+          {/* Desktop Nav - only from xl (1280px): at 8 top-level items, lg
+              (1024px) is too narrow to fit a single line without wrapping,
+              so those widths get the mobile hamburger menu instead. */}
+          <div className="hidden xl:flex items-center mt-1">
+            <div className="flex space-x-3 2xl:space-x-5">
               {navLinks.map((link) => (
                 <div key={link.name} className="relative group">
                   <Link
                     to={link.path}
-                    className={`flex items-center text-[12px] lg:text-[13px] xl:text-[14px] uppercase tracking-wider font-semibold hover:text-accent-hover transition-colors py-2 ${
+                    className={`flex items-center whitespace-nowrap text-[12px] 2xl:text-[13px] uppercase tracking-wider font-semibold hover:text-accent-hover transition-colors py-2 ${
                       (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path
                         ? 'text-primary-blue'
                         : isSolid ? 'text-body-text' : 'text-gray-200 hover:text-white'
@@ -109,7 +111,7 @@ export default function Header() {
                 
                 <Link
                   to="/contact"
-                  className="bg-primary-blue hover:bg-accent-hover text-white px-6 py-2 xl:px-8 xl:py-2.5 rounded-full text-[13px] xl:text-[14px] uppercase tracking-wider font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 ml-4"
+                  className="bg-primary-blue hover:bg-accent-hover text-white px-5 py-2 2xl:px-7 2xl:py-2.5 rounded-full text-[12px] 2xl:text-[13px] uppercase tracking-wider font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 ml-3 whitespace-nowrap"
                 >
                   Contact
                 </Link>
@@ -117,7 +119,7 @@ export default function Header() {
             </div>
 
           {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center">
+          <div className="xl:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`${isSolid ? 'text-primary-dark' : 'text-white'} hover:text-primary-blue focus:outline-none`}
@@ -130,7 +132,7 @@ export default function Header() {
 
       {/* Mobile Nav */}
       {isOpen && (
-        <div className="lg:hidden bg-white shadow-lg absolute w-full left-0 top-full max-h-[85vh] overflow-y-auto">
+        <div className="xl:hidden bg-white shadow-lg absolute w-full left-0 top-full max-h-[85vh] overflow-y-auto">
           <div className="px-4 py-4 space-y-1">
             {navLinks.map((link) => (
               <div key={link.name}>
