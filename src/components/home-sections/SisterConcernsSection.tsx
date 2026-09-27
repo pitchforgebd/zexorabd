@@ -1,6 +1,8 @@
-import { ArrowRight, Share2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
 import FadeIn from '../FadeIn';
 import { useSiteSettings } from '../../lib/useSiteSettings';
+import { slugify } from '../../lib/slugify';
 import type { SisterConcernsContent } from '../../lib/types';
 
 const DEFAULT_CONTENT: SisterConcernsContent = {
@@ -9,10 +11,12 @@ const DEFAULT_CONTENT: SisterConcernsContent = {
   items: [
     {
       logo: 'https://i.ibb.co.com/7dbkZsNS/Proactive-Trade-International-Logo.png',
+      coverImage: '',
       name: 'Proactive Trade International',
       tagline: 'One-Stop Printing & Packaging Solutions',
       description:
         'Founded in 2024, Proactive Trade International is a trusted printing and packaging solutions provider in Bangladesh. Stands at the forefront of technical excellence in the printing and packaging industry.\n\nWe specialize in high-performance advanced printing & packaging industries machineries & consumables. Headquartered in Dhaka, Bangladesh, We proudly serve over 100+ top-tier printing and packaging companies.',
+      story: '',
       websiteUrl: 'https://proactive.com.bd/',
     },
   ],
@@ -41,49 +45,43 @@ export default function SisterConcernsSection() {
           <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">{c.heading}</h2>
         </FadeIn>
 
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div
+          className={`grid gap-6 lg:gap-8 ${c.items.length === 1 ? 'max-w-sm mx-auto' : 'sm:grid-cols-2 lg:grid-cols-3'}`}
+        >
           {c.items.map((concern, idx) => (
             <FadeIn key={idx} delay={idx * 0.1}>
-              <div className="group relative bg-gradient-to-br from-white/8 via-white/3 to-transparent border border-white/10 hover:border-white/25 rounded-3xl p-8 md:p-14 transition-all duration-500 overflow-hidden">
-                {/* Top accent line */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-blue to-transparent opacity-70" />
-                {/* Large decorative "ecosystem" watermark */}
-                <Share2 className="absolute -bottom-12 -right-12 w-72 h-72 text-white/4 rotate-12 pointer-events-none" />
-                <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary-blue/10 group-hover:bg-primary-blue/20 blur-3xl transition-colors duration-500 pointer-events-none" />
+              <Link
+                to={`/subsidiaries/${slugify(concern.name)}`}
+                className="group relative block h-96 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 hover:ring-primary-blue/50 transition-all duration-500"
+              >
+                {concern.coverImage ? (
+                  <img
+                    src={concern.coverImage}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-blue via-primary-blue/70 to-primary-dark" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary-dark/70 to-primary-dark/30" />
 
-                <div className="relative flex flex-col md:flex-row items-center gap-10 md:gap-16">
-                  <div className="w-full md:w-1/3 flex flex-col items-center text-center">
-                    <div className="relative mb-6">
-                      <div className="absolute inset-0 rounded-3xl bg-primary-blue/25 blur-xl scale-110 group-hover:scale-125 transition-transform duration-500" />
-                      <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-3xl bg-white shadow-2xl ring-4 ring-white/10 flex items-center justify-center p-6 group-hover:-translate-y-1 transition-transform duration-500">
-                        <img src={concern.logo} alt={concern.name} className="max-w-full max-h-full object-contain" />
-                      </div>
-                    </div>
-                    {concern.websiteUrl && (
-                      <a
-                        href={concern.websiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-white border-2 border-white/20 hover:border-white hover:bg-white hover:text-primary-dark px-6 py-3 rounded-full font-semibold transition-all duration-300"
-                      >
-                        Visit Website <ArrowRight className="w-4 h-4" />
-                      </a>
-                    )}
-                  </div>
+                <span className="absolute top-6 right-6 w-10 h-10 rounded-full border border-white/20 bg-white/5 text-white/60 flex items-center justify-center group-hover:bg-primary-blue group-hover:text-white group-hover:border-primary-blue group-hover:rotate-45 transition-all duration-500">
+                  <ArrowUpRight className="w-5 h-5" />
+                </span>
 
-                  <div className="w-full md:w-2/3 text-center md:text-left">
-                    <span className="inline-block px-3.5 py-1.5 rounded-full bg-primary-blue/20 border border-primary-blue/30 text-primary-light text-xs font-bold uppercase tracking-[2px] mb-4">
-                      {concern.tagline}
-                    </span>
-                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-5 tracking-tight">{concern.name}</h3>
-                    <div className="text-blue-100/80 space-y-4 text-[15px] md:text-base leading-relaxed">
-                      {concern.description.split('\n\n').map((p, pIdx) => (
-                        <p key={pIdx}>{p}</p>
-                      ))}
-                    </div>
+                <div className="relative h-full flex flex-col items-center justify-center text-center p-8">
+                  <div className="w-24 h-24 rounded-2xl bg-white shadow-xl flex items-center justify-center p-4 mb-6 group-hover:-translate-y-1 transition-transform duration-500">
+                    <img src={concern.logo} alt={concern.name} className="max-w-full max-h-full object-contain" />
                   </div>
+                  <span className="text-primary-light text-xs font-bold uppercase tracking-[2px] mb-2">
+                    {concern.tagline}
+                  </span>
+                  <h3 className="text-2xl font-bold text-white mb-5 tracking-tight">{concern.name}</h3>
+                  <span className="inline-flex items-center gap-1.5 text-white/70 group-hover:text-white text-sm font-bold uppercase tracking-wide transition-colors">
+                    Explore Company
+                  </span>
                 </div>
-              </div>
+              </Link>
             </FadeIn>
           ))}
         </div>

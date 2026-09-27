@@ -57,7 +57,7 @@ export default function SupplierLogos() {
                   <img
                     src={supplier.url}
                     alt={supplier.altText || `Supplier ${supplier.id}`}
-                    className="w-full h-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
                     loading="lazy"
                   />
                 </div>

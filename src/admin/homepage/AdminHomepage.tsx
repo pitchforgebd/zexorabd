@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Trash2, ImagePlus } from 'lucide-react';
 import { apiFetch, ApiError } from '../../lib/api';
+import { slugify } from '../../lib/slugify';
 import type { HeroSlide, SiteSettings, StatItem, WhyChooseReason, SisterConcern } from '../../lib/types';
 
 function emptySlide(): HeroSlide {
@@ -14,7 +15,7 @@ function emptyReason(): WhyChooseReason {
   return { title: '', desc: '' };
 }
 function emptyConcern(): SisterConcern {
-  return { logo: '', name: '', tagline: '', description: '', websiteUrl: '' };
+  return { logo: '', coverImage: '', name: '', tagline: '', description: '', story: '', websiteUrl: '' };
 }
 
 function SavedBadge({ message }: { message: string | null }) {
@@ -50,6 +51,9 @@ export default function AdminHomepage() {
   const [uploadingConcernIdx, setUploadingConcernIdx] = useState<number | null>(null);
   const concernFileInputRef = useRef<HTMLInputElement>(null);
   const pendingConcernUploadIdx = useRef<number | null>(null);
+  const [uploadingConcernCoverIdx, setUploadingConcernCoverIdx] = useState<number | null>(null);
+  const concernCoverFileInputRef = useRef<HTMLInputElement>(null);
+  const pendingConcernCoverUploadIdx = useRef<number | null>(null);
 
   useEffect(() => {
     apiFetch<SiteSettings>('/api/admin/site-settings')
@@ -137,6 +141,29 @@ export default function AdminHomepage() {
     }
   }
 
+  function triggerConcernCoverUpload(i: number) {
+    pendingConcernCoverUploadIdx.current = i;
+    concernCoverFileInputRef.current?.click();
+  }
+
+  async function handleConcernCoverSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const idx = pendingConcernCoverUploadIdx.current;
+    if (!file || idx === null) return;
+    setUploadingConcernCoverIdx(idx);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const result = await apiFetch<{ url: string }>('/api/admin/site-settings/upload-image', { method: 'POST', body: fd });
+      updateConcern(idx, { coverImage: result.url });
+    } catch (err) {
+      alert(err instanceof ApiError ? err.message : 'Cover image upload failed');
+    } finally {
+      setUploadingConcernCoverIdx(null);
+      if (concernCoverFileInputRef.current) concernCoverFileInputRef.current.value = '';
+    }
+  }
+
   if (loading) return <p className="text-body-text">Loading…</p>;
   if (error) return <p className="text-red-600">{error}</p>;
 
@@ -149,6 +176,7 @@ export default function AdminHomepage() {
 
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleSlideImageSelected} className="hidden" />
       <input ref={concernFileInputRef} type="file" accept="image/*" onChange={handleConcernLogoSelected} className="hidden" />
+      <input ref={concernCoverFileInputRef} type="file" accept="image/*" onChange={handleConcernCoverSelected} className="hidden" />
 
       {/* Hero Slider */}
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -337,33 +365,63 @@ export default function AdminHomepage() {
         </div>
         <div className="space-y-4">
           {concerns.map((concern, i) => (
-            <div key={i} className="border border-gray-200 rounded-xl p-4 flex gap-4">
-              <div className="w-24 h-24 rounded-lg overflow-hidden bg-light-gray shrink-0 relative">
-                {concern.logo ? (
-                  <img src={concern.logo} alt={concern.name} className="w-full h-full object-contain p-1" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No logo</div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => triggerConcernLogoUpload(i)}
-                  className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
-                >
-                  <ImagePlus className="w-5 h-5 text-white" />
+            <div key={i} className="border border-gray-200 rounded-xl p-4">
+              <div className="flex gap-4">
+                <div className="flex flex-col gap-2 shrink-0">
+                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-light-gray relative">
+                    {concern.logo ? (
+                      <img src={concern.logo} alt={concern.name} className="w-full h-full object-contain p-1" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No logo</div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => triggerConcernLogoUpload(i)}
+                      className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+                    >
+                      <ImagePlus className="w-5 h-5 text-white" />
+                    </button>
+                    {uploadingConcernIdx === i && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs">…</div>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-gray-400 text-center">Logo</span>
+
+                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-light-gray relative">
+                    {concern.coverImage ? (
+                      <img src={concern.coverImage} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px] text-center px-1">
+                        No cover (uses gradient)
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => triggerConcernCoverUpload(i)}
+                      className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+                    >
+                      <ImagePlus className="w-5 h-5 text-white" />
+                    </button>
+                    {uploadingConcernCoverIdx === i && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs">…</div>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-gray-400 text-center">Card background</span>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <input value={concern.name} onChange={(e) => updateConcern(i, { name: e.target.value })} placeholder="Company name" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                  <input value={concern.tagline} onChange={(e) => updateConcern(i, { tagline: e.target.value })} placeholder="Tagline" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                  <textarea value={concern.description} onChange={(e) => updateConcern(i, { description: e.target.value })} placeholder="About the Company (shown on the subsidiary's page - use a blank line between paragraphs)" rows={3} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
+                  <textarea value={concern.story} onChange={(e) => updateConcern(i, { story: e.target.value })} placeholder="Our Story (optional - shown on the subsidiary's page - use a blank line between paragraphs)" rows={3} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
+                  <input value={concern.websiteUrl} onChange={(e) => updateConcern(i, { websiteUrl: e.target.value })} placeholder="Official website URL (optional - shown as a secondary link on their page)" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
+                  <p className="text-xs text-gray-400">
+                    Page URL: <span className="font-mono">/subsidiaries/{slugify(concern.name) || '...'}</span>
+                  </p>
+                </div>
+                <button onClick={() => setConcerns((c) => c.filter((_, idx) => idx !== i))} className="text-gray-400 hover:text-red-600 p-2 self-start">
+                  <Trash2 className="w-4 h-4" />
                 </button>
-                {uploadingConcernIdx === i && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs">…</div>
-                )}
               </div>
-              <div className="flex-1 space-y-2">
-                <input value={concern.name} onChange={(e) => updateConcern(i, { name: e.target.value })} placeholder="Company name" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
-                <input value={concern.tagline} onChange={(e) => updateConcern(i, { tagline: e.target.value })} placeholder="Tagline" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
-                <textarea value={concern.description} onChange={(e) => updateConcern(i, { description: e.target.value })} placeholder="Description (use a blank line between paragraphs)" rows={3} className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm resize-y" />
-                <input value={concern.websiteUrl} onChange={(e) => updateConcern(i, { websiteUrl: e.target.value })} placeholder="Website URL (optional - hides the button if blank)" className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-sm" />
-              </div>
-              <button onClick={() => setConcerns((c) => c.filter((_, idx) => idx !== i))} className="text-gray-400 hover:text-red-600 p-2 self-start">
-                <Trash2 className="w-4 h-4" />
-              </button>
             </div>
           ))}
         </div>

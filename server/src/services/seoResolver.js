@@ -50,6 +50,17 @@ function absoluteUrl(pathname) {
   return `${config.siteUrl}${pathname}`;
 }
 
+// Mirrors src/lib/slugify.ts exactly - home.sisterConcerns has no stored
+// slug/id (it's a plain settings array), so both the frontend link and this
+// server-side route match derive the same slug from the company name.
+function slugify(name) {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 // Prefixes "Home" and resolves each crumb's (optional, relative) url to an
 // absolute one - the trail's own current page is intentionally left
 // without a url in STATIC_BREADCRUMBS/callers, filled in here from pathname.
@@ -157,6 +168,27 @@ async function resolveCore(pathname) {
           dateModified: post.updatedAt,
           url: absoluteUrl(pathname),
         },
+      });
+    }
+  }
+
+  // /subsidiaries/:slug - home.sisterConcerns is a plain settings array (no
+  // DB table/id), so the slug is derived from the company name on the fly.
+  const subsidiaryMatch = pathname.match(/^\/subsidiaries\/([a-z0-9-]+)\/?$/);
+  if (subsidiaryMatch) {
+    const slug = subsidiaryMatch[1];
+    const settings = await siteSettingsService.getAll();
+    const concern = (settings['home.sisterConcerns']?.items || []).find((item) => slugify(item.name) === slug);
+    if (concern) {
+      return buildResult({
+        pathname,
+        title: `${concern.name} | ${SITE_NAME}`,
+        description: concern.tagline || concern.description,
+        ogImage: concern.coverImage || concern.logo,
+        // No breadcrumb parent for "Subsidiaries" - it's a homepage section,
+        // not a listing page of its own, so a fake middle crumb pointing at
+        // "/" and calling it something other than "Home" would be wrong.
+        breadcrumbs: buildBreadcrumbs(pathname, [{ name: concern.name }]),
       });
     }
   }

@@ -899,6 +899,35 @@
 
 ---
 
+## Phase 17.1 — Sister Concerns tile grid + dynamic subsidiary pages, supplier logo colors
+**Status:** Done
+
+**Goal:** Client feedback (mid-deployment): the "Subsidiaries & Ecosystem" section was still too plain despite the Phase 16.7 dark-spotlight redesign; wanted the external "Visit Website" link replaced with a proper internal, dynamic page per sister concern (structured like an "About the Company" + "Our Story" page, referencing `proactive.com.bd/company` and `proactive.com.bd/our-story` as the kind of page meant); reported unspecified errors on the local dev site; and asked for the black & white hover effect on supplier logos to be removed (logos should always show in color).
+
+**What was built:**
+- **`src/components/SupplierLogos.tsx`** — removed the `grayscale`/`opacity-70`/hover-reveal classes from the logo `<img>`; logos now render in full color at all times (kept the existing hover scale-up).
+- **`src/lib/slugify.ts`** (new) — derives a URL slug from a sister concern's name on the fly (`home.sisterConcerns` is a plain settings array with no stored id/slug), mirrored server-side in `seoResolver.js` and `sitemap.js` since there's no shared-code path between frontend and backend in this project.
+- **`src/lib/types.ts`** — `SisterConcern` gained `coverImage` (optional homepage-tile background photo) and `story` (optional "Our Story" copy for the detail page).
+- **`src/components/home-sections/SisterConcernsSection.tsx`** — rebuilt as a responsive grid of clickable poster tiles (cover photo or gradient fallback, floating logo plate, tagline/name, "Explore Company" affordance) linking to `/subsidiaries/:slug`, replacing the inline description dump and external link.
+- **`src/pages/SubsidiaryDetail.tsx`** (new) — dark hero (cover photo + logo + name/tagline), "About the Company" section from `description`, "Our Story" section from `story` (only rendered when non-empty), footer CTA with an optional external "Visit Official Website" link plus an internal link back to the homepage; a not-found state for an unknown slug.
+- **`src/App.tsx`** — added the `subsidiaries/:slug` route.
+- **`src/admin/homepage/AdminHomepage.tsx`** — Sister Concerns editor gained a second image-upload box ("Card background", reusing the existing generic upload endpoint) and an "Our Story" textarea, plus a live `Page URL: /subsidiaries/{slug}` preview.
+- **`server/src/services/seoResolver.js`** — new `/subsidiaries/:slug` resolution branch: title/description/og:image from the matched concern, breadcrumbs to the concern itself (deliberately no fake "Subsidiaries" parent crumb - it's a homepage section, not a listing page).
+- **`server/src/routes/sitemap.js`** — sitemap now includes one entry per sister concern at `/subsidiaries/<slug>`.
+- **Local dev "errors" diagnosed**: both local servers (port 3000 Vite, port 3001 Express) were down, a side effect of this session's earlier `Stop-Process` calls made while troubleshooting the cPanel deployment. Restarted both; a Playwright error sweep found only one artifact (`net::ERR_ABORTED` on an external ibb.co logo image during a fast page-load race), confirmed via `curl -sI` that the image itself returns 200 - not a real bug.
+
+**Verified, not just written:**
+- `tsc --noEmit` clean; production build succeeds.
+- `/sitemap.xml` confirmed via curl to include `/subsidiaries/proactive-trade-international`.
+- SEO output verified via curl against both the SSR `<head>` (real browser hit) and the `/api/page-meta` endpoint (client-side route-change path): correct title, og:image, canonical, and `BreadcrumbList` JSON-LD for the real subsidiary; correct `notFound`/`noIndex: true` fallback for an unknown slug.
+- Playwright: clicking a homepage tile navigates to the correct detail page with the correct title; the not-found state renders; zero `.grayscale` classes remain on supplier logos; zero console/page errors. Screenshotted desktop and mobile for both the tile grid and the detail page.
+- Admin editor tested end-to-end through the real UI (not just the API): logged in, filled the "Our Story" textarea, uploaded a cover image through the actual upload button (not by bypassing it - an earlier script attempt that set the hidden file input directly skipped the click handler that records which concern the upload is for, and silently no-opped), clicked the section's own Save button, reloaded, and confirmed both fields persisted; confirmed the public subsidiary page rendered the new "Our Story" section. Cleaned up the test story text and test cover image afterward via the same admin session (CSRF-token-aware requests) so no test content was left live.
+- Re-ran both regression suites: admin-CRUD 16/16 (deleted a leftover "QA Test News Post" the suite's own news-create check doesn't clean up after itself); public smoke 432/450, the same pre-existing 18-failure WebKit/Windows HSTS baseline, no new regressions.
+
+**Deliverable:** ✅ Sister Concerns is now a grid of clickable tiles, each backed by its own dynamic, SEO-indexed detail page; supplier logos show in color at all times; local dev site restored to a clean, error-free state.
+
+---
+
 ## Phase 18 — Documentation & Handover
 **Status:** Not Started
 

@@ -110,10 +110,12 @@ export type SiteInfo = {
 
 export type SisterConcern = {
   logo: string;
+  coverImage: string; // optional background photo for the homepage tile; falls back to a gradient when unset
   name: string;
   tagline: string;
-  description: string;
-  websiteUrl: string;
+  description: string; // shown as "About the Company" on the subsidiary's own page
+  story: string; // shown as "Our Story" on the subsidiary's own page
+  websiteUrl: string; // optional - shown as a secondary link on the subsidiary's own page
 };
 
 export type SisterConcernsContent = {
