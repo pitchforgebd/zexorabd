@@ -1003,6 +1003,23 @@
 
 ---
 
+## Phase 17.5 — Site-wide `position: sticky` bug fixed (CEO photo)
+
+**Goal:** Client asked for the CEO photo on `/ceo-message` to stay visible near the top of the viewport while the (much longer) message text scrolls past beside it, rather than scrolling away with the page.
+
+**What was found:** the photo's wrapper already had `sticky top-32` in the code - but it silently never actually engaged, tracking scroll 1:1 like ordinary content instead of sticking. Root-caused (after ruling out every other classic sticky-breaker - transforms, filters, `contain`, container height, cascade layers - via direct computed-style inspection at each ancestor) to a site-wide CSS rule: `overflow-x: hidden` set on `<body>` (added in Phase 12 to stop off-canvas `FadeIn` animations and the marquee logo strip from causing a horizontal scrollbar before they'd animated in). Any non-`visible` overflow value turns that element into its own scroll container; since nothing ever actually scrolls `<body>`'s own internal scroll position (the user's wheel/touch scrolls the true page/viewport), every `position: sticky` descendant on *every page* was silently computing its stuck offset against body's permanently-zero scroll position instead of the real one - a latent, site-wide bug, not something this session introduced.
+
+**The fix:** switched both `html` and `body` from `overflow-x: hidden` to `overflow-x: clip`. `clip` clips the paint and constrains `scrollWidth` the same way `hidden` does, but per the CSS Overflow spec it does not establish a scroll container - so it stops breaking `position: sticky` without reopening the Phase 12 horizontal-scrollbar bug.
+
+**Verified, not just written:**
+- Isolated the true root cause methodically rather than guessing: computed-style dumps of every ancestor (position, overflow, transform, filter, `contain`, `will-change`, `perspective`) ruled out every other known sticky-breaker one at a time; a minimal `position:sticky` test element injected directly into `<body>` (bypassing the app's own components entirely) reproduced the same non-sticking behavior, proving it was a page-wide CSS issue, not something specific to this one component; temporarily removing `overflow-x` from `body` alone (via `page.evaluate`) confirmed sticky started working immediately, pinpointing the exact rule.
+- Confirmed the fix doesn't reopen the original bug: real mouse-wheel and touch-drag horizontal scroll attempts (not just `window.scrollTo()`, which turned out to bypass `overflow: hidden` in a way real input doesn't) remain fully blocked on every page tested, both before and after switching to `clip`.
+- Re-ran the public smoke suite: first pass after the initial fix attempt (`overflow-x: hidden` removed from `body` only) came back 427/450 - the suite's own "no horizontal overflow" check caught 5 new failures on 3 pages, traced to a genuine (if real-user-invisible) `scrollWidth` measurement artifact from `FadeIn`'s pre-animation off-canvas transform state, previously masked by the double `overflow-x: hidden`. Switching to `overflow-x: clip` on both `html` and `body` fixed that measurement too - back to 432/450, the same pre-existing 18-failure WebKit/Windows HSTS baseline, no new regressions. Admin-CRUD suite: 16/16.
+
+**Deliverable:** ✅ The CEO photo now sticks near the top of the viewport while scrolling through the message text, as requested - and every other (present or future) `position: sticky` element on the site is fixed along with it.
+
+---
+
 ## Phase 18 — Documentation & Handover
 **Status:** Not Started
 
