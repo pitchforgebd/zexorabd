@@ -81,7 +81,14 @@ export default function AdminHomepage() {
         setSupDescription(settings['home.suppliers']?.description || '');
         setConcernHeading(settings['home.sisterConcerns']?.heading || '');
         setConcernSubheading(settings['home.sisterConcerns']?.subheading || '');
-        setConcerns(settings['home.sisterConcerns']?.items || []);
+        // Normalize each loaded concern against the current full shape -
+        // production data saved before the Overview/What We Do/stats fields
+        // existed is missing them entirely (not just empty strings), and
+        // every read below (concern.stats.founded etc.) assumes they're
+        // present. Merging onto emptyConcern() here, once, means the rest
+        // of this file never has to guard every individual field access.
+        const rawConcerns = settings['home.sisterConcerns']?.items || [];
+        setConcerns(rawConcerns.map((c) => ({ ...emptyConcern(), ...c, stats: { ...emptyConcern().stats, ...c.stats } })));
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to load settings'))
       .finally(() => setLoading(false));
