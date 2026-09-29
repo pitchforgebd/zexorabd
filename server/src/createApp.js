@@ -75,6 +75,18 @@ function createApp() {
   app.use(sessionMiddleware);
   app.use('/api', csrf);
   app.use('/api', apiLimiter);
+  // Every /api response is dynamic and often session/auth-dependent - the
+  // Node app itself never sends a Cache-Control header for these (unlike
+  // the SPA HTML route and /uploads, which set theirs explicitly), so on
+  // shared cPanel/LiteSpeed hosting an intermediate cache in front of the
+  // app can serve a stale GET response after a write, e.g. reading
+  // site-settings right after saving them still shows the old value until
+  // that cache entry expires. Explicit no-store here stops any proxy
+  // between the browser and this process from caching API responses at all.
+  app.use('/api', (req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
 
   // Uploaded filenames are randomized per-file (crypto.randomBytes) and
   // never reused, so a far-future immutable cache is safe - a URL either
