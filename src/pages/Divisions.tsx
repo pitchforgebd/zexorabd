@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { useDivision, useDivisionsList } from '../lib/useDivisions';
 import { getIcon } from '../lib/icons';
 
@@ -21,6 +22,7 @@ export function DivisionTemplate({ id }: { id: string }) {
       <section className="bg-gradient-to-br from-primary-blue to-accent-hover text-white py-24 px-4 text-center overflow-hidden relative">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80')] opacity-5 bg-cover bg-center"></div>
         <FadeIn className="max-w-5xl mx-auto relative z-10">
+          <Breadcrumbs variant="dark" center />
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 text-white tracking-tight leading-tight">
             {data.name}
           </h1>

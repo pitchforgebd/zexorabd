@@ -11,6 +11,9 @@ const DEFAULT_DESCRIPTION =
 const DEFAULT_OG_IMAGE = `${config.siteUrl}/logo.png`;
 
 // Static routes -> the seo_meta.page_key that holds their editable content.
+// The Media Centre hub (/media-centre) used to share 'media-centre-news' -
+// same title/description as its own News sub-page - now has its own key so
+// it can carry a distinct, accurate title/description of its own.
 const STATIC_PAGE_KEYS = {
   '/': 'home',
   '/about': 'about',
@@ -21,11 +24,20 @@ const STATIC_PAGE_KEYS = {
   '/our-story': 'our-story',
   '/company': 'company',
   '/career': 'career',
-  '/media-centre': 'media-centre-news',
+  '/media-centre': 'media-centre',
   '/media-centre/news': 'media-centre-news',
   '/media-centre/photo-gallery': 'media-centre-photos',
   '/media-centre/video-gallery': 'media-centre-videos',
   '/contact': 'contact',
+};
+
+// schema.org WebPage subtype per static route, where a more specific type
+// genuinely applies (only where the page content matches it) - consumed by
+// htmlTemplate.js. Routes not listed here get the generic WebPage default
+// baked into htmlTemplate itself.
+const STATIC_PAGE_TYPES = {
+  '/about': 'AboutPage',
+  '/contact': 'ContactPage',
 };
 
 // Breadcrumb trail per static route (Home is implicit/first for all of
@@ -79,7 +91,7 @@ function resolveImageUrl(image) {
   return image.startsWith('/') ? absoluteUrl(image) : image;
 }
 
-function buildResult({ pathname, title, description, ogImage, canonicalUrl, breadcrumbs, notFound, article, noIndex }) {
+function buildResult({ pathname, title, description, ogImage, canonicalUrl, breadcrumbs, notFound, article, noIndex, pageType }) {
   return {
     title: title || DEFAULT_TITLE,
     description: truncate(description) || DEFAULT_DESCRIPTION,
@@ -90,6 +102,9 @@ function buildResult({ pathname, title, description, ogImage, canonicalUrl, brea
     canonicalUrl: canonicalUrl || absoluteUrl(pathname),
     breadcrumbs: breadcrumbs || null,
     article: article || null,
+    // The specific schema.org WebPage subtype (AboutPage, ContactPage...)
+    // for this route, if one genuinely applies - see STATIC_PAGE_TYPES.
+    pageType: pageType || null,
     notFound: !!notFound,
     // A 404 is never worth indexing; explicit noIndex covers anything else
     // that shouldn't be (there's currently nothing else, but the hook is
@@ -105,14 +120,22 @@ function buildResult({ pathname, title, description, ogImage, canonicalUrl, brea
  * override. Static pages are entirely admin-editable via seo_meta.
  */
 async function resolveForPath(pathname) {
-  const [settings, result] = await Promise.all([siteSettingsService.getAll(), resolveCore(pathname)]);
+  const [settings, result, divisions] = await Promise.all([
+    siteSettingsService.getAll(),
+    resolveCore(pathname),
+    // Fetched on every request (not just the homepage) because the
+    // Organization JSON-LD's `department` list is injected site-wide by
+    // htmlTemplate.js, same as the org info itself - a lightweight
+    // slug+name query, the same one sitemap.js already runs per-request.
+    divisionsService.listDivisions({ includeInactive: false }),
+  ]);
   const siteInfo = settings['global.siteInfo'];
   const seoTools = settings['global.seoTools'];
   // Fallback chain: this page's own og:image -> the site-wide default set
   // in Website Settings -> the hardcoded logo, so every page has always
   // had *something* correct to show even before Phase 13/16.5 existed.
   const ogImage = result.ogImage || resolveImageUrl(siteInfo?.ogImage) || DEFAULT_OG_IMAGE;
-  return { ...result, ogImage, siteInfo, seoTools };
+  return { ...result, ogImage, siteInfo, seoTools, divisions };
 }
 
 // Does the actual route matching/lookup; siteInfo is merged in by the
@@ -177,16 +200,19 @@ async function resolveCore(pathname) {
       ogImage: entry?.ogImage,
       canonicalUrl: entry?.canonicalUrl,
       breadcrumbs: trail ? buildBreadcrumbs(pathname, trail) : null,
+      pageType: STATIC_PAGE_TYPES[pathname],
     });
   }
 
   // Real routes with placeholder content pending from the client (see
   // phases.md Phase 12) - valid pages (200), just not in STATIC_PAGE_KEYS
   // since there's no seo_meta entry to manage yet, and deliberately left
-  // out of sitemap.xml so they aren't submitted for indexing while the
-  // content is still a placeholder.
+  // out of sitemap.xml AND explicitly noindexed so they aren't submitted
+  // for/eligible for indexing while the content is still a placeholder -
+  // Google can still discover them via the footer link, so the sitemap
+  // omission alone isn't sufficient.
   if (pathname === '/privacy-policy' || pathname === '/terms-of-service') {
-    return buildResult({ pathname });
+    return buildResult({ pathname, noIndex: true });
   }
 
   // Anything unrecognized (a division/news slug that doesn't exist, a typo'd

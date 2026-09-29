@@ -34,10 +34,25 @@ const DEFAULT_SOCIAL = {
   youtube: 'https://www.youtube.com/@zexoracorporation',
 };
 
+// Established in 2024 - stated consistently across the site's own copy
+// (About, CEO Message, Our Story), not a value invented for this schema.
+const FOUNDING_DATE = '2024';
+
 // Falls back to these defaults if the admin hasn't saved Website Settings
 // yet (siteInfo is undefined) - keeps this schema working even before
 // Phase 13's global.siteInfo row exists.
-function organizationJsonLd(siteInfo) {
+//
+// `department` lists the real, active business divisions (fetched from the
+// same divisions table the site itself renders, never hardcoded) using
+// schema.org's `department` property - appropriate here because the site's
+// own copy consistently describes these six as internal divisions of one
+// company, not separate legal entities. Sister concerns (e.g. Proactive
+// Trade International) are deliberately NOT represented as
+// subOrganization/parentOrganization anywhere in this codebase - the site's
+// own language never claims formal ownership of them, only an "ecosystem"/
+// "sister concern" relationship, so asserting a formal corporate-structure
+// schema property for that would be a claim the content doesn't support.
+function organizationJsonLd(siteInfo, divisions) {
   const logo = siteInfo?.logo || '/logo.png';
   const social = siteInfo?.social || DEFAULT_SOCIAL;
   const org = {
@@ -47,6 +62,7 @@ function organizationJsonLd(siteInfo) {
     name: siteInfo?.companyName || 'Zexora Corporation',
     url: config.siteUrl,
     logo: logo.startsWith('http') ? logo : `${config.siteUrl}${logo}`,
+    foundingDate: FOUNDING_DATE,
     sameAs: [social.facebook, social.instagram, social.linkedin, social.youtube].filter(Boolean),
   };
   if (siteInfo?.tagline) org.description = siteInfo.tagline;
@@ -60,6 +76,13 @@ function organizationJsonLd(siteInfo) {
       ...(siteInfo.phone ? { telephone: siteInfo.phone } : {}),
       ...(siteInfo.email ? { email: siteInfo.email } : {}),
     };
+  }
+  if (divisions && divisions.length > 0) {
+    org.department = divisions.map((d) => ({
+      '@type': 'Organization',
+      name: d.name,
+      url: `${config.siteUrl}/divisions/${d.slug}`,
+    }));
   }
   return org;
 }
@@ -155,12 +178,34 @@ function breadcrumbJsonLd(breadcrumbs) {
   };
 }
 
+// A specific schema.org WebPage subtype (AboutPage, ContactPage...) where
+// one genuinely applies (see seoResolver's STATIC_PAGE_TYPES) - falls back
+// to the generic WebPage for every other indexable page, which just ties
+// the page's own title/description to its URL for Google's WebPage entity
+// graph without asserting a more specific type the content doesn't back up.
+function webPageJsonLd(meta) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': meta.pageType || 'WebPage',
+    '@id': `${meta.canonicalUrl}#webpage`,
+    url: meta.canonicalUrl,
+    name: meta.title,
+    description: meta.description,
+    isPartOf: { '@id': `${config.siteUrl}/#website` },
+  };
+}
+
 /**
  * Render the built index.html with per-request SEO values substituted for
  * the %%SEO_*%% tokens (see index.html). meta comes from seoResolver.
  */
 function renderPage(meta) {
-  const jsonLdBlocks = [organizationJsonLd(meta.siteInfo), websiteJsonLd(meta.siteInfo)];
+  const jsonLdBlocks = [organizationJsonLd(meta.siteInfo, meta.divisions), websiteJsonLd(meta.siteInfo)];
+  // Only where a specific WebPage subtype genuinely applies (About,
+  // Contact) - not added as a generic default on every page, since it
+  // wouldn't add anything Organization/WebSite/Breadcrumb don't already
+  // cover for pages with no more specific type to claim.
+  if (meta.pageType) jsonLdBlocks.push(webPageJsonLd(meta));
   if (meta.breadcrumbs) jsonLdBlocks.push(breadcrumbJsonLd(meta.breadcrumbs));
   if (meta.article) jsonLdBlocks.push(newsArticleJsonLd(meta.article));
   // JSON.stringify doesn't escape "<", so a division name or news title

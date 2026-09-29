@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { CalendarDays, ArrowLeft } from 'lucide-react';
+import Breadcrumbs from '../../components/Breadcrumbs';
 import { useNewsPost } from '../../lib/useMedia';
 
 export default function NewsDetail() {
@@ -22,6 +23,7 @@ export default function NewsDetail() {
     <>
       <div className="pt-32 pb-24 bg-white min-h-screen">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumbs />
           <Link to="/media-centre/news" className="inline-flex items-center text-sm text-primary-blue font-medium mb-8 hover:text-accent-hover">
             <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to News
           </Link>

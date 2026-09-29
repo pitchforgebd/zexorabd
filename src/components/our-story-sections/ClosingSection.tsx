@@ -22,7 +22,7 @@ export default function ClosingSection() {
           {closing.image && (
             <FadeIn delay={0.15}>
               <div className="rounded-2xl overflow-hidden shadow-2xl">
-                <img src={closing.image} alt="" className="w-full h-auto object-cover" />
+                <img src={closing.image} alt="Zexora Corporation" className="w-full h-auto object-cover" />
               </div>
             </FadeIn>
           )}

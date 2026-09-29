@@ -15,6 +15,7 @@ const STATIC_URLS = [
   { path: '/our-story', changefreq: 'monthly', priority: '0.6' },
   { path: '/company', changefreq: 'monthly', priority: '0.6' },
   { path: '/career', changefreq: 'monthly', priority: '0.6' },
+  { path: '/media-centre', changefreq: 'weekly', priority: '0.5' },
   { path: '/media-centre/news', changefreq: 'weekly', priority: '0.6' },
   { path: '/media-centre/photo-gallery', changefreq: 'monthly', priority: '0.4' },
   { path: '/media-centre/video-gallery', changefreq: 'monthly', priority: '0.4' },
