@@ -44,8 +44,8 @@ const DEFAULT_CONTENT: SisterConcernsContent = {
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-[1.5px] text-gray-400 mb-1">{label}</p>
-      <p className="text-sm font-bold text-primary-dark">{value}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[1.5px] text-gray-400 mb-1 text-left">{label}</p>
+      <p className="text-sm font-bold text-primary-dark text-left">{value}</p>
     </div>
   );
 }

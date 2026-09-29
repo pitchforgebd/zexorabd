@@ -11,7 +11,7 @@ export default function ClosingSection() {
         <div className={`grid ${closing.image ? 'lg:grid-cols-2' : ''} gap-12 lg:gap-16 items-center`}>
           <FadeIn>
             <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-3">{closing.heading}</h2>
-            {closing.subheading && <p className="text-accent-hover text-sm font-semibold uppercase tracking-wide mb-6">{closing.subheading}</p>}
+            {closing.subheading && <p className="text-accent-hover text-sm font-semibold uppercase tracking-wide mb-6 text-left">{closing.subheading}</p>}
             <div className="space-y-4 text-gray-300 leading-relaxed">
               {closing.paragraphs.map((p, i) => (
                 <p key={i}>{p}</p>

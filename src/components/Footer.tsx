@@ -162,7 +162,7 @@ export default function Footer() {
 
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-500 text-sm">
           <div className="text-center md:text-left">
-            © 2026 Zexora Corporation. All Rights Reserved. <span className="hidden sm:inline">|</span><br className="sm:hidden" /> Developed By <a href="https://lumensofttech.com/" target="_blank" rel="noopener noreferrer" className="hover:text-primary-blue text-white transition-colors font-medium">Lumen SoftTech Ltd.</a>
+            © 2026 Zexora Corporation. All Rights Reserved.
           </div>
           <div className="flex space-x-4">
             <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>

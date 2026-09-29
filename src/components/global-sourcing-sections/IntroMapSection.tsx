@@ -16,11 +16,11 @@ export default function IntroMapSection() {
           <div className="grid grid-cols-2 gap-8">
             <div className="border-l-4 border-primary-blue pl-5">
               <h4 className="text-4xl font-bold text-primary-dark tracking-tighter">{c.intro.stat1Value}</h4>
-              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mt-2">{c.intro.stat1Label}</p>
+              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mt-2 text-left">{c.intro.stat1Label}</p>
             </div>
             <div className="border-l-4 border-primary-blue pl-5">
               <h4 className="text-4xl font-bold text-primary-dark tracking-tighter">{c.intro.stat2Value}</h4>
-              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mt-2">{c.intro.stat2Label}</p>
+              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mt-2 text-left">{c.intro.stat2Label}</p>
             </div>
           </div>
         </FadeIn>
