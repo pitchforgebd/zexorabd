@@ -22,7 +22,7 @@ export default function CtaSection() {
           <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white tracking-tight">
             Ready to Work with Zexora Corporation?
           </h2>
-          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto leading-relaxed text-center">
             Whether you are looking for industrial chemicals, equipment, sourcing solutions, or logistics support —
             our team is ready to assist you.
           </p>

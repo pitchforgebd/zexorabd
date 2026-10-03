@@ -17,7 +17,7 @@ export default function WhyChooseUsSection() {
                 <CheckCircle2 className="w-8 h-8 text-primary-blue" />
               </div>
               <h4 className="text-lg font-bold mb-2 text-primary-dark">{reason.title}</h4>
-              <p className="text-body-text text-sm leading-relaxed">{reason.desc}</p>
+              <p className="text-body-text text-sm leading-relaxed text-center">{reason.desc}</p>
             </FadeIn>
           ))}
         </div>

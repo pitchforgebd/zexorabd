@@ -20,7 +20,7 @@ export default function BusinessModelsSection() {
                     <Icon className="w-10 h-10 text-primary-blue group-hover:text-white transition-colors" />
                   </div>
                   <h3 className="text-2xl font-bold text-primary-dark mb-4 group-hover:text-primary-blue transition-colors">{model.title}</h3>
-                  <p className="text-body-text leading-relaxed font-medium">{model.desc}</p>
+                  <p className="text-body-text leading-relaxed font-medium text-center">{model.desc}</p>
                 </div>
               </FadeIn>
             );

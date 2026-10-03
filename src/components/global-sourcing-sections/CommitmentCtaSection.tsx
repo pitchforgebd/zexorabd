@@ -21,7 +21,7 @@ export default function CommitmentCtaSection() {
         </FadeIn>
         <FadeIn direction="left" className="text-center md:text-left">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 tracking-tight leading-tight">{c.cta.heading}</h2>
-          <p className="text-gray-300 mb-10 text-xl leading-relaxed">{c.cta.text}</p>
+          <p className="text-gray-300 mb-10 text-xl leading-relaxed text-center md:text-left">{c.cta.text}</p>
           <Link
             to="/contact"
             className="inline-flex items-center justify-center bg-primary-blue text-white hover:bg-white hover:text-primary-dark px-10 py-5 rounded-full font-bold transition-all shadow-[0_0_20px_rgba(43,43,155,0.3)] hover:shadow-lg hover:-translate-y-1 text-lg"

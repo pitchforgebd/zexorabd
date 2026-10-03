@@ -39,7 +39,7 @@ export default function Contact() {
       <section className="bg-primary-blue text-white py-24 px-4 text-center">
         <FadeIn className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">Contact Us</h1>
-          <p className="text-xl md:text-2xl text-blue-100 font-medium">We Are Here to Support Your Business</p>
+          <p className="text-xl md:text-2xl text-blue-100 font-medium text-center">We Are Here to Support Your Business</p>
         </FadeIn>
       </section>
 
@@ -167,10 +167,10 @@ export default function Contact() {
       {/* Footer Quote */}
       <section className="bg-white py-16 text-center px-4 border-t border-gray-100">
         <FadeIn>
-          <p className="text-2xl md:text-3xl font-bold text-primary-dark max-w-3xl mx-auto mb-6">
+          <p className="text-2xl md:text-3xl font-bold text-primary-dark max-w-3xl mx-auto mb-6 text-center">
             "Your industrial success is our commitment. Let's build something great together."
           </p>
-          <p className="text-body-text italic mb-6">— Zexora Corporation — Performance. Partnership. Progress.</p>
+          <p className="text-body-text italic mb-6 text-center">— Zexora Corporation — Performance. Partnership. Progress.</p>
           <div className="flex items-center justify-center space-x-6 text-body-text font-medium">
              <a href="https://www.facebook.com/zexoracorporation" target="_blank" rel="noopener noreferrer" className="hover:text-primary-blue transition-colors underline decoration-2 underline-offset-4">Facebook</a>
              <a href="https://www.instagram.com/zexoracorporation" target="_blank" rel="noopener noreferrer" className="hover:text-primary-blue transition-colors underline decoration-2 underline-offset-4">Instagram</a>

@@ -18,7 +18,7 @@ export default function HeroBanner({ title, subtitle, bgImage }: HeroBannerProps
         <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 text-white tracking-tight leading-tight">
           {title}
         </h1>
-        <p className="text-xl md:text-2xl text-blue-100 font-medium tracking-wide">
+        <p className="text-xl md:text-2xl text-blue-100 font-medium tracking-wide text-center">
           {subtitle}
         </p>
       </FadeIn>

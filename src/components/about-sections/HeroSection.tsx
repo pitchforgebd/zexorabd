@@ -9,7 +9,7 @@ export default function HeroSection() {
       <div className="max-w-4xl mx-auto text-center relative z-10">
         <FadeIn>
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 text-white tracking-tight">{c.hero.title}</h1>
-          <p className="text-xl md:text-3xl text-blue-100 font-medium tracking-wide">{c.hero.subtitle}</p>
+          <p className="text-xl md:text-3xl text-blue-100 font-medium tracking-wide text-center">{c.hero.subtitle}</p>
         </FadeIn>
       </div>
     </section>

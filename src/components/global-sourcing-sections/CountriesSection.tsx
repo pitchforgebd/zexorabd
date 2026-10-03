@@ -8,7 +8,7 @@ export default function CountriesSection() {
       <div className="max-w-7xl mx-auto">
         <FadeIn className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-primary-dark mb-4 tracking-tight">{c.countries.heading}</h2>
-          <p className="text-lg text-body-text max-w-2xl mx-auto">{c.countries.subheading}</p>
+          <p className="text-lg text-body-text max-w-2xl mx-auto text-center">{c.countries.subheading}</p>
         </FadeIn>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {c.countries.items.map((country, idx) => (

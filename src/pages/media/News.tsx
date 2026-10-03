@@ -16,7 +16,7 @@ export default function News() {
           <div className="text-center mb-16">
             <h1 className="text-sm font-semibold text-primary-blue tracking-wider uppercase mb-3">Media Centre</h1>
             <h2 className="text-3xl md:text-5xl font-bold text-primary-dark mb-4 tracking-tight">News & Announcements</h2>
-            <p className="text-lg text-body-text max-w-2xl mx-auto">Latest updates from around the Zexora corporate group.</p>
+            <p className="text-lg text-body-text max-w-2xl mx-auto text-center">Latest updates from around the Zexora corporate group.</p>
           </div>
 
           {loading && <p className="text-center text-body-text">Loading…</p>}

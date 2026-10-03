@@ -3,7 +3,7 @@ export default function TermsOfService() {
     <div className="bg-light-gray pt-24 min-h-screen">
       <section className="bg-primary-blue text-white py-20 px-4 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Terms of Service</h1>
-        <p className="text-blue-100">Last updated: 2026</p>
+        <p className="text-blue-100 text-center">Last updated: 2026</p>
       </section>
 
       <section className="py-16 px-4 max-w-3xl mx-auto">

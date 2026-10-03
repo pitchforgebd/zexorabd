@@ -35,7 +35,7 @@ export default function IndustriesSection() {
             <span className="w-8 h-0.5 bg-primary-blue" />
           </div>
           <h2 className="text-3xl md:text-5xl font-bold text-primary-dark mb-4 tracking-tight">Industries We Serve</h2>
-          <p className="text-lg text-body-text max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-body-text max-w-3xl mx-auto leading-relaxed text-center">
             Zexora provides premium raw materials, specialized equipment, and comprehensive supply chain solutions
             to the most dynamic, high-growth industries in Bangladesh.
           </p>

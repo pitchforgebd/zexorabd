@@ -20,7 +20,7 @@ export default function CoreValuesSection() {
                     <Icon className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-3">{val.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{val.desc}</p>
+                  <p className="text-gray-400 text-sm leading-relaxed text-center">{val.desc}</p>
                 </div>
               </FadeIn>
             );

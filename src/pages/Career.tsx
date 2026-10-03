@@ -92,7 +92,7 @@ export default function Career() {
           <div className="text-center mb-12">
             <h1 className="text-sm font-semibold text-primary-blue tracking-wider uppercase mb-3">Careers</h1>
             <h2 className="text-3xl md:text-5xl font-bold text-primary-dark mb-4 tracking-tight">Join Our Team / Apply For A Position</h2>
-            <p className="text-lg text-body-text max-w-2xl mx-auto">
+            <p className="text-lg text-body-text max-w-2xl mx-auto text-center">
               We are always looking for passionate and talented individuals.
             </p>
           </div>
@@ -104,7 +104,7 @@ export default function Career() {
                   <CheckCircle2 className="w-10 h-10 text-green-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h3>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                <p className="text-gray-600 mb-8 max-w-md mx-auto text-center">
                   Thank you for your interest in joining Zexora. Our HR team will review your application and contact you if you are a good fit.
                 </p>
                 <button 
@@ -174,7 +174,7 @@ export default function Career() {
                         </label>
                         <p className="pl-1 hidden sm:block">or drag and drop</p>
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 text-center">
                         {file ? <span className="font-semibold text-primary-dark">{file.name}</span> : 'PDF, DOC, DOCX up to 5MB'}
                       </p>
                     </div>

@@ -29,7 +29,7 @@ export default function SupplierLogos() {
           <h2 className="text-3xl font-bold text-primary-dark tracking-tight sm:text-4xl mb-4">
             {copy?.heading || 'Our Global Suppliers'}
           </h2>
-          <p className="text-lg text-body-text max-w-2xl mx-auto mb-6">
+          <p className="text-lg text-body-text max-w-2xl mx-auto mb-6 text-center">
             {copy?.description ||
               'We collaborate with industry-leading manufacturers and suppliers to deliver uncompromising quality and excellence worldwide.'}
           </p>

@@ -26,7 +26,7 @@ export function DivisionTemplate({ id }: { id: string }) {
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 text-white tracking-tight leading-tight">
             {data.name}
           </h1>
-          <p className="text-xl md:text-2xl text-blue-100 font-medium tracking-wide">
+          <p className="text-xl md:text-2xl text-blue-100 font-medium tracking-wide text-center">
             {data.tagline}
           </p>
         </FadeIn>
@@ -270,7 +270,7 @@ export function DivisionTemplate({ id }: { id: string }) {
                 <h2 className="text-3xl font-bold text-primary-dark tracking-tight mb-4">
                   Visuals & Products
                 </h2>
-                <p className="text-gray-500 max-w-2xl mx-auto">
+                <p className="text-gray-500 max-w-2xl mx-auto text-center">
                   A glimpse into our facilities, products, and operational
                   excellence.
                 </p>
@@ -309,14 +309,14 @@ export default function Divisions() {
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <FadeIn>
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 text-white tracking-tight leading-tight">Our Business Divisions</h1>
-            <p className="text-xl md:text-3xl text-blue-100 font-medium tracking-wide"> Six specialized divisions. One integrated corporate platform.</p>
+            <p className="text-xl md:text-3xl text-blue-100 font-medium tracking-wide text-center"> Six specialized divisions. One integrated corporate platform.</p>
           </FadeIn>
         </div>
       </section>
 
       <section className="py-24 px-4 max-w-7xl mx-auto">
         <FadeIn className="text-center mb-16">
-          <p className="text-xl text-body-text max-w-3xl mx-auto">
+          <p className="text-xl text-body-text max-w-3xl mx-auto text-center">
             Operating under one integrated corporate platform to deliver consistent quality and reliable supply.
           </p>
         </FadeIn>

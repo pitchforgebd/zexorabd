@@ -42,7 +42,7 @@ export default function WhyChooseUsSection({ variant }: { variant?: string }) {
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-white tracking-tight">
             {whyChooseUs?.heading || 'Why Choose Zexora Corporation?'}
           </h2>
-          <p className="text-lg sm:text-xl text-blue-100/80 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-blue-100/80 max-w-3xl mx-auto text-center">
             {whyChooseUs?.subheading || 'Built on experience. Driven by performance. Trusted by industry.'}
           </p>
         </FadeIn>

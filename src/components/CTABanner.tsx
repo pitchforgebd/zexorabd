@@ -20,7 +20,7 @@ export default function CTABanner({
       <div className="max-w-4xl mx-auto">
         <FadeIn>
           <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">{title}</h2>
-          <p className="text-xl text-gray-300 mb-10">
+          <p className="text-xl text-gray-300 mb-10 text-center">
             {description}
           </p>
           <Link 
